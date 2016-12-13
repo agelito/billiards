@@ -9,22 +9,53 @@
 
 #include "window.h"
 
+#define GL_PROC_DEC(function, ...) typedef void (APIENTRYP GL_PROC_##function) (__VA_ARGS__)
+#define GL_PROC_DEF(function) GL_PROC_##function function
+#define GL_PROC_ADDR(function) (GL_PROC_##function)glXGetProcAddress((const GLubyte*)#function)
+
+GL_PROC_DEC(glGenVertexArrays, GLsizei n, GLuint* arrays);
+GL_PROC_DEC(glBindVertexArray, GLuint array);
+GL_PROC_DEC(glGenBuffers, GLsizei n, GLuint* buffers);
+GL_PROC_DEC(glBindBuffer, GLenum target, GLuint buffer);
+GL_PROC_DEC(glBufferData, GLenum target, GLsizeiptr size, const GLvoid* data, GLenum usage);
+GL_PROC_DEC(glEnableVertexAttribArray, GLuint index);
+GL_PROC_DEC(glVertexAttribPointer, GLuint index, GLuint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* pointer);
+
+GL_PROC_DEF(glGenVertexArrays);
+GL_PROC_DEF(glBindVertexArray);
+GL_PROC_DEF(glGenBuffers);
+GL_PROC_DEF(glBindBuffer);
+GL_PROC_DEF(glBufferData);
+GL_PROC_DEF(glEnableVertexAttribArray);
+GL_PROC_DEF(glVertexAttribPointer);
+
 typedef struct
 {
-    GLint vao;
-    GLint vbo;
+    GLuint vao;
+    GLuint vbo;
 } mesh_buffer;
+
+void load_gl_functions()
+{
+    glGenVertexArrays = GL_PROC_ADDR(glGenVertexArrays);
+    glBindVertexArray = GL_PROC_ADDR(glBindVertexArray);
+    glGenBuffers = GL_PROC_ADDR(glGenBuffers);
+    glBindBuffer = GL_PROC_ADDR(glBindBuffer);
+    glBufferData = GL_PROC_ADDR(glBufferData);
+    glEnableVertexAttribArray = GL_PROC_ADDR(glEnableVertexAttribArray);
+    glVertexAttribPointer = GL_PROC_ADDR(glVertexAttribPointer);
+}
 
 mesh_buffer load_triangle()
 {
     mesh_buffer mesh;
     
-    GLint vao;
+    GLuint vao;
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
     mesh.vao = vao;
 
-    GLint vbo;
+    GLuint vbo;
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     mesh.vbo = vbo;
@@ -50,6 +81,8 @@ mesh_buffer load_triangle()
 int main(int argc, char* argv[])
 {
     window_and_gl_context window_context = create_window_and_gl_context(500, 500, "aren");
+
+    load_gl_functions();
 
     mesh_buffer triangle_buffer = load_triangle();
     
