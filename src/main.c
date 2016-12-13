@@ -10,6 +10,7 @@
 #include "window.h"
 
 #define GL_PROC_DEC(function, ...) typedef void (APIENTRYP GL_PROC_##function) (__VA_ARGS__)
+#define GL_PROC_DEC2(function, return_type, ...) typedef return_type (APIENTRYP GL_PROC_##function) (__VA_ARGS__)
 #define GL_PROC_DEF(function) GL_PROC_##function function
 #define GL_PROC_ADDR(function) (GL_PROC_##function)glXGetProcAddress((const GLubyte*)#function)
 
@@ -20,6 +21,15 @@ GL_PROC_DEC(glBindBuffer, GLenum target, GLuint buffer);
 GL_PROC_DEC(glBufferData, GLenum target, GLsizeiptr size, const GLvoid* data, GLenum usage);
 GL_PROC_DEC(glEnableVertexAttribArray, GLuint index);
 GL_PROC_DEC(glVertexAttribPointer, GLuint index, GLuint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* pointer);
+GL_PROC_DEC2(glCreateShader, GLuint, GLenum );
+GL_PROC_DEC(glShaderSource, GLuint shader, GLsizei count, const GLchar** string, const GLint* length);
+GL_PROC_DEC(glCompileShader, GLuint shader);
+GL_PROC_DEC(glGetShaderiv, GLuint shader, GLenum pname, GLint* params);
+GL_PROC_DEC2(glCreateProgram, GLuint, void);
+GL_PROC_DEC(glAttachShader, GLuint program, GLuint shader);
+GL_PROC_DEC(glLinkProgram, GLuint program);
+GL_PROC_DEC(glGetProgramiv, GLuint program, GLenum pname, GLint* params);
+GL_PROC_DEC(glGetProgramInfoLog, GLuint program, GLsizei maxLength, GLsizei* length, GLchar* infoLog);
 
 GL_PROC_DEF(glGenVertexArrays);
 GL_PROC_DEF(glBindVertexArray);
@@ -28,12 +38,28 @@ GL_PROC_DEF(glBindBuffer);
 GL_PROC_DEF(glBufferData);
 GL_PROC_DEF(glEnableVertexAttribArray);
 GL_PROC_DEF(glVertexAttribPointer);
+GL_PROC_DEF(glCreateShader);
+GL_PROC_DEF(glShaderSource);
+GL_PROC_DEF(glCompileShader);
+GL_PROC_DEF(glGetShaderiv);
+GL_PROC_DEF(glCreateProgram);
+GL_PROC_DEF(glAttachShader);
+GL_PROC_DEF(glLinkProgram);
+GL_PROC_DEF(glGetProgramiv);
+GL_PROC_DEF(glGetProgramInfoLog);
 
 typedef struct
 {
     GLuint vao;
     GLuint vbo;
 } mesh_buffer;
+
+typedef struct
+{
+    GLuint vertex;
+    GLuint fragment;
+    GLuint program;
+} shader_program;
 
 void load_gl_functions()
 {
@@ -44,6 +70,61 @@ void load_gl_functions()
     glBufferData = GL_PROC_ADDR(glBufferData);
     glEnableVertexAttribArray = GL_PROC_ADDR(glEnableVertexAttribArray);
     glVertexAttribPointer = GL_PROC_ADDR(glVertexAttribPointer);
+
+    glCreateShader = GL_PROC_ADDR(glCreateShader);
+    glShaderSource = GL_PROC_ADDR(glShaderSource);
+    glCompileShader = GL_PROC_ADDR(glCompileShader);
+    glGetShaderiv = GL_PROC_ADDR(glGetShaderiv);
+    glCreateProgram = GL_PROC_ADDR(glCreateProgram);
+    glAttachShader = GL_PROC_ADDR(glAttachShader);
+    glLinkProgram = GL_PROC_ADDR(glLinkProgram);
+    glGetProgramiv = GL_PROC_ADDR(glGetProgramiv);
+    glGetProgramInfoLog = GL_PROC_ADDR(glGetProgramInfoLog);
+}
+
+shader_program load_shader(char* vertex_source, int vertex_source_length, char* fragment_source, int fragment_source_length)
+{
+    shader_program shader;
+
+    shader.vertex = glCreateShader(GL_VERTEX_SHADER);
+    shader.fragment = glCreateShader(GL_FRAGMENT_SHADER);
+
+    glShaderSource(shader.vertex, 1, (const GLchar**)&vertex_source, &vertex_source_length);
+    glShaderSource(shader.fragment, 1, (const GLchar**)&fragment_source, &fragment_source_length);
+
+    int successful_compile = 0;
+    
+    glCompileShader(shader.vertex);
+    glGetShaderiv(shader.vertex, GL_COMPILE_STATUS, &successful_compile);
+    if(!successful_compile)
+    {
+	printf("failed to compile vertex shader:\n %s\n", vertex_source);
+    }
+
+    glCompileShader(shader.fragment);
+    glGetShaderiv(shader.fragment, GL_COMPILE_STATUS, &successful_compile);
+    if(!successful_compile)
+    {
+	printf("failed to compile fragment shader:\n %s\n", fragment_source);
+    }
+
+    shader.program = glCreateProgram();
+    glAttachShader(shader.program, shader.vertex);
+    glAttachShader(shader.program, shader.fragment);
+    glLinkProgram(shader.program);
+
+    int successful_link = 0;
+    glGetProgramiv(shader.program, GL_LINK_STATUS, &successful_link);
+    if(!successful_link)
+    {
+	GLsizei info_log_length;
+	char info_log[1024];
+	glGetProgramInfoLog(shader.program, 1024, &info_log_length, (GLchar*)info_log);
+	printf("failed to link shader program:\n%s\n\n", info_log);
+	printf("sources:\n%s\n\n%s\n\n", vertex_source, fragment_source);
+    }
+
+    return shader;
 }
 
 mesh_buffer load_triangle()
@@ -84,6 +165,41 @@ int main(int argc, char* argv[])
 
     load_gl_functions();
 
+    char vertex_source[1024];
+    int vertex_source_length = 0;
+    
+    char fragment_source[1024];
+    int fragment_source_length = 0;
+    
+    FILE* file = fopen("simple.vert", "rb");
+    if(!file)
+    {
+	printf("can't open file simple.vert\n");
+	exit(0);
+    }
+    
+    fseek(file, 0, SEEK_END);
+    vertex_source_length = ftell(file);
+    fseek(file, 0, SEEK_SET);
+    fread(vertex_source, 1, vertex_source_length, file);
+    vertex_source[vertex_source_length] = 0;
+    fclose(file);
+
+    file = fopen("simple.frag", "rb");
+    if(!file)
+    {
+	printf("can't open file simple.frag\n");
+	exit(0);
+    }
+    
+    fseek(file, 0, SEEK_END);
+    fragment_source_length = ftell(file);
+    fseek(file, 0, SEEK_SET);
+    fread(fragment_source, 1, fragment_source_length, file);
+    fragment_source[fragment_source_length] = 0;
+    fclose(file);
+
+    shader_program shader = load_shader(vertex_source, vertex_source_length, fragment_source, fragment_source_length);
     mesh_buffer triangle_buffer = load_triangle();
     
     while(1)
