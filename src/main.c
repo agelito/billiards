@@ -30,6 +30,7 @@ GL_PROC_DEC(glAttachShader, GLuint program, GLuint shader);
 GL_PROC_DEC(glLinkProgram, GLuint program);
 GL_PROC_DEC(glGetProgramiv, GLuint program, GLenum pname, GLint* params);
 GL_PROC_DEC(glGetProgramInfoLog, GLuint program, GLsizei maxLength, GLsizei* length, GLchar* infoLog);
+GL_PROC_DEC(glUseProgram, GLuint program);
 
 GL_PROC_DEF(glGenVertexArrays);
 GL_PROC_DEF(glBindVertexArray);
@@ -47,6 +48,7 @@ GL_PROC_DEF(glAttachShader);
 GL_PROC_DEF(glLinkProgram);
 GL_PROC_DEF(glGetProgramiv);
 GL_PROC_DEF(glGetProgramInfoLog);
+GL_PROC_DEF(glUseProgram);
 
 typedef struct
 {
@@ -80,6 +82,7 @@ void load_gl_functions()
     glLinkProgram = GL_PROC_ADDR(glLinkProgram);
     glGetProgramiv = GL_PROC_ADDR(glGetProgramiv);
     glGetProgramInfoLog = GL_PROC_ADDR(glGetProgramInfoLog);
+    glUseProgram = GL_PROC_ADDR(glUseProgram);
 }
 
 shader_program load_shader(char* vertex_source, int vertex_source_length, char* fragment_source, int fragment_source_length)
@@ -142,7 +145,7 @@ mesh_buffer load_triangle()
     mesh.vbo = vbo;
 
     GLfloat vertices[] = {
-	0.0f, 0.0f, 0.0f,
+	0.0f, 0.75f, 0.0f,
 	-0.75f, -0.75f, 0.0f,
 	0.75f, -0.75f, 0.0
     };
@@ -157,6 +160,31 @@ mesh_buffer load_triangle()
     glBindVertexArray(0);
 
     return mesh;
+}
+
+int read_file(char* path, char* destination, int destination_size)
+{
+    FILE* file = fopen(path, "rb");
+    if(!file)
+    {
+	printf("can't open file %s\n", path);
+	return 0;
+    }
+
+    fseek(file, 0, SEEK_END);
+    int size = ftell(file);
+
+    if(size >= destination_size)
+    {
+	size = (destination_size - 1);
+    }
+    
+    fseek(file, 0, SEEK_SET);
+    fread(destination, 1, size, file);
+    fclose(file);
+
+    destination[size] = 0;
+    return size;
 }
 
 int main(int argc, char* argv[])
@@ -177,35 +205,22 @@ int main(int argc, char* argv[])
 	printf("can't open file simple.vert\n");
 	exit(0);
     }
-    
-    fseek(file, 0, SEEK_END);
-    vertex_source_length = ftell(file);
-    fseek(file, 0, SEEK_SET);
-    fread(vertex_source, 1, vertex_source_length, file);
-    vertex_source[vertex_source_length] = 0;
-    fclose(file);
 
-    file = fopen("simple.frag", "rb");
-    if(!file)
-    {
-	printf("can't open file simple.frag\n");
-	exit(0);
-    }
-    
-    fseek(file, 0, SEEK_END);
-    fragment_source_length = ftell(file);
-    fseek(file, 0, SEEK_SET);
-    fread(fragment_source, 1, fragment_source_length, file);
-    fragment_source[fragment_source_length] = 0;
-    fclose(file);
+    vertex_source_length = read_file("simple.vert", vertex_source, vertex_source_length);
+    fragment_source_length = read_file("simple.frag", fragment_source, fragment_source_length);
 
     shader_program shader = load_shader(vertex_source, vertex_source_length, fragment_source, fragment_source_length);
     mesh_buffer triangle_buffer = load_triangle();
     
     while(1)
     {
-	glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
+	glClearColor(0.10f, 0.10f, 0.10f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glUseProgram(shader.program);
+	glBindVertexArray(triangle_buffer.vao);
+	glBindBuffer(GL_ARRAY_BUFFER, triangle_buffer.vbo);
+	glDrawArrays(GL_TRIANGLES, 0, 3);
 	
 	XEvent event;
 	XNextEvent(window_context.display, &event);
