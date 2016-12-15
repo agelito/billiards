@@ -6,6 +6,8 @@
 #include "gl_extensions.h"
 #include "window.h"
 
+#define UNUSED(variable) (void)(variable)
+
 typedef struct
 {
     GLuint vao;
@@ -123,6 +125,9 @@ int read_file(char* path, char* destination, int destination_size)
 
 int main(int argc, char* argv[])
 {
+    UNUSED(argc);
+    UNUSED(argv);
+    
     window_and_gl_context window_context = create_window_and_gl_context(500, 500, "aren");
 
     load_gl_functions();
