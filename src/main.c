@@ -3,52 +3,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <X11/Xlib.h>
-#include <GL/gl.h>
-#include <GL/glx.h>
-
+#include "gl_extensions.h"
 #include "window.h"
-
-#define GL_PROC_DEC(function, ...) typedef void (APIENTRYP GL_PROC_##function) (__VA_ARGS__)
-#define GL_PROC_DEC2(function, return_type, ...) typedef return_type (APIENTRYP GL_PROC_##function) (__VA_ARGS__)
-#define GL_PROC_DEF(function) GL_PROC_##function function
-#define GL_PROC_ADDR(function) (GL_PROC_##function)glXGetProcAddress((const GLubyte*)#function)
-
-GL_PROC_DEC(glGenVertexArrays, GLsizei n, GLuint* arrays);
-GL_PROC_DEC(glBindVertexArray, GLuint array);
-GL_PROC_DEC(glGenBuffers, GLsizei n, GLuint* buffers);
-GL_PROC_DEC(glBindBuffer, GLenum target, GLuint buffer);
-GL_PROC_DEC(glBufferData, GLenum target, GLsizeiptr size, const GLvoid* data, GLenum usage);
-GL_PROC_DEC(glEnableVertexAttribArray, GLuint index);
-GL_PROC_DEC(glVertexAttribPointer, GLuint index, GLuint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* pointer);
-GL_PROC_DEC2(glCreateShader, GLuint, GLenum );
-GL_PROC_DEC(glShaderSource, GLuint shader, GLsizei count, const GLchar** string, const GLint* length);
-GL_PROC_DEC(glCompileShader, GLuint shader);
-GL_PROC_DEC(glGetShaderiv, GLuint shader, GLenum pname, GLint* params);
-GL_PROC_DEC2(glCreateProgram, GLuint, void);
-GL_PROC_DEC(glAttachShader, GLuint program, GLuint shader);
-GL_PROC_DEC(glLinkProgram, GLuint program);
-GL_PROC_DEC(glGetProgramiv, GLuint program, GLenum pname, GLint* params);
-GL_PROC_DEC(glGetProgramInfoLog, GLuint program, GLsizei maxLength, GLsizei* length, GLchar* infoLog);
-GL_PROC_DEC(glUseProgram, GLuint program);
-
-GL_PROC_DEF(glGenVertexArrays);
-GL_PROC_DEF(glBindVertexArray);
-GL_PROC_DEF(glGenBuffers);
-GL_PROC_DEF(glBindBuffer);
-GL_PROC_DEF(glBufferData);
-GL_PROC_DEF(glEnableVertexAttribArray);
-GL_PROC_DEF(glVertexAttribPointer);
-GL_PROC_DEF(glCreateShader);
-GL_PROC_DEF(glShaderSource);
-GL_PROC_DEF(glCompileShader);
-GL_PROC_DEF(glGetShaderiv);
-GL_PROC_DEF(glCreateProgram);
-GL_PROC_DEF(glAttachShader);
-GL_PROC_DEF(glLinkProgram);
-GL_PROC_DEF(glGetProgramiv);
-GL_PROC_DEF(glGetProgramInfoLog);
-GL_PROC_DEF(glUseProgram);
 
 typedef struct
 {
@@ -62,28 +18,6 @@ typedef struct
     GLuint fragment;
     GLuint program;
 } shader_program;
-
-void load_gl_functions()
-{
-    glGenVertexArrays = GL_PROC_ADDR(glGenVertexArrays);
-    glBindVertexArray = GL_PROC_ADDR(glBindVertexArray);
-    glGenBuffers = GL_PROC_ADDR(glGenBuffers);
-    glBindBuffer = GL_PROC_ADDR(glBindBuffer);
-    glBufferData = GL_PROC_ADDR(glBufferData);
-    glEnableVertexAttribArray = GL_PROC_ADDR(glEnableVertexAttribArray);
-    glVertexAttribPointer = GL_PROC_ADDR(glVertexAttribPointer);
-
-    glCreateShader = GL_PROC_ADDR(glCreateShader);
-    glShaderSource = GL_PROC_ADDR(glShaderSource);
-    glCompileShader = GL_PROC_ADDR(glCompileShader);
-    glGetShaderiv = GL_PROC_ADDR(glGetShaderiv);
-    glCreateProgram = GL_PROC_ADDR(glCreateProgram);
-    glAttachShader = GL_PROC_ADDR(glAttachShader);
-    glLinkProgram = GL_PROC_ADDR(glLinkProgram);
-    glGetProgramiv = GL_PROC_ADDR(glGetProgramiv);
-    glGetProgramInfoLog = GL_PROC_ADDR(glGetProgramInfoLog);
-    glUseProgram = GL_PROC_ADDR(glUseProgram);
-}
 
 shader_program load_shader(char* vertex_source, int vertex_source_length, char* fragment_source, int fragment_source_length)
 {
@@ -214,7 +148,7 @@ int main(int argc, char* argv[])
     
     while(1)
     {
-	glClearColor(0.10f, 0.10f, 0.10f, 1.0f);
+	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glUseProgram(shader.program);

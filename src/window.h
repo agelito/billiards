@@ -1,6 +1,8 @@
 #ifndef WINDOW_H_INCLUDED
 #define WINDOW_H_INCLUDED
 
+#include <X11/Xlib.h>
+
 typedef struct
 {
     Display* display;
