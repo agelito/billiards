@@ -2,11 +2,17 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+
+#include <unistd.h>
 
 #include "gl_extensions.h"
 #include "window.h"
 
 #define UNUSED(variable) (void)(variable)
+
+#define invalid_code *((int*)0) = 0
+#define array_count(array) (sizeof(array) / sizeof(array[0]))
 
 typedef struct
 {
@@ -20,6 +26,55 @@ typedef struct
     GLuint fragment;
     GLuint program;
 } shader_program;
+
+long
+platform_executable_directory(char* destination, long destination_size)
+{
+    char proc_exe[32];
+    snprintf(proc_exe, array_count(proc_exe), "/proc/%d/exe", getpid());
+
+    char path_store[1024];
+    int result = readlink(proc_exe, path_store, array_count(path_store));
+    if(result == -1)
+    {
+        fprintf(stderr, "error %d when trying to read %s", result, proc_exe);
+        invalid_code;
+    }
+
+    path_store[result] = 0;
+    
+    for(int i = result; i > 0; i--)
+    {
+        if(path_store[i] == '/')
+        {
+            path_store[i+1] = 0;
+            break;
+        }
+    }
+
+    long length_required = 0;
+    long length_without_filename = strlen(path_store);
+    if(length_without_filename < destination_size)
+    {
+        strcpy(destination, path_store);
+    }
+    else
+    {
+        length_required = length_without_filename + 1;
+    }
+
+    return length_required;
+}
+
+void
+platform_set_working_directory(char* directory)
+{
+    int chdir_result = chdir(directory);
+    if(chdir_result != 0)
+    {
+        fprintf(stderr, "couldn't set working directory to '%s'.", directory);
+    }
+}
 
 shader_program load_shader(char* vertex_source, int vertex_source_length, char* fragment_source, int fragment_source_length)
 {
@@ -127,6 +182,12 @@ int main(int argc, char* argv[])
 {
     UNUSED(argc);
     UNUSED(argv);
+
+    char exe_dir[1024];
+    int exe_dir_length = 1024;
+    
+    exe_dir_length = platform_executable_directory(exe_dir, exe_dir_length);
+    platform_set_working_directory(exe_dir);
     
     window_and_gl_context window_context = create_window_and_gl_context(500, 500, "aren");
 
