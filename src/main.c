@@ -128,7 +128,7 @@ int read_file(char* path, char* destination, int destination_size)
 
 int handle_window_events(window_and_gl_context* window_context, keycode_map* keyboard)
 {
-    int keep_window_open = 1;
+    int window_is_open = 1;
 
     while(XPending(window_context->display))
     {
@@ -143,12 +143,17 @@ int handle_window_events(window_and_gl_context* window_context, keycode_map* key
 	{
 	    if(keycode_is_symbol(keyboard, event.xkey.keycode, XK_Escape))
 	    {
-		keep_window_open = 0;
+		destroy_window(window_context);
 	    }
+	}
+	else if(event.type == DestroyNotify)
+	{
+	    destroy_gl_context(window_context);
+	    window_is_open = 0;
 	}
     }
 
-    return keep_window_open;
+    return window_is_open;
 }
 
 int main(int argc, char* argv[])
@@ -208,7 +213,7 @@ int main(int argc, char* argv[])
 	platform_sleep(1);
     }
 
-    destroy_window_and_gl_context(&window_context);
+    XCloseDisplay(window_context.display);
 
     return 0;
 }

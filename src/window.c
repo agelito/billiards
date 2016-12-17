@@ -35,7 +35,7 @@ create_window_and_gl_context(int width, int height, char* title)
 
     XSetWindowAttributes set_window_attributes;
     set_window_attributes.colormap = color_map;
-    set_window_attributes.event_mask = ExposureMask | KeyPressMask;
+    set_window_attributes.event_mask = ExposureMask | KeyPressMask | StructureNotifyMask;
 
     Window window = XCreateWindow(display, root_window, 0, 0, width, height, 0, visual_info->depth, InputOutput,
 				  visual_info->visual, CWColormap | CWEventMask, &set_window_attributes);
@@ -56,12 +56,16 @@ create_window_and_gl_context(int width, int height, char* title)
 }
 
 void
-destroy_window_and_gl_context(window_and_gl_context* window_context)
+destroy_gl_context(window_and_gl_context* window_context)
 {
     glXMakeCurrent(window_context->display, None, NULL);
     glXDestroyContext(window_context->display, window_context->gl_context);
+}
+
+void
+destroy_window(window_and_gl_context* window_context)
+{
     XDestroyWindow(window_context->display, window_context->window);
-    XCloseDisplay(window_context->display);
 }
 
 void
