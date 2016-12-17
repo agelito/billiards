@@ -20,6 +20,9 @@ void
 destroy_window(window_and_gl_context* window_context);
 
 void
+resize_viewport(window_and_gl_context* window_context);
+
+void
 redraw_window(window_and_gl_context* window_context);
 
 #endif // WINDOW_H_INCLUDED

@@ -69,10 +69,15 @@ destroy_window(window_and_gl_context* window_context)
 }
 
 void
-redraw_window(window_and_gl_context* window_context)
+resize_viewport(window_and_gl_context* window_context)
 {
     XWindowAttributes window_attributes;
     XGetWindowAttributes(window_context->display, window_context->window, &window_attributes);
     glViewport(0, 0, window_attributes.width, window_attributes.height);
+}
+
+void
+redraw_window(window_and_gl_context* window_context)
+{
     glXSwapBuffers(window_context->display, window_context->window);
 }

@@ -135,16 +135,16 @@ int handle_window_events(window_and_gl_context* window_context, keycode_map* key
 	XEvent event;
 	XNextEvent(window_context->display, &event);
 
-	if(event.type == Expose)
-	{
-	    redraw_window(window_context);
-	}
-	else if(event.type == KeyPress)
+        if(event.type == KeyPress)
 	{
 	    if(keycode_is_symbol(keyboard, event.xkey.keycode, XK_Escape))
 	    {
 		destroy_window(window_context);
 	    }
+	}
+	else if(event.type == ConfigureNotify)
+	{
+	    resize_viewport(window_context);
 	}
 	else if(event.type == DestroyNotify)
 	{
@@ -210,6 +210,8 @@ int main(int argc, char* argv[])
 	    break;
 	}
 
+	redraw_window(&window_context);
+	
 	platform_sleep(1);
     }
 
