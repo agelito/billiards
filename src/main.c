@@ -9,11 +9,7 @@
 #include "window.h"
 #include "keyboard_x11.h"
 
-typedef struct
-{
-    GLuint vao;
-    GLuint vbo;
-} mesh_buffer;
+#include "mesh.h"
 
 typedef struct
 {
@@ -67,38 +63,6 @@ shader_program load_shader(gl_functions* gl, char* vertex_source, int vertex_sou
     return shader;
 }
 
-mesh_buffer load_triangle(gl_functions* gl)
-{
-    mesh_buffer mesh;
-    
-    GLuint vao;
-    gl->glGenVertexArrays(1, &vao);
-    gl->glBindVertexArray(vao);
-    mesh.vao = vao;
-
-    GLuint vbo;
-    gl->glGenBuffers(1, &vbo);
-    gl->glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    mesh.vbo = vbo;
-
-    GLfloat vertices[] = {
-	0.0f, 0.75f, 0.0f,
-	-0.75f, -0.75f, 0.0f,
-	0.75f, -0.75f, 0.0
-    };
-
-    gl->glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    // TODO: Vertex attribute bind point hardcoded.
-    gl->glEnableVertexAttribArray(0);
-    gl->glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-
-    gl->glBindBuffer(GL_ARRAY_BUFFER, 0);
-    gl->glBindVertexArray(0);
-
-    return mesh;
-}
-
 int read_file(char* path, char* destination, int destination_size)
 {
     FILE* file = fopen(path, "rb");
@@ -124,8 +88,6 @@ int read_file(char* path, char* destination, int destination_size)
     return size;
 }
 
-
-
 int handle_window_events(window_and_gl_context* window_context, keycode_map* keyboard)
 {
     int window_is_open = 1;
@@ -134,6 +96,7 @@ int handle_window_events(window_and_gl_context* window_context, keycode_map* key
     {
 	XEvent event;
 	XNextEvent(window_context->display, &event);
+	printf("event type: %d\n", event.type);
 
         if(event.type == KeyPress)
 	{
@@ -190,7 +153,10 @@ int main(int argc, char* argv[])
     fragment_source_length = read_file("simple.frag", fragment_source, fragment_source_length);
 
     shader_program shader = load_shader(&gl, vertex_source, vertex_source_length, fragment_source, fragment_source_length);
-    mesh_buffer triangle_buffer = load_triangle(&gl);
+
+    mesh_data triangle_data = mesh_create_triangle(1.0f);
+    loaded_mesh triangle = load_mesh(&gl, triangle_data);
+    mesh_data_free(&triangle_data);
     
     while(handle_window_events(&window_context, &keyboard))
     {
@@ -198,9 +164,9 @@ int main(int argc, char* argv[])
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	gl.glUseProgram(shader.program);
-	gl.glBindVertexArray(triangle_buffer.vao);
-	gl.glBindBuffer(GL_ARRAY_BUFFER, triangle_buffer.vbo);
-	glDrawArrays(GL_TRIANGLES, 0, 3);
+	gl.glBindVertexArray(triangle.vao);
+	gl.glBindBuffer(GL_ARRAY_BUFFER, triangle.vbo);
+	glDrawArrays(GL_TRIANGLES, 0, triangle.data.vertex_count);
 
 	redraw_window(&window_context);
 	
