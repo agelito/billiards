@@ -202,8 +202,6 @@ int main(int argc, char* argv[])
 	glBindBuffer(GL_ARRAY_BUFFER, triangle_buffer.vbo);
 	glDrawArrays(GL_TRIANGLES, 0, 3);
 
-	// TODO: handle_window_events is currently very misleading in name and usage
-	// it only process one event and it doesn't return 0 when closed.
 	int window_open = handle_window_events(&window_context, &keyboard);
 	if(!window_open)
 	{
