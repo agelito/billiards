@@ -123,6 +123,23 @@ int read_file(char* path, char* destination, int destination_size)
     return size;
 }
 
+int handle_window_events(window_and_gl_context* window_context)
+{
+    XEvent event;
+    XNextEvent(window_context->display, &event);
+
+    if(event.type == Expose)
+    {
+	redraw_window(window_context);
+    }
+    else if(event.type == KeyPress)
+    {
+	return 0;
+    }
+
+    return 1;
+}
+
 int main(int argc, char* argv[])
 {
     UNUSED(argc);
@@ -135,7 +152,7 @@ int main(int argc, char* argv[])
     platform_set_working_directory(exe_dir);
     
     window_and_gl_context window_context = create_window_and_gl_context(500, 500, "aren");
-
+    
     load_gl_functions();
 
     char vertex_source[1024];
@@ -166,15 +183,11 @@ int main(int argc, char* argv[])
 	glBindVertexArray(triangle_buffer.vao);
 	glBindBuffer(GL_ARRAY_BUFFER, triangle_buffer.vbo);
 	glDrawArrays(GL_TRIANGLES, 0, 3);
-	
-	XEvent event;
-	XNextEvent(window_context.display, &event);
 
-	if(event.type == Expose)
-	{
-	    redraw_window(&window_context);
-	}
-	else if(event.type == KeyPress)
+	// TODO: handle_window_events is currently very misleading in name and usage
+	// it only process one event and it doesn't return 0 when closed.
+	int window_open = handle_window_events(&window_context);
+	if(!window_open)
 	{
 	    break;
 	}
