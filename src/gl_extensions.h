@@ -1,7 +1,6 @@
 #ifndef GL_EXTENSIONS_H_INCLUDED
 #define GL_EXTENSIONS_H_INCLUDED
 
-
 #include <GL/gl.h>
 #include <GL/glx.h>
 
@@ -28,24 +27,27 @@ GL_PROC_DEC(glGetProgramiv, GLuint program, GLenum pname, GLint* params);
 GL_PROC_DEC(glGetProgramInfoLog, GLuint program, GLsizei maxLength, GLsizei* length, GLchar* infoLog);
 GL_PROC_DEC(glUseProgram, GLuint program);
 
-GL_PROC_DEF(glGenVertexArrays);
-GL_PROC_DEF(glBindVertexArray);
-GL_PROC_DEF(glGenBuffers);
-GL_PROC_DEF(glBindBuffer);
-GL_PROC_DEF(glBufferData);
-GL_PROC_DEF(glEnableVertexAttribArray);
-GL_PROC_DEF(glVertexAttribPointer);
-GL_PROC_DEF(glCreateShader);
-GL_PROC_DEF(glShaderSource);
-GL_PROC_DEF(glCompileShader);
-GL_PROC_DEF(glGetShaderiv);
-GL_PROC_DEF(glCreateProgram);
-GL_PROC_DEF(glAttachShader);
-GL_PROC_DEF(glLinkProgram);
-GL_PROC_DEF(glGetProgramiv);
-GL_PROC_DEF(glGetProgramInfoLog);
-GL_PROC_DEF(glUseProgram);
+typedef struct
+{
+    GL_PROC_DEF(glGenVertexArrays);
+    GL_PROC_DEF(glBindVertexArray);
+    GL_PROC_DEF(glGenBuffers);
+    GL_PROC_DEF(glBindBuffer);
+    GL_PROC_DEF(glBufferData);
+    GL_PROC_DEF(glEnableVertexAttribArray);
+    GL_PROC_DEF(glVertexAttribPointer);
+    GL_PROC_DEF(glCreateShader);
+    GL_PROC_DEF(glShaderSource);
+    GL_PROC_DEF(glCompileShader);
+    GL_PROC_DEF(glGetShaderiv);
+    GL_PROC_DEF(glCreateProgram);
+    GL_PROC_DEF(glAttachShader);
+    GL_PROC_DEF(glLinkProgram);
+    GL_PROC_DEF(glGetProgramiv);
+    GL_PROC_DEF(glGetProgramInfoLog);
+    GL_PROC_DEF(glUseProgram);
+} gl_functions;
 
-void load_gl_functions();
+gl_functions load_gl_functions();
 
 #endif // GL_EXTENSIONS_H_INCLUDED
