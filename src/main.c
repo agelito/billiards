@@ -192,7 +192,7 @@ int main(int argc, char* argv[])
     shader_program shader = load_shader(vertex_source, vertex_source_length, fragment_source, fragment_source_length);
     mesh_buffer triangle_buffer = load_triangle();
     
-    while(1)
+    while(handle_window_events(&window_context, &keyboard))
     {
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -201,12 +201,6 @@ int main(int argc, char* argv[])
 	glBindVertexArray(triangle_buffer.vao);
 	glBindBuffer(GL_ARRAY_BUFFER, triangle_buffer.vbo);
 	glDrawArrays(GL_TRIANGLES, 0, 3);
-
-	int window_open = handle_window_events(&window_context, &keyboard);
-	if(!window_open)
-	{
-	    break;
-	}
 
 	redraw_window(&window_context);
 	
