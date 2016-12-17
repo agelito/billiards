@@ -3,7 +3,7 @@
 CFLAGS="-Wall -Wextra -g"
 LDLIBS="-lGL -lX11"
 
-SRC_FILES="src/main.c src/window.c src/gl_extensions.c src/platform_posix.c"
+SRC_FILES="src/main.c src/window.c src/gl_extensions.c src/platform_posix.c src/keyboard_x11.c"
 
 OUTPUT_FILE=aren
 

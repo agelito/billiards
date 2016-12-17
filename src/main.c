@@ -7,6 +7,7 @@
 #include "platform.h"
 #include "gl_extensions.h"
 #include "window.h"
+#include "keyboard_x11.h"
 
 typedef struct
 {
@@ -123,7 +124,9 @@ int read_file(char* path, char* destination, int destination_size)
     return size;
 }
 
-int handle_window_events(window_and_gl_context* window_context)
+
+
+int handle_window_events(window_and_gl_context* window_context, keycode_map* keyboard)
 {
     int keep_window_open = 1;
 
@@ -138,7 +141,10 @@ int handle_window_events(window_and_gl_context* window_context)
 	}
 	else if(event.type == KeyPress)
 	{
-	    keep_window_open = 0;
+	    if(keycode_is_symbol(keyboard, event.xkey.keycode, XK_Escape))
+	    {
+		keep_window_open = 0;
+	    }
 	}
     }
 
@@ -157,6 +163,8 @@ int main(int argc, char* argv[])
     platform_set_working_directory(exe_dir);
     
     window_and_gl_context window_context = create_window_and_gl_context(500, 500, "aren");
+
+    keycode_map keyboard = create_keycode_map(window_context.display);
     
     load_gl_functions();
 
@@ -191,7 +199,7 @@ int main(int argc, char* argv[])
 
 	// TODO: handle_window_events is currently very misleading in name and usage
 	// it only process one event and it doesn't return 0 when closed.
-	int window_open = handle_window_events(&window_context);
+	int window_open = handle_window_events(&window_context, &keyboard);
 	if(!window_open)
 	{
 	    break;
