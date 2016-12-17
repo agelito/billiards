@@ -125,19 +125,24 @@ int read_file(char* path, char* destination, int destination_size)
 
 int handle_window_events(window_and_gl_context* window_context)
 {
-    XEvent event;
-    XNextEvent(window_context->display, &event);
+    int keep_window_open = 1;
 
-    if(event.type == Expose)
+    while(XPending(window_context->display))
     {
-	redraw_window(window_context);
-    }
-    else if(event.type == KeyPress)
-    {
-	return 0;
+	XEvent event;
+	XNextEvent(window_context->display, &event);
+
+	if(event.type == Expose)
+	{
+	    redraw_window(window_context);
+	}
+	else if(event.type == KeyPress)
+	{
+	    keep_window_open = 0;
+	}
     }
 
-    return 1;
+    return keep_window_open;
 }
 
 int main(int argc, char* argv[])
@@ -191,6 +196,8 @@ int main(int argc, char* argv[])
 	{
 	    break;
 	}
+
+	platform_sleep(1);
     }
 
     destroy_window_and_gl_context(&window_context);

@@ -55,3 +55,9 @@ platform_set_working_directory(char* directory)
         fprintf(stderr, "couldn't set working directory to '%s'.", directory);
     }
 }
+
+void
+platform_sleep(int milliseconds)
+{
+    usleep(milliseconds * 1000);
+}
