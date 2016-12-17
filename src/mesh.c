@@ -5,6 +5,10 @@
 
 // TODO: Use platform for memory allocation instead of stdlib.
 #include <stdlib.h>
+#include <math.h>
+
+#define MATH_PI 3.14159265359f
+#define MATH_PIOVER2 1.57079632679f
 
 loaded_mesh
 load_mesh(gl_functions* gl, mesh_data data)
@@ -49,6 +53,66 @@ mesh_data mesh_create_triangle(float side)
     *(data.vertices + 0) = (vertex){0.0f, half_side, 0.0f};
     *(data.vertices + 1) = (vertex){-half_side, -half_side, 0.0f};
     *(data.vertices + 2) = (vertex){half_side, -half_side, 0.0f};
+
+    return data;
+}
+
+mesh_data mesh_create_circle(float radius, int segments_per_side)
+{
+    mesh_data data = (mesh_data){0};
+
+    int segments = (segments_per_side * 4);
+    int vertex_count = (segments * 3);
+
+    unsigned int vertex_data_size = vertex_count * sizeof(vertex);
+    data.vertices = (vertex*)malloc(vertex_data_size);
+    data.vertex_count = vertex_count;
+    
+    vertex center = (vertex){0.0f, 0.0f, 0.0f};
+
+    float segment_step = MATH_PIOVER2 / segments_per_side;
+
+    int segment, vertex_index = 0;
+    for(segment = 0; segment < segments_per_side; ++segment)
+    {
+	float circle_x1 = cos(segment * segment_step) * radius;
+	float circle_y1 = sin(segment * segment_step) * radius;
+
+	float circle_x2 = cos((segment + 1) * segment_step) * radius;
+	float circle_y2 = sin((segment + 1) * segment_step) * radius;
+
+	// side 0
+	vertex segment0_0 = (vertex){circle_x1, circle_y1, 0.0f};
+	vertex segment1_0 = (vertex){circle_x2, circle_y2, 0.0f};
+
+	*(data.vertices + vertex_index++) = center;
+	*(data.vertices + vertex_index++) = segment0_0;
+	*(data.vertices + vertex_index++) = segment1_0;
+
+	// side 1
+	vertex segment0_1 = (vertex){circle_x1, -circle_y1, 0.0f};
+	vertex segment1_1 = (vertex){circle_x2, -circle_y2, 0.0f};
+
+	*(data.vertices + vertex_index++) = center;
+	*(data.vertices + vertex_index++) = segment0_1;
+	*(data.vertices + vertex_index++) = segment1_1;
+
+	// side 2
+	vertex segment0_2 = (vertex){-circle_x1, circle_y1, 0.0f};
+	vertex segment1_2 = (vertex){-circle_x2, circle_y2, 0.0f};
+
+	*(data.vertices + vertex_index++) = center;
+	*(data.vertices + vertex_index++) = segment0_2;
+	*(data.vertices + vertex_index++) = segment1_2;
+
+	// side 3
+	vertex segment0_3 = (vertex){-circle_x1, -circle_y1, 0.0f};
+	vertex segment1_3 = (vertex){-circle_x2, -circle_y2, 0.0f};
+
+	*(data.vertices + vertex_index++) = center;
+	*(data.vertices + vertex_index++) = segment0_3;
+	*(data.vertices + vertex_index++) = segment1_3;
+    }
 
     return data;
 }

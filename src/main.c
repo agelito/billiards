@@ -154,9 +154,8 @@ int main(int argc, char* argv[])
 
     shader_program shader = load_shader(&gl, vertex_source, vertex_source_length, fragment_source, fragment_source_length);
 
-    mesh_data triangle_data = mesh_create_triangle(1.0f);
-    loaded_mesh triangle = load_mesh(&gl, triangle_data);
-    mesh_data_free(&triangle_data);
+    loaded_mesh mesh = load_mesh(&gl, mesh_create_circle(0.5f, 5));
+    mesh_data_free(&mesh.data);
     
     while(handle_window_events(&window_context, &keyboard))
     {
@@ -164,9 +163,9 @@ int main(int argc, char* argv[])
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	gl.glUseProgram(shader.program);
-	gl.glBindVertexArray(triangle.vao);
-	gl.glBindBuffer(GL_ARRAY_BUFFER, triangle.vbo);
-	glDrawArrays(GL_TRIANGLES, 0, triangle.data.vertex_count);
+	gl.glBindVertexArray(mesh.vao);
+	gl.glBindBuffer(GL_ARRAY_BUFFER, mesh.vbo);
+	glDrawArrays(GL_TRIANGLES, 0, mesh.data.vertex_count);
 
 	redraw_window(&window_context);
 	
