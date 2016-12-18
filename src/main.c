@@ -154,7 +154,7 @@ int main(int argc, char* argv[])
 
     shader_program shader = load_shader(&gl, vertex_source, vertex_source_length, fragment_source, fragment_source_length);
 
-    loaded_mesh mesh = load_mesh(&gl, mesh_create_circle(0.5f, 5));
+    loaded_mesh mesh = load_mesh(&gl, mesh_create_circle(0.9f, 5));
     mesh_data_free(&mesh.data);
     
     while(handle_window_events(&window_context, &keyboard))

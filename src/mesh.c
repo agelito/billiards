@@ -94,16 +94,16 @@ mesh_data mesh_create_circle(float radius, int segments_per_side)
 	vertex segment1_1 = (vertex){circle_x2, -circle_y2, 0.0f};
 
 	*(data.vertices + vertex_index++) = center;
-	*(data.vertices + vertex_index++) = segment0_1;
 	*(data.vertices + vertex_index++) = segment1_1;
+	*(data.vertices + vertex_index++) = segment0_1;
 
 	// side 2
 	vertex segment0_2 = (vertex){-circle_x1, circle_y1, 0.0f};
 	vertex segment1_2 = (vertex){-circle_x2, circle_y2, 0.0f};
 
 	*(data.vertices + vertex_index++) = center;
-	*(data.vertices + vertex_index++) = segment0_2;
 	*(data.vertices + vertex_index++) = segment1_2;
+	*(data.vertices + vertex_index++) = segment0_2;
 
 	// side 3
 	vertex segment0_3 = (vertex){-circle_x1, -circle_y1, 0.0f};
