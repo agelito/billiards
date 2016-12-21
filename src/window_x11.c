@@ -1,4 +1,4 @@
-// window.c
+// window_x11.c
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -7,7 +7,7 @@
 #include <GL/gl.h>
 #include <GL/glx.h>
 
-#include "window.h"
+#include "window_x11.h"
 
 window_and_gl_context
 create_window_and_gl_context(int width, int height, char* title)

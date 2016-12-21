@@ -1,5 +1,5 @@
-#ifndef WINDOW_H_INCLUDED
-#define WINDOW_H_INCLUDED
+#ifndef WINDOW_X11_H_INCLUDED
+#define WINDOW_X11_H_INCLUDED
 
 #include <X11/Xlib.h>
 
@@ -25,4 +25,4 @@ resize_viewport(window_and_gl_context* window_context);
 void
 redraw_window(window_and_gl_context* window_context);
 
-#endif // WINDOW_H_INCLUDED
+#endif // WINDOW_X11_H_INCLUDED
