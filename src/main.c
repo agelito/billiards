@@ -6,6 +6,7 @@
 #include "aren.h"
 #include "platform.h"
 #include "gl_extensions.h"
+
 #include "window_x11.h"
 #include "keyboard_x11.h"
 
@@ -89,13 +90,6 @@ int main(int argc, char* argv[])
     
     char fragment_source[1024];
     int fragment_source_length = 0;
-    
-    FILE* file = fopen("simple.vert", "rb");
-    if(!file)
-    {
-	printf("can't open file simple.vert\n");
-	exit(0);
-    }
 
     vertex_source_length = read_file("simple.vert", vertex_source, vertex_source_length);
     fragment_source_length = read_file("simple.frag", fragment_source, fragment_source_length);
