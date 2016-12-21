@@ -32,7 +32,10 @@ load_mesh(gl_functions* gl, mesh_data data)
 
     // TODO: Vertex attribute bind point hardcoded.
     gl->glEnableVertexAttribArray(0);
-    gl->glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+    gl->glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vertex), NULL);
+
+    gl->glEnableVertexAttribArray(1);
+    gl->glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(vertex), (void*)(sizeof(float) * 3));
 
     gl->glBindBuffer(GL_ARRAY_BUFFER, 0);
     gl->glBindVertexArray(0);
@@ -48,11 +51,13 @@ mesh_data mesh_create_triangle(float side)
     unsigned int vertex_data_size = data.vertex_count * sizeof(vertex);
 
     float half_side = side * 0.5f;
+
+    color c = { 0.0f, 0.0f, 1.0f };
     
     data.vertices = (vertex*)malloc(vertex_data_size);
-    *(data.vertices + 0) = (vertex){0.0f, half_side, 0.0f};
-    *(data.vertices + 1) = (vertex){-half_side, -half_side, 0.0f};
-    *(data.vertices + 2) = (vertex){half_side, -half_side, 0.0f};
+    *(data.vertices + 0) = (vertex){{0.0f, half_side, 0.0f}, c};
+    *(data.vertices + 1) = (vertex){{-half_side, -half_side, 0.0f}, c};
+    *(data.vertices + 2) = (vertex){{half_side, -half_side, 0.0f}, c};
 
     return data;
 }
@@ -67,8 +72,11 @@ mesh_data mesh_create_circle(float radius, int segments_per_side)
     unsigned int vertex_data_size = vertex_count * sizeof(vertex);
     data.vertices = (vertex*)malloc(vertex_data_size);
     data.vertex_count = vertex_count;
+
+    color c1 = { 0.0f, 0.0f, 1.0f };
+    color c2 = { 1.0f, 0.0f, 0.0f };
     
-    vertex center = (vertex){0.0f, 0.0f, 0.0f};
+    vertex center = (vertex){{0.0f, 0.0f, 0.0f}, c1};
 
     float segment_step = MATH_PIOVER2 / segments_per_side;
 
@@ -82,32 +90,32 @@ mesh_data mesh_create_circle(float radius, int segments_per_side)
 	float circle_y2 = sin((segment + 1) * segment_step) * radius;
 
 	// side 0
-	vertex segment0_0 = (vertex){circle_x1, circle_y1, 0.0f};
-	vertex segment1_0 = (vertex){circle_x2, circle_y2, 0.0f};
+	vertex segment0_0 = (vertex){{circle_x1, circle_y1, 0.0f}, c2};
+	vertex segment1_0 = (vertex){{circle_x2, circle_y2, 0.0f}, c2};
 
 	*(data.vertices + vertex_index++) = center;
 	*(data.vertices + vertex_index++) = segment0_0;
 	*(data.vertices + vertex_index++) = segment1_0;
 
 	// side 1
-	vertex segment0_1 = (vertex){circle_x1, -circle_y1, 0.0f};
-	vertex segment1_1 = (vertex){circle_x2, -circle_y2, 0.0f};
+	vertex segment0_1 = (vertex){{circle_x1, -circle_y1, 0.0f}, c2};
+	vertex segment1_1 = (vertex){{circle_x2, -circle_y2, 0.0f}, c2};
 
 	*(data.vertices + vertex_index++) = center;
 	*(data.vertices + vertex_index++) = segment1_1;
 	*(data.vertices + vertex_index++) = segment0_1;
 
 	// side 2
-	vertex segment0_2 = (vertex){-circle_x1, circle_y1, 0.0f};
-	vertex segment1_2 = (vertex){-circle_x2, circle_y2, 0.0f};
+	vertex segment0_2 = (vertex){{-circle_x1, circle_y1, 0.0f}, c2};
+	vertex segment1_2 = (vertex){{-circle_x2, circle_y2, 0.0f}, c2};
 
 	*(data.vertices + vertex_index++) = center;
 	*(data.vertices + vertex_index++) = segment1_2;
 	*(data.vertices + vertex_index++) = segment0_2;
 
 	// side 3
-	vertex segment0_3 = (vertex){-circle_x1, -circle_y1, 0.0f};
-	vertex segment1_3 = (vertex){-circle_x2, -circle_y2, 0.0f};
+	vertex segment0_3 = (vertex){{-circle_x1, -circle_y1, 0.0f}, c2};
+	vertex segment1_3 = (vertex){{-circle_x2, -circle_y2, 0.0f}, c2};
 
 	*(data.vertices + vertex_index++) = center;
 	*(data.vertices + vertex_index++) = segment0_3;

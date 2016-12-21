@@ -26,6 +26,8 @@ GL_PROC_DEC(glLinkProgram, GLuint program);
 GL_PROC_DEC(glGetProgramiv, GLuint program, GLenum pname, GLint* params);
 GL_PROC_DEC(glGetProgramInfoLog, GLuint program, GLsizei maxLength, GLsizei* length, GLchar* infoLog);
 GL_PROC_DEC(glUseProgram, GLuint program);
+GL_PROC_DEC2(glGetUniformLocation, GLint, GLuint program, const GLchar* name);
+GL_PROC_DEC(glUniformMatrix4fv, GLint location, GLsizei count, GLboolean transpose, const GLfloat* value);
 
 typedef struct
 {
@@ -46,6 +48,8 @@ typedef struct
     GL_PROC_DEF(glGetProgramiv);
     GL_PROC_DEF(glGetProgramInfoLog);
     GL_PROC_DEF(glUseProgram);
+    GL_PROC_DEF(glGetUniformLocation);
+    GL_PROC_DEF(glUniformMatrix4fv);
 } gl_functions;
 
 gl_functions load_gl_functions();

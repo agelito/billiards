@@ -68,6 +68,48 @@ int handle_window_events(window_and_gl_context* window_context, keycode_map* key
     return window_is_open;
 }
 
+void set_shader_uniforms(gl_functions* gl, GLuint program)
+{
+    GLint projection_matrix_location = gl->glGetUniformLocation(program, "projection");
+    if(projection_matrix_location != -1)
+    {
+	float projection_matrix[] = {
+	    1.0f, 0.0f, 0.0f, 0.0f,
+	    0.0f, 1.0f, 0.0f, 0.0f,
+	    0.0f, 0.0f, 1.0f, 0.0f,
+	    0.0f, 0.0f, 0.0f, 1.0f
+	};
+
+	gl->glUniformMatrix4fv(projection_matrix_location, 1, GL_FALSE, projection_matrix);
+    }
+
+    GLint view_matrix_location = gl->glGetUniformLocation(program, "view");
+    if(view_matrix_location != -1)
+    {
+	float view_matrix[] = {
+	    1.0f, 0.0f, 0.0f, 0.0f,
+	    0.0f, 1.0f, 0.0f, 0.0f,
+	    0.0f, 0.0f, 1.0f, 0.0f,
+	    0.0f, 0.0f, 0.0f, 1.0f
+	};
+
+	gl->glUniformMatrix4fv(view_matrix_location, 1, GL_FALSE, view_matrix);
+    }
+
+    GLint world_matrix_location = gl->glGetUniformLocation(program, "world");
+    if(world_matrix_location != -1)
+    {
+	float world_matrix[] = {
+	    1.0f, 0.0f, 0.0f, 0.0f,
+	    0.0f, 1.0f, 0.0f, 0.0f,
+	    0.0f, 0.0f, 1.0f, 0.0f,
+	    0.0f, 0.0f, 0.0f, 1.0f
+	};
+
+	gl->glUniformMatrix4fv(world_matrix_location, 1, GL_FALSE, world_matrix);
+    }
+}
+
 int main(int argc, char* argv[])
 {
     UNUSED(argc);
@@ -105,6 +147,8 @@ int main(int argc, char* argv[])
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	gl.glUseProgram(shader.program);
+	set_shader_uniforms(&gl, shader.program);
+	
 	gl.glBindVertexArray(mesh.vao);
 	gl.glBindBuffer(GL_ARRAY_BUFFER, mesh.vbo);
 	glDrawArrays(GL_TRIANGLES, 0, mesh.data.vertex_count);

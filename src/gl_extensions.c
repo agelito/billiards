@@ -23,6 +23,9 @@ gl_functions load_gl_functions()
     gl.glGetProgramiv = GL_PROC_ADDR(glGetProgramiv);
     gl.glGetProgramInfoLog = GL_PROC_ADDR(glGetProgramInfoLog);
     gl.glUseProgram = GL_PROC_ADDR(glUseProgram);
+    
+    gl.glGetUniformLocation = GL_PROC_ADDR(glGetUniformLocation);
+    gl.glUniformMatrix4fv = GL_PROC_ADDR(glUniformMatrix4fv);
 
     return gl;
 }

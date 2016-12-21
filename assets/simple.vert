@@ -1,8 +1,19 @@
 // simple.vert
 
-in vec3 vertex;
+in vec3 in_vertex;
+in vec3 in_color;
+
+uniform mat4 world;
+uniform mat4 view;
+uniform mat4 projection;
+
+varying vec3 color;
 
 void main()
 {
-    gl_Position = vec4(vertex, 1.0);
+    color = in_color;
+
+    mat4 model_view = view * world;
+    mat4 world_view_projection = projection * model_view;
+    gl_Position = world_view_projection * vec4(in_vertex, 1.0);
 }

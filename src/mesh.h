@@ -6,6 +6,19 @@ typedef struct
     float x;
     float y;
     float z;
+} vector3;
+
+typedef struct
+{
+    float r;
+    float g;
+    float b;
+} color;
+
+typedef struct
+{
+    vector3 p;
+    color c;
 } vertex;
 
 typedef struct
