@@ -10,6 +10,7 @@
 #include "window_x11.h"
 #include "keyboard_x11.h"
 
+#include "math.h"
 #include "shader.h"
 #include "mesh.h"
 
@@ -99,14 +100,12 @@ void set_shader_uniforms(gl_functions* gl, GLuint program)
     GLint world_matrix_location = gl->glGetUniformLocation(program, "world");
     if(world_matrix_location != -1)
     {
-	float world_matrix[] = {
-	    1.0f, 0.0f, 0.0f, 0.0f,
-	    0.0f, 1.0f, 0.0f, 0.0f,
-	    0.0f, 0.0f, 1.0f, 0.0f,
-	    0.0f, 0.0f, 0.0f, 1.0f
-	};
 
-	gl->glUniformMatrix4fv(world_matrix_location, 1, GL_FALSE, world_matrix);
+	static float rotation_y = 0.0f;
+	rotation_y = rotation_y + 0.01f;
+
+	matrix4 world_matrix = matrix_rotation_z(rotation_y);
+	gl->glUniformMatrix4fv(world_matrix_location, 1, GL_FALSE, world_matrix.data);
     }
 }
 
