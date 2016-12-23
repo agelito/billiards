@@ -73,10 +73,9 @@ mesh_data mesh_create_circle(float radius, int segments_per_side)
     data.vertices = (vertex*)malloc(vertex_data_size);
     data.vertex_count = vertex_count;
 
-    color c1 = { 0.0f, 0.0f, 1.0f };
-    color c2 = { 1.0f, 0.0f, 0.0f };
-    
-    vertex center = (vertex){{0.0f, 0.0f, 0.0f}, c1};
+    color color_center = { 0.5f, 0.5f, 0.5f };
+    color color_outer = { 0.08f, 0.08f, 0.08f };
+    vertex center = (vertex){{0.0f, 0.0f, 0.0f}, color_center};
 
     float segment_step = MATH_PIOVER2 / segments_per_side;
 
@@ -90,32 +89,32 @@ mesh_data mesh_create_circle(float radius, int segments_per_side)
 	float circle_y2 = sin((segment + 1) * segment_step) * radius;
 
 	// side 0
-	vertex segment0_0 = (vertex){{circle_x1, circle_y1, 0.0f}, c2};
-	vertex segment1_0 = (vertex){{circle_x2, circle_y2, 0.0f}, c2};
+	vertex segment0_0 = (vertex){{circle_x1, circle_y1, 0.0f}, color_outer};
+	vertex segment1_0 = (vertex){{circle_x2, circle_y2, 0.0f}, color_outer};
 
 	*(data.vertices + vertex_index++) = center;
 	*(data.vertices + vertex_index++) = segment0_0;
 	*(data.vertices + vertex_index++) = segment1_0;
 
 	// side 1
-	vertex segment0_1 = (vertex){{circle_x1, -circle_y1, 0.0f}, c2};
-	vertex segment1_1 = (vertex){{circle_x2, -circle_y2, 0.0f}, c2};
-
+	vertex segment0_1 = (vertex){{circle_x1, -circle_y1, 0.0f}, color_outer};
+	vertex segment1_1 = (vertex){{circle_x2, -circle_y2, 0.0f}, color_outer};
+	
 	*(data.vertices + vertex_index++) = center;
 	*(data.vertices + vertex_index++) = segment1_1;
 	*(data.vertices + vertex_index++) = segment0_1;
 
 	// side 2
-	vertex segment0_2 = (vertex){{-circle_x1, circle_y1, 0.0f}, c2};
-	vertex segment1_2 = (vertex){{-circle_x2, circle_y2, 0.0f}, c2};
+	vertex segment0_2 = (vertex){{-circle_x1, circle_y1, 0.0f}, color_outer};
+	vertex segment1_2 = (vertex){{-circle_x2, circle_y2, 0.0f}, color_outer};
 
 	*(data.vertices + vertex_index++) = center;
 	*(data.vertices + vertex_index++) = segment1_2;
 	*(data.vertices + vertex_index++) = segment0_2;
 
 	// side 3
-	vertex segment0_3 = (vertex){{-circle_x1, -circle_y1, 0.0f}, c2};
-	vertex segment1_3 = (vertex){{-circle_x2, -circle_y2, 0.0f}, c2};
+	vertex segment0_3 = (vertex){{-circle_x1, -circle_y1, 0.0f}, color_outer};
+	vertex segment1_3 = (vertex){{-circle_x2, -circle_y2, 0.0f}, color_outer};
 
 	*(data.vertices + vertex_index++) = center;
 	*(data.vertices + vertex_index++) = segment0_3;
