@@ -5,6 +5,19 @@
 #include <math.h>
 
 matrix4
+matrix_identity()
+{
+    matrix4 matrix = {{
+	    1.0f, 0.0f, 0.0f, 0.0f,
+	    0.0f, 1.0f, 0.0f, 0.0f,
+	    0.0f, 0.0f, 1.0f, 0.0f,
+	    0.0f, 0.0f, 0.0f, 1.0f
+	}};
+
+    return matrix;
+}
+
+matrix4
 matrix_rotation_x(float rotation)
 {
     float theta_sin = sin(rotation);

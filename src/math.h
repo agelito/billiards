@@ -6,6 +6,7 @@ typedef struct
     float data[16];
 } matrix4;
 
+matrix4 matrix_identity();
 matrix4 matrix_rotation_x(float rotation);
 matrix4 matrix_rotation_y(float rotation);
 matrix4 matrix_rotation_z(float rotation);

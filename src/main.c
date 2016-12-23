@@ -74,27 +74,17 @@ void set_shader_uniforms(gl_functions* gl, GLuint program)
     GLint projection_matrix_location = gl->glGetUniformLocation(program, "projection");
     if(projection_matrix_location != -1)
     {
-	float projection_matrix[] = {
-	    1.0f, 0.0f, 0.0f, 0.0f,
-	    0.0f, 1.0f, 0.0f, 0.0f,
-	    0.0f, 0.0f, 1.0f, 0.0f,
-	    0.0f, 0.0f, 0.0f, 1.0f
-	};
+	matrix4 projection_matrix = matrix_identity();
 
-	gl->glUniformMatrix4fv(projection_matrix_location, 1, GL_FALSE, projection_matrix);
+	gl->glUniformMatrix4fv(projection_matrix_location, 1, GL_FALSE, projection_matrix.data);
     }
 
     GLint view_matrix_location = gl->glGetUniformLocation(program, "view");
     if(view_matrix_location != -1)
     {
-	float view_matrix[] = {
-	    1.0f, 0.0f, 0.0f, 0.0f,
-	    0.0f, 1.0f, 0.0f, 0.0f,
-	    0.0f, 0.0f, 1.0f, 0.0f,
-	    0.0f, 0.0f, 0.0f, 1.0f
-	};
+	matrix4 view_matrix = matrix_identity();
 
-	gl->glUniformMatrix4fv(view_matrix_location, 1, GL_FALSE, view_matrix);
+	gl->glUniformMatrix4fv(view_matrix_location, 1, GL_FALSE, view_matrix.data);
     }
 
     GLint world_matrix_location = gl->glGetUniformLocation(program, "world");
@@ -104,7 +94,7 @@ void set_shader_uniforms(gl_functions* gl, GLuint program)
 	static float rotation_y = 0.0f;
 	rotation_y = rotation_y + 0.01f;
 
-	matrix4 world_matrix = matrix_rotation_z(rotation_y);
+	matrix4 world_matrix = matrix_rotation_y(rotation_y);
 	gl->glUniformMatrix4fv(world_matrix_location, 1, GL_FALSE, world_matrix.data);
     }
 }
