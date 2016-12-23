@@ -3,12 +3,11 @@
 #include "gl_extensions.h"
 #include "mesh.h"
 
+#include "math.h"
+
 // TODO: Use platform for memory allocation instead of stdlib.
 #include <stdlib.h>
 #include <math.h>
-
-#define MATH_PI 3.14159265359f
-#define MATH_PIOVER2 1.57079632679f
 
 loaded_mesh
 load_mesh(gl_functions* gl, mesh_data data)
@@ -43,7 +42,8 @@ load_mesh(gl_functions* gl, mesh_data data)
     return mesh;
 }
 
-mesh_data mesh_create_triangle(float side)
+mesh_data
+mesh_create_triangle(float side)
 {
     mesh_data data = (mesh_data){0};
     data.vertex_count = 3;
@@ -62,11 +62,12 @@ mesh_data mesh_create_triangle(float side)
     return data;
 }
 
-mesh_data mesh_create_circle(float radius, int segments_per_side)
+mesh_data
+mesh_create_circle(float radius, int subdivisions)
 {
     mesh_data data = (mesh_data){0};
 
-    int segments = (segments_per_side * 4);
+    int segments = (subdivisions * 4);
     int vertex_count = (segments * 3);
 
     unsigned int vertex_data_size = vertex_count * sizeof(vertex);
@@ -77,10 +78,10 @@ mesh_data mesh_create_circle(float radius, int segments_per_side)
     color color_outer = { 0.08f, 0.08f, 0.08f };
     vertex center = (vertex){{0.0f, 0.0f, 0.0f}, color_center};
 
-    float segment_step = MATH_PIOVER2 / segments_per_side;
+    float segment_step = MATH_PIOVER2 / subdivisions;
 
     int segment, vertex_index = 0;
-    for(segment = 0; segment < segments_per_side; ++segment)
+    for(segment = 0; segment < subdivisions; ++segment)
     {
 	float circle_x1 = cos(segment * segment_step) * radius;
 	float circle_y1 = sin(segment * segment_step) * radius;
@@ -124,7 +125,98 @@ mesh_data mesh_create_circle(float radius, int segments_per_side)
     return data;
 }
 
-void mesh_data_free(mesh_data* data)
+#include <string.h>
+
+mesh_data
+mesh_create_cube(float side)
+{
+    mesh_data data = (mesh_data){0};
+    data.vertex_count = 36;
+
+    unsigned int vertex_data_size = data.vertex_count * sizeof(vertex);
+
+    float half_side = side * 0.5f;
+
+    color colors[] = {
+	{1.0f, 0.0f, 0.0f},
+	{0.0f, 1.0f, 0.0f},
+	{0.0f, 0.0f, 1.0f},
+	{1.0f, 1.0f, 0.0f},
+	{0.0f, 1.0f, 1.0f},
+	{1.0f, 0.0f, 1.0f},
+	{1.0f, 1.0f, 1.0f},
+	{0.0f, 0.0f, 0.0f}
+    };
+    
+    data.vertices = (vertex*)malloc(vertex_data_size);
+    memset(data.vertices, 0, vertex_data_size);
+
+    int vertex_index = 0;
+
+    vertex corners[8] = {
+	{{half_side, half_side, half_side}, *(colors + 0)},    // [0]TOP RIGHT FRONT
+	{{half_side, half_side, -half_side}, *(colors + 1)},   // [1]TOP RIGHT BACK
+	{{half_side, -half_side, half_side}, *(colors + 2)},   // [2]BOTTOM RIGHT FRONT
+	{{half_side, -half_side, -half_side}, *(colors + 3)},  // [3]BOTTOM RIGHT BACK
+	{{-half_side, half_side, half_side}, *(colors + 4)},   // [4]TOP LEFT FRONT
+	{{-half_side, half_side, -half_side}, *(colors + 5)},  // [5]TOP LEFT BACK
+	{{-half_side, -half_side, half_side}, *(colors + 6)},  // [6]BOTTOM LEFT FRONT
+	{{-half_side, -half_side, -half_side}, *(colors + 7)}, // [7]BOTTOM LEFT BACK
+    };
+
+    // Right Side
+    *(data.vertices + vertex_index++) = *(corners + 0);
+    *(data.vertices + vertex_index++) = *(corners + 2);
+    *(data.vertices + vertex_index++) = *(corners + 1);
+    *(data.vertices + vertex_index++) = *(corners + 2);
+    *(data.vertices + vertex_index++) = *(corners + 3);
+    *(data.vertices + vertex_index++) = *(corners + 1);
+
+    // Left Side
+    *(data.vertices + vertex_index++) = *(corners + 5);
+    *(data.vertices + vertex_index++) = *(corners + 6);
+    *(data.vertices + vertex_index++) = *(corners + 4);
+    *(data.vertices + vertex_index++) = *(corners + 6);
+    *(data.vertices + vertex_index++) = *(corners + 5);
+    *(data.vertices + vertex_index++) = *(corners + 7);
+    
+    // Top Side
+    *(data.vertices + vertex_index++) = *(corners + 4);
+    *(data.vertices + vertex_index++) = *(corners + 1);
+    *(data.vertices + vertex_index++) = *(corners + 5);
+    *(data.vertices + vertex_index++) = *(corners + 1);
+    *(data.vertices + vertex_index++) = *(corners + 4);
+    *(data.vertices + vertex_index++) = *(corners + 0);
+    
+    // Bottom Side
+    *(data.vertices + vertex_index++) = *(corners + 6);
+    *(data.vertices + vertex_index++) = *(corners + 7);
+    *(data.vertices + vertex_index++) = *(corners + 3);
+    *(data.vertices + vertex_index++) = *(corners + 3);
+    *(data.vertices + vertex_index++) = *(corners + 2);
+    *(data.vertices + vertex_index++) = *(corners + 6);
+
+    // Front Side
+    *(data.vertices + vertex_index++) = *(corners + 6);
+    *(data.vertices + vertex_index++) = *(corners + 2);
+    *(data.vertices + vertex_index++) = *(corners + 4);
+    *(data.vertices + vertex_index++) = *(corners + 4);
+    *(data.vertices + vertex_index++) = *(corners + 2);
+    *(data.vertices + vertex_index++) = *(corners + 0);
+    
+    // Back Side
+    *(data.vertices + vertex_index++) = *(corners + 7);
+    *(data.vertices + vertex_index++) = *(corners + 5);
+    *(data.vertices + vertex_index++) = *(corners + 1);
+    *(data.vertices + vertex_index++) = *(corners + 1);
+    *(data.vertices + vertex_index++) = *(corners + 3);
+    *(data.vertices + vertex_index++) = *(corners + 7);
+
+    return data;
+}
+
+void
+mesh_data_free(mesh_data* data)
 {
     if(data->vertices)
     {

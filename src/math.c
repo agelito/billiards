@@ -79,8 +79,14 @@ matrix_translate(float x, float y, float z)
 }
 
 matrix4
-matrix_perspective(float left, float right, float bottom, float top, float near, float far)
+matrix_perspective(float field_of_view, float aspect_ratio, float near, float far)
 {
+    float fov_radians = (MATH_PI / 180.0f) * field_of_view;
+    float top = near * tan(fov_radians * 0.5f);
+    float bottom = -top;
+    float right = top * aspect_ratio;
+    float left = -right;
+    
     float near2 = near * 2.0f;
     float rml = (right - left);
     float rpl = (right + left);

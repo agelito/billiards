@@ -37,7 +37,8 @@ typedef struct
 loaded_mesh load_mesh(gl_functions* gl, mesh_data data);
 
 mesh_data mesh_create_triangle(float side);
-mesh_data mesh_create_circle(float radius, int segments_per_side);
+mesh_data mesh_create_circle(float radius, int subdivisions);
+mesh_data mesh_create_cube(float side);
 void mesh_data_free(mesh_data* data);
 
 #endif // MESH_H_INCLUDED
