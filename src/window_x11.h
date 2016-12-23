@@ -8,6 +8,9 @@ typedef struct
     Display* display;
     Window window;
     GLXContext gl_context;
+    
+    int width;
+    int height;
 }  window_and_gl_context;
 
 window_and_gl_context

@@ -69,13 +69,19 @@ int handle_window_events(window_and_gl_context* window_context, keycode_map* key
     return window_is_open;
 }
 
-void set_shader_uniforms(gl_functions* gl, GLuint program)
+void set_shader_uniforms(gl_functions* gl, GLuint program, int screen_width, int screen_height)
 {
     GLint projection_matrix_location = gl->glGetUniformLocation(program, "projection");
     if(projection_matrix_location != -1)
     {
-	//matrix4 projection_matrix = matrix_perspective(-1.0f, 1.0f, -1.0f, 1.0f, 0.01f, 100.0f);
-	matrix4 projection_matrix = matrix_orthographic(2.0f, 2.0f, 0.01f, 100.0f);
+	float right = (float)screen_width * 0.5f;
+	float left = -right;
+	
+	float top = (float)screen_height * 0.5f;
+	float bottom = -top;
+	
+	matrix4 projection_matrix = matrix_perspective(left, right, bottom, top, 0.01f, 100.0f);
+	//matrix4 projection_matrix = matrix_orthographic(2.0f, 2.0f, 0.01f, 100.0f);
 	//matrix4 projection_matrix = matrix_identity();
 	gl->glUniformMatrix4fv(projection_matrix_location, 1, GL_FALSE, projection_matrix.data);
     }
@@ -128,7 +134,7 @@ int main(int argc, char* argv[])
 
     shader_program shader = load_shader(&gl, vertex_source, vertex_source_length, fragment_source, fragment_source_length);
 
-    loaded_mesh mesh = load_mesh(&gl, mesh_create_circle(0.9f, 5));
+    loaded_mesh mesh = load_mesh(&gl, mesh_create_circle(256.0f, 5));
     mesh_data_free(&mesh.data);
     
     while(handle_window_events(&window_context, &keyboard))
@@ -137,7 +143,7 @@ int main(int argc, char* argv[])
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	gl.glUseProgram(shader.program);
-	set_shader_uniforms(&gl, shader.program);
+	set_shader_uniforms(&gl, shader.program, window_context.width, window_context.height);
 	
 	gl.glBindVertexArray(mesh.vao);
 	gl.glBindBuffer(GL_ARRAY_BUFFER, mesh.vbo);
