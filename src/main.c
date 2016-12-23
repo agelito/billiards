@@ -74,8 +74,9 @@ void set_shader_uniforms(gl_functions* gl, GLuint program)
     GLint projection_matrix_location = gl->glGetUniformLocation(program, "projection");
     if(projection_matrix_location != -1)
     {
-	matrix4 projection_matrix = matrix_identity();
-
+	//matrix4 projection_matrix = matrix_perspective(-1.0f, 1.0f, -1.0f, 1.0f, 0.01f, 100.0f);
+	matrix4 projection_matrix = matrix_orthographic(2.0f, 2.0f, 0.01f, 100.0f);
+	//matrix4 projection_matrix = matrix_identity();
 	gl->glUniformMatrix4fv(projection_matrix_location, 1, GL_FALSE, projection_matrix.data);
     }
 
@@ -90,11 +91,11 @@ void set_shader_uniforms(gl_functions* gl, GLuint program)
     GLint world_matrix_location = gl->glGetUniformLocation(program, "world");
     if(world_matrix_location != -1)
     {
-
 	static float rotation_y = 0.0f;
-	rotation_y = rotation_y + 0.01f;
+	rotation_y = rotation_y + 0.1f;
 
-	matrix4 world_matrix = matrix_rotation_y(rotation_y);
+	//matrix4 world_matrix = matrix_rotation_y(rotation_y);
+	matrix4 world_matrix = matrix_translate(0.0f, 0.0f, -0.01f);
 	gl->glUniformMatrix4fv(world_matrix_location, 1, GL_FALSE, world_matrix.data);
     }
 }
