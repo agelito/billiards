@@ -86,9 +86,12 @@ void set_shader_uniforms(gl_functions* gl, GLuint program, int screen_width, int
     GLint view_matrix_location = gl->glGetUniformLocation(program, "view");
     if(view_matrix_location != -1)
     {
-	matrix4 view_matrix = matrix_identity();
-	view_matrix.data[14] = -4.0f;
+	vector3 eye = (vector3){{{0.0f, 0.0f, 5.0f}}};
 
+	static float pitch = 0.0f;
+	static float yaw = 0.0f;
+
+	matrix4 view_matrix = matrix_look_fps(eye, pitch, yaw);
 	gl->glUniformMatrix4fv(view_matrix_location, 1, GL_FALSE, view_matrix.data);
     }
 
@@ -99,7 +102,6 @@ void set_shader_uniforms(gl_functions* gl, GLuint program, int screen_width, int
 	rotation = rotation + 0.009f;
 
 	matrix4 world_matrix = matrix_rotation_y(rotation);
-	//matrix4 world_matrix = matrix_translate(0.0f, 0.0f, -0.01f);
 	gl->glUniformMatrix4fv(world_matrix_location, 1, GL_FALSE, world_matrix.data);
     }
 }
@@ -137,6 +139,7 @@ int main(int argc, char* argv[])
     mesh_data_free(&mesh.data);
 
     glCullFace(GL_BACK);
+    
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
     

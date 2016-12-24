@@ -4,6 +4,55 @@
 
 #include <math.h>
 
+float
+vector3_magnitude(vector3 input)
+{
+    return sqrt(input.x * input.x +
+		input.y * input.y +
+		input.z * input.z);
+}
+
+vector3
+vector3_subtract(vector3 a, vector3 b)
+{
+    vector3 result;
+    result.x = a.x - b.x;
+    result.y = a.y - b.y;
+    result.z = a.z - b.z;
+    return result;
+}
+
+vector3
+vector3_normalize(vector3 input)
+{
+    float magnitude = vector3_magnitude(input);
+    float magnitude_inv = 0.0f;
+    if(magnitude > 0.0f)
+    {
+	magnitude_inv = 1.0f / magnitude;
+	
+    }
+    return (vector3){{{input.x * magnitude_inv,
+		    input.y * magnitude_inv,
+		    input.z * magnitude_inv}}};
+}
+
+vector3
+vector3_cross(vector3 a, vector3 b)
+{
+    vector3 result;
+    result.x = a.y * b.z - a.z * b.y;
+    result.y = a.z * b.x - a.x * b.z;
+    result.z = a.y * b.x - a.x * b.y;
+    return result;
+}
+
+float
+vector3_dot(vector3 a, vector3 b)
+{
+    return (a.x * b.x + a.y * b.y + a.z * b.z);
+}
+
 matrix4
 matrix_identity()
 {
@@ -124,3 +173,52 @@ matrix_orthographic(float width, float height, float near, float far)
     return matrix;
 }
 
+matrix4
+matrix_look_at(vector3 eye, vector3 at, vector3 up)
+{
+    vector3 z = vector3_normalize(vector3_subtract(eye, at));
+    vector3 x = vector3_normalize(vector3_cross(up, z));
+    vector3 y = vector3_cross(z, x);
+
+    float tx = vector3_dot(x, eye);
+    float ty = vector3_dot(y, eye);
+    float tz = vector3_dot(z, eye);
+    
+    matrix4 result = (matrix4){{
+	    x.x, x.y, x.z, 0.0f,
+	    y.x, y.y, y.z, 0.0f,
+	    z.x, z.y, z.z, 0.0f,
+	    -tx, -ty, -tz, 1.0f
+	}};
+
+    return result;
+}
+
+matrix4
+matrix_look_fps(vector3 eye, float pitch, float yaw)
+{
+    float pitch_radians = (MATH_PI / 180.0f) * pitch;
+    float yaw_radians = (MATH_PI / 180.0f) * yaw;
+    
+    float cos_pitch = cos(pitch_radians);
+    float sin_pitch = sin(pitch_radians);
+    float cos_yaw = cos(yaw_radians);
+    float sin_yaw = sin(yaw_radians);
+
+    vector3 x = (vector3){{{cos_yaw, 0.0f, -sin_yaw}}};
+    vector3 y = (vector3){{{sin_yaw * sin_pitch, cos_pitch, cos_yaw * sin_pitch}}};
+    vector3 z = (vector3){{{sin_yaw * cos_pitch, -sin_pitch, cos_pitch * cos_yaw}}};
+    
+    float tx = vector3_dot(x, eye);
+    float ty = vector3_dot(y, eye);
+    float tz = vector3_dot(z, eye);
+
+    matrix4 result = (matrix4){{
+	    x.x, x.y, x.z, 0.0f,
+	    y.x, y.y, y.z, 0.0f,
+	    z.x, z.y, z.z, 0.0f,
+	    -tx, -ty, -tz, 1.0f
+	}};
+
+    return result;
+}
