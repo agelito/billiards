@@ -3,11 +3,11 @@
 #include "gl_extensions.h"
 #include "mesh.h"
 
-#include "math.h"
-
 // TODO: Use platform for memory allocation instead of stdlib.
 #include <stdlib.h>
 #include <math.h>
+
+#define create_vertex(x, y, z, color) (vertex){{{{x, y, z}}}, color}
 
 loaded_mesh
 load_mesh(gl_functions* gl, mesh_data data)
@@ -55,9 +55,9 @@ mesh_create_triangle(float side)
     color c = { 0.0f, 0.0f, 1.0f };
     
     data.vertices = (vertex*)malloc(vertex_data_size);
-    *(data.vertices + 0) = (vertex){{0.0f, half_side, 0.0f}, c};
-    *(data.vertices + 1) = (vertex){{-half_side, -half_side, 0.0f}, c};
-    *(data.vertices + 2) = (vertex){{half_side, -half_side, 0.0f}, c};
+    *(data.vertices + 0) = create_vertex(0.0f, half_side, 0.0f, c);
+    *(data.vertices + 1) = create_vertex(-half_side, -half_side, 0.0f, c);
+    *(data.vertices + 2) = create_vertex(half_side, -half_side, 0.0f, c);
 
     return data;
 }
@@ -76,7 +76,7 @@ mesh_create_circle(float radius, int subdivisions)
 
     color color_center = { 0.5f, 0.5f, 0.5f };
     color color_outer = { 0.08f, 0.08f, 0.08f };
-    vertex center = (vertex){{0.0f, 0.0f, 0.0f}, color_center};
+    vertex center = create_vertex(0.0f, 0.0f, 0.0f, color_center);
 
     float segment_step = MATH_PIOVER2 / subdivisions;
 
@@ -90,32 +90,32 @@ mesh_create_circle(float radius, int subdivisions)
 	float circle_y2 = sin((segment + 1) * segment_step) * radius;
 
 	// side 0
-	vertex segment0_0 = (vertex){{circle_x1, circle_y1, 0.0f}, color_outer};
-	vertex segment1_0 = (vertex){{circle_x2, circle_y2, 0.0f}, color_outer};
+	vertex segment0_0 = create_vertex(circle_x1, circle_y1, 0.0f, color_outer);
+	vertex segment1_0 = create_vertex(circle_x2, circle_y2, 0.0f, color_outer);
 
 	*(data.vertices + vertex_index++) = center;
 	*(data.vertices + vertex_index++) = segment0_0;
 	*(data.vertices + vertex_index++) = segment1_0;
 
 	// side 1
-	vertex segment0_1 = (vertex){{circle_x1, -circle_y1, 0.0f}, color_outer};
-	vertex segment1_1 = (vertex){{circle_x2, -circle_y2, 0.0f}, color_outer};
+	vertex segment0_1 = create_vertex(circle_x1, -circle_y1, 0.0f, color_outer);
+	vertex segment1_1 = create_vertex(circle_x2, -circle_y2, 0.0f, color_outer);
 	
 	*(data.vertices + vertex_index++) = center;
 	*(data.vertices + vertex_index++) = segment1_1;
 	*(data.vertices + vertex_index++) = segment0_1;
 
 	// side 2
-	vertex segment0_2 = (vertex){{-circle_x1, circle_y1, 0.0f}, color_outer};
-	vertex segment1_2 = (vertex){{-circle_x2, circle_y2, 0.0f}, color_outer};
+	vertex segment0_2 = create_vertex(-circle_x1, circle_y1, 0.0f, color_outer);
+	vertex segment1_2 = create_vertex(-circle_x2, circle_y2, 0.0f, color_outer);
 
 	*(data.vertices + vertex_index++) = center;
 	*(data.vertices + vertex_index++) = segment1_2;
 	*(data.vertices + vertex_index++) = segment0_2;
 
 	// side 3
-	vertex segment0_3 = (vertex){{-circle_x1, -circle_y1, 0.0f}, color_outer};
-	vertex segment1_3 = (vertex){{-circle_x2, -circle_y2, 0.0f}, color_outer};
+	vertex segment0_3 = create_vertex(-circle_x1, -circle_y1, 0.0f, color_outer);
+	vertex segment1_3 = create_vertex(-circle_x2, -circle_y2, 0.0f, color_outer);
 
 	*(data.vertices + vertex_index++) = center;
 	*(data.vertices + vertex_index++) = segment0_3;
@@ -154,14 +154,14 @@ mesh_create_cube(float side)
     int vertex_index = 0;
 
     vertex corners[8] = {
-	{{half_side, half_side, half_side}, *(colors + 0)},    // [0]TOP RIGHT FRONT
-	{{half_side, half_side, -half_side}, *(colors + 1)},   // [1]TOP RIGHT BACK
-	{{half_side, -half_side, half_side}, *(colors + 2)},   // [2]BOTTOM RIGHT FRONT
-	{{half_side, -half_side, -half_side}, *(colors + 3)},  // [3]BOTTOM RIGHT BACK
-	{{-half_side, half_side, half_side}, *(colors + 4)},   // [4]TOP LEFT FRONT
-	{{-half_side, half_side, -half_side}, *(colors + 5)},  // [5]TOP LEFT BACK
-	{{-half_side, -half_side, half_side}, *(colors + 6)},  // [6]BOTTOM LEFT FRONT
-	{{-half_side, -half_side, -half_side}, *(colors + 7)}, // [7]BOTTOM LEFT BACK
+	{{{{half_side, half_side, half_side}}}, *(colors + 0)},    // [0]TOP RIGHT FRONT
+	{{{{half_side, half_side, -half_side}}}, *(colors + 1)},   // [1]TOP RIGHT BACK
+	{{{{half_side, -half_side, half_side}}}, *(colors + 2)},   // [2]BOTTOM RIGHT FRONT
+	{{{{half_side, -half_side, -half_side}}}, *(colors + 3)},  // [3]BOTTOM RIGHT BACK
+	{{{{-half_side, half_side, half_side}}}, *(colors + 4)},   // [4]TOP LEFT FRONT
+	{{{{-half_side, half_side, -half_side}}}, *(colors + 5)},  // [5]TOP LEFT BACK
+	{{{{-half_side, -half_side, half_side}}}, *(colors + 6)},  // [6]BOTTOM LEFT FRONT
+	{{{{-half_side, -half_side, -half_side}}}, *(colors + 7)}, // [7]BOTTOM LEFT BACK
     };
 
     // Right Side

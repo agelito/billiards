@@ -75,13 +75,10 @@ void set_shader_uniforms(gl_functions* gl, GLuint program, int screen_width, int
     if(projection_matrix_location != -1)
     {
 	float right = (float)screen_width * 0.5f;
-	float left = -right;
-	
 	float top = (float)screen_height * 0.5f;
-	float bottom = -top;
 	
 	matrix4 projection_matrix = matrix_perspective(60.0f, right / top, 0.01f, 100.0f);
-	//matrix4 projection_matrix = matrix_orthographic(2.0f, top / right * 2.0f, 0.01f, 100.0f);
+	// matrix4 projection_matrix = matrix_orthographic(2.0f, top / right * 2.0f, 0.01f, 100.0f);
 	//matrix4 projection_matrix = matrix_identity();
 	gl->glUniformMatrix4fv(projection_matrix_location, 1, GL_FALSE, projection_matrix.data);
     }

@@ -1,12 +1,7 @@
 #ifndef MESH_H_INCLUDED
 #define MESH_H_INCLUDED
 
-typedef struct
-{
-    float x;
-    float y;
-    float z;
-} vector3;
+#include "math.h"
 
 typedef struct
 {
