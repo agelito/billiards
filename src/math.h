@@ -4,6 +4,8 @@
 #define MATH_PI 3.14159265359f
 #define MATH_PIOVER2 1.57079632679f
 
+#define DEGREES_TO_RADIANS (MATH_PI / 180.0f)
+
 typedef struct
 {
     union {

@@ -130,7 +130,7 @@ matrix_translate(float x, float y, float z)
 matrix4
 matrix_perspective(float field_of_view, float aspect_ratio, float near, float far)
 {
-    float fov_radians = (MATH_PI / 180.0f) * field_of_view;
+    float fov_radians = DEGREES_TO_RADIANS * field_of_view;
     float top = near * tan(fov_radians * 0.5f);
     float bottom = -top;
     float right = top * aspect_ratio;
@@ -177,8 +177,8 @@ matrix4
 matrix_look_at(vector3 eye, vector3 at, vector3 up)
 {
     vector3 z = vector3_normalize(vector3_subtract(eye, at));
-    vector3 x = vector3_normalize(vector3_cross(up, z));
-    vector3 y = vector3_cross(z, x);
+    vector3 x = vector3_normalize(vector3_cross(z, up));
+    vector3 y = vector3_cross(x, z);
 
     float tx = vector3_dot(x, eye);
     float ty = vector3_dot(y, eye);
@@ -197,8 +197,8 @@ matrix_look_at(vector3 eye, vector3 at, vector3 up)
 matrix4
 matrix_look_fps(vector3 eye, float pitch, float yaw)
 {
-    float pitch_radians = (MATH_PI / 180.0f) * pitch;
-    float yaw_radians = (MATH_PI / 180.0f) * yaw;
+    float pitch_radians = DEGREES_TO_RADIANS * pitch;
+    float yaw_radians = DEGREES_TO_RADIANS * yaw;
     
     float cos_pitch = cos(pitch_radians);
     float sin_pitch = sin(pitch_radians);

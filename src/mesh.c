@@ -52,12 +52,14 @@ mesh_create_triangle(float side)
 
     float half_side = side * 0.5f;
 
-    color c = { 0.0f, 0.0f, 1.0f };
+    color c1 = { 1.0f, 0.0f, 0.0f };
+    color c2 = { 0.0f, 1.0f, 0.0f };
+    color c3 = { 0.0f, 0.0f, 1.0f };
     
     data.vertices = (vertex*)malloc(vertex_data_size);
-    *(data.vertices + 0) = create_vertex(0.0f, half_side, 0.0f, c);
-    *(data.vertices + 1) = create_vertex(-half_side, -half_side, 0.0f, c);
-    *(data.vertices + 2) = create_vertex(half_side, -half_side, 0.0f, c);
+    *(data.vertices + 0) = create_vertex(0.0f, half_side, 0.0f, c1);
+    *(data.vertices + 1) = create_vertex(-half_side, -half_side, 0.0f, c2);
+    *(data.vertices + 2) = create_vertex(half_side, -half_side, 0.0f, c3);
 
     return data;
 }
@@ -166,51 +168,51 @@ mesh_create_cube(float side)
 
     // Right Side
     *(data.vertices + vertex_index++) = *(corners + 0);
-    *(data.vertices + vertex_index++) = *(corners + 2);
     *(data.vertices + vertex_index++) = *(corners + 1);
     *(data.vertices + vertex_index++) = *(corners + 2);
+    *(data.vertices + vertex_index++) = *(corners + 2);
+    *(data.vertices + vertex_index++) = *(corners + 1);
     *(data.vertices + vertex_index++) = *(corners + 3);
-    *(data.vertices + vertex_index++) = *(corners + 1);
 
     // Left Side
     *(data.vertices + vertex_index++) = *(corners + 5);
-    *(data.vertices + vertex_index++) = *(corners + 6);
     *(data.vertices + vertex_index++) = *(corners + 4);
     *(data.vertices + vertex_index++) = *(corners + 6);
-    *(data.vertices + vertex_index++) = *(corners + 5);
+    *(data.vertices + vertex_index++) = *(corners + 6);
     *(data.vertices + vertex_index++) = *(corners + 7);
+    *(data.vertices + vertex_index++) = *(corners + 5);
     
     // Top Side
     *(data.vertices + vertex_index++) = *(corners + 4);
-    *(data.vertices + vertex_index++) = *(corners + 1);
     *(data.vertices + vertex_index++) = *(corners + 5);
     *(data.vertices + vertex_index++) = *(corners + 1);
-    *(data.vertices + vertex_index++) = *(corners + 4);
+    *(data.vertices + vertex_index++) = *(corners + 1);
     *(data.vertices + vertex_index++) = *(corners + 0);
+    *(data.vertices + vertex_index++) = *(corners + 4);
     
     // Bottom Side
     *(data.vertices + vertex_index++) = *(corners + 6);
+    *(data.vertices + vertex_index++) = *(corners + 3);
     *(data.vertices + vertex_index++) = *(corners + 7);
     *(data.vertices + vertex_index++) = *(corners + 3);
-    *(data.vertices + vertex_index++) = *(corners + 3);
-    *(data.vertices + vertex_index++) = *(corners + 2);
     *(data.vertices + vertex_index++) = *(corners + 6);
+    *(data.vertices + vertex_index++) = *(corners + 2);
 
     // Front Side
     *(data.vertices + vertex_index++) = *(corners + 6);
-    *(data.vertices + vertex_index++) = *(corners + 2);
-    *(data.vertices + vertex_index++) = *(corners + 4);
     *(data.vertices + vertex_index++) = *(corners + 4);
     *(data.vertices + vertex_index++) = *(corners + 2);
+    *(data.vertices + vertex_index++) = *(corners + 4);
     *(data.vertices + vertex_index++) = *(corners + 0);
+    *(data.vertices + vertex_index++) = *(corners + 2);
     
     // Back Side
     *(data.vertices + vertex_index++) = *(corners + 7);
+    *(data.vertices + vertex_index++) = *(corners + 1);
     *(data.vertices + vertex_index++) = *(corners + 5);
     *(data.vertices + vertex_index++) = *(corners + 1);
-    *(data.vertices + vertex_index++) = *(corners + 1);
-    *(data.vertices + vertex_index++) = *(corners + 3);
     *(data.vertices + vertex_index++) = *(corners + 7);
+    *(data.vertices + vertex_index++) = *(corners + 3);
 
     return data;
 }

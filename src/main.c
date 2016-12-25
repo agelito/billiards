@@ -78,7 +78,7 @@ void set_shader_uniforms(gl_functions* gl, GLuint program, int screen_width, int
 	float top = (float)screen_height * 0.5f;
 	
 	matrix4 projection_matrix = matrix_perspective(60.0f, right / top, 0.01f, 100.0f);
-	// matrix4 projection_matrix = matrix_orthographic(2.0f, top / right * 2.0f, 0.01f, 100.0f);
+	//matrix4 projection_matrix = matrix_orthographic(2.0f, top / right * 2.0f, 0.01f, 100.0f);
 	//matrix4 projection_matrix = matrix_identity();
 	gl->glUniformMatrix4fv(projection_matrix_location, 1, GL_FALSE, projection_matrix.data);
     }
@@ -86,22 +86,33 @@ void set_shader_uniforms(gl_functions* gl, GLuint program, int screen_width, int
     GLint view_matrix_location = gl->glGetUniformLocation(program, "view");
     if(view_matrix_location != -1)
     {
-	vector3 eye = (vector3){{{0.0f, 0.0f, 5.0f}}};
+	vector3 eye = (vector3){{{0.0f, 0.0f, -3.0f}}};
 
+#if 1
+	vector3 at = (vector3){{{0.0f, 0.0f, 0.0f}}};
+	vector3 up = (vector3){{{0.0f, 1.0f, 0.0f}}};
+	matrix4 view_matrix = matrix_look_at(eye, at, up);
+#else
 	static float pitch = 0.0f;
 	static float yaw = 0.0f;
-
 	matrix4 view_matrix = matrix_look_fps(eye, pitch, yaw);
+#endif
 	gl->glUniformMatrix4fv(view_matrix_location, 1, GL_FALSE, view_matrix.data);
     }
 
     GLint world_matrix_location = gl->glGetUniformLocation(program, "world");
     if(world_matrix_location != -1)
     {
+	#if 1
 	static float rotation = 0.0f;
-	rotation = rotation + 0.009f;
+	rotation = rotation + 0.04f;
 
 	matrix4 world_matrix = matrix_rotation_y(rotation);
+	#else
+	static float z_offset = 1.0f;
+	matrix4 world_matrix = matrix_translate(0.0f, 0.0f, z_offset);
+	#endif
+	
 	gl->glUniformMatrix4fv(world_matrix_location, 1, GL_FALSE, world_matrix.data);
     }
 }
@@ -138,7 +149,9 @@ int main(int argc, char* argv[])
     loaded_mesh mesh = load_mesh(&gl, mesh_create_cube(1.0f));
     mesh_data_free(&mesh.data);
 
-    glCullFace(GL_BACK);
+    //glEnable(GL_CULL_FACE);
+    //glCullFace(GL_BACK);
+    glPolygonMode(GL_BACK, GL_LINE);
     
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
