@@ -35,7 +35,7 @@ create_window_and_gl_context(int width, int height, char* title)
 
     XSetWindowAttributes set_window_attributes;
     set_window_attributes.colormap = color_map;
-    set_window_attributes.event_mask = ExposureMask | KeyPressMask | StructureNotifyMask;
+    set_window_attributes.event_mask = ExposureMask | KeyPressMask | PointerMotionMask | StructureNotifyMask;
 
     Window window = XCreateWindow(display, root_window, 0, 0, width, height, 0, visual_info->depth, InputOutput,
 				  visual_info->visual, CWColormap | CWEventMask, &set_window_attributes);
@@ -82,4 +82,46 @@ void
 redraw_window(window_and_gl_context* window_context)
 {
     glXSwapBuffers(window_context->display, window_context->window);
+}
+
+int
+handle_window_events(window_and_gl_context* window_context, keycode_map* keyboard, mouse_input* mouse)
+{
+    int window_is_open = 1;
+
+    while(XPending(window_context->display))
+    {
+	XEvent event;
+	XNextEvent(window_context->display, &event);
+
+        if(event.type == KeyPress)
+	{
+	    if(keycode_is_symbol(keyboard, event.xkey.keycode, XK_Escape))
+	    {
+		destroy_window(window_context);
+	    }
+	}
+	else if(event.type == MotionNotify)
+	{
+	    int delta_x = event.xmotion.x - mouse->relative_x;
+	    int delta_y = event.xmotion.y - mouse->relative_y;
+	    
+	    mouse->relative_x = event.xmotion.x;
+	    mouse->relative_y = event.xmotion.y;
+
+	    mouse->movement_delta_x = delta_x;
+	    mouse->movement_delta_y = delta_y;
+	}
+	else if(event.type == ConfigureNotify)
+	{
+	    resize_viewport(window_context);
+	}
+	else if(event.type == DestroyNotify)
+	{
+	    destroy_gl_context(window_context);
+	    window_is_open = 0;
+	}
+    }
+
+    return window_is_open;
 }

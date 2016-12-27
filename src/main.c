@@ -9,6 +9,7 @@
 
 #include "window_x11.h"
 #include "keyboard_x11.h"
+#include "mouse_x11.h"
 
 #include "math.h"
 #include "shader.h"
@@ -39,36 +40,6 @@ int read_file(char* path, char* destination, int destination_size)
     return size;
 }
 
-int handle_window_events(window_and_gl_context* window_context, keycode_map* keyboard)
-{
-    int window_is_open = 1;
-
-    while(XPending(window_context->display))
-    {
-	XEvent event;
-	XNextEvent(window_context->display, &event);
-
-        if(event.type == KeyPress)
-	{
-	    if(keycode_is_symbol(keyboard, event.xkey.keycode, XK_Escape))
-	    {
-		destroy_window(window_context);
-	    }
-	}
-	else if(event.type == ConfigureNotify)
-	{
-	    resize_viewport(window_context);
-	}
-	else if(event.type == DestroyNotify)
-	{
-	    destroy_gl_context(window_context);
-	    window_is_open = 0;
-	}
-    }
-
-    return window_is_open;
-}
-
 void set_shader_uniforms(gl_functions* gl, GLuint program, int screen_width, int screen_height)
 {
     GLint projection_matrix_location = gl->glGetUniformLocation(program, "projection");
@@ -78,8 +49,6 @@ void set_shader_uniforms(gl_functions* gl, GLuint program, int screen_width, int
 	float top = (float)screen_height * 0.5f;
 	
 	matrix4 projection_matrix = matrix_perspective(60.0f, right / top, 0.01f, 100.0f);
-	//matrix4 projection_matrix = matrix_orthographic(2.0f, top / right * 2.0f, 0.01f, 100.0f);
-	//matrix4 projection_matrix = matrix_identity();
 	gl->glUniformMatrix4fv(projection_matrix_location, 1, GL_FALSE, projection_matrix.data);
     }
 
@@ -88,31 +57,21 @@ void set_shader_uniforms(gl_functions* gl, GLuint program, int screen_width, int
     {
 	vector3 eye = (vector3){{{0.0f, 0.0f, -3.0f}}};
 
-#if 0
-	vector3 at = (vector3){{{0.0f, 0.0f, 0.0f}}};
-	vector3 up = (vector3){{{0.0f, 1.0f, 0.0f}}};
-	matrix4 view_matrix = matrix_look_at(eye, at, up);
-#else
 	static float pitch = 0.0f;
 	static float yaw = 0.0f;
 	
 	matrix4 view_matrix = matrix_look_fps(eye, pitch, yaw);
-#endif
+
 	gl->glUniformMatrix4fv(view_matrix_location, 1, GL_FALSE, view_matrix.data);
     }
 
     GLint world_matrix_location = gl->glGetUniformLocation(program, "world");
     if(world_matrix_location != -1)
     {
-#if 1
 	static float rotation = 0.0f;
 	rotation = rotation + 0.04f;
 
 	matrix4 world_matrix = matrix_rotation_y(rotation);
-#else
-	static float z_offset = 1.0f;
-	matrix4 world_matrix = matrix_translate(0.0f, 0.0f, z_offset);
-#endif
 	
 	gl->glUniformMatrix4fv(world_matrix_location, 1, GL_FALSE, world_matrix.data);
     }
@@ -132,6 +91,7 @@ int main(int argc, char* argv[])
     window_and_gl_context window_context = create_window_and_gl_context(500, 500, "aren");
 
     keycode_map keyboard = create_keycode_map(window_context.display);
+    mouse_input mouse = init_mouse_input(window_context.display, window_context.window);
     
     gl_functions gl = load_gl_functions();
 
@@ -157,7 +117,7 @@ int main(int argc, char* argv[])
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
     
-    while(handle_window_events(&window_context, &keyboard))
+    while(handle_window_events(&window_context, &keyboard, &mouse))
     {
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -170,6 +130,9 @@ int main(int argc, char* argv[])
 	glDrawArrays(GL_TRIANGLES, 0, mesh.data.vertex_count);
 
 	redraw_window(&window_context);
+
+	mouse.movement_delta_x = 0;
+	mouse.movement_delta_y = 0;
 	
 	platform_sleep(1);
     }
