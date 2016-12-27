@@ -205,9 +205,9 @@ matrix_look_fps(vector3 eye, float pitch, float yaw)
     float cos_yaw = cos(yaw_radians);
     float sin_yaw = sin(yaw_radians);
 
-    vector3 x = (vector3){{{cos_yaw, 0.0f, -sin_yaw}}};
-    vector3 y = (vector3){{{sin_yaw * sin_pitch, cos_pitch, cos_yaw * sin_pitch}}};
-    vector3 z = (vector3){{{sin_yaw * cos_pitch, -sin_pitch, cos_pitch * cos_yaw}}};
+    vector3 x = (vector3){{{cos_yaw, 0.0f, sin_yaw}}};
+    vector3 y = (vector3){{{sin_yaw * sin_pitch, cos_pitch, -cos_yaw * sin_pitch}}};
+    vector3 z = (vector3){{{sin_yaw * cos_pitch, -sin_pitch, -cos_pitch* cos_yaw}}};
     
     float tx = vector3_dot(x, eye);
     float ty = vector3_dot(y, eye);
