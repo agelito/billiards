@@ -131,6 +131,7 @@ matrix4
 matrix_perspective(float field_of_view, float aspect_ratio, float near, float far)
 {
     float fov_radians = DEGREES_TO_RADIANS * field_of_view;
+    
     float top = near * tan(fov_radians * 0.5f);
     float bottom = -top;
     float right = top * aspect_ratio;
@@ -145,10 +146,10 @@ matrix_perspective(float field_of_view, float aspect_ratio, float near, float fa
     float fpn = (far + near);
 
     matrix4 matrix = {{
-	    near2 / rml, 0.0f, rpl / rml, 0.0f,
-	    0.0f, near2 / tmb, tpb / tmb, 0.0f,
-	    0.0f, 0.0f, -fpn / fmn, -1.0f,
-	    0.0f, 0.0f, -(2.0f * far * near) / fmn, 0.0f
+	    near2 / rml, 0.0f, 0.0f, 0.0f,
+	    0.0f, near2 / tmb, 0.0f, 0.0f,
+	    rpl / rml, tpb / tmb, -(fpn / fmn), -1.0f,
+	    0.0f, 0.0f, -((2.0f * far * near) / fmn), 0.0f
 	}};
 
     return matrix;
@@ -213,12 +214,21 @@ matrix_look_fps(vector3 eye, float pitch, float yaw)
     float ty = vector3_dot(y, eye);
     float tz = vector3_dot(z, eye);
 
+#if 0
     matrix4 result = (matrix4){{
 	    x.x, x.y, x.z, 0.0f,
 	    y.x, y.y, y.z, 0.0f,
 	    z.x, z.y, z.z, 0.0f,
 	    -tx, -ty, -tz, 1.0f
 	}};
+#else
+    matrix4 result = (matrix4){{
+	    x.x, y.x, z.x, 0.0f,
+	    x.y, y.y, z.y, 0.0f,
+	    x.z, y.z, z.z, 0.0f,
+	    -tx, -ty, -tz, 1.0f
+	}};
+#endif
 
     return result;
 }

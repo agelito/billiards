@@ -13,7 +13,6 @@ void main()
 {
     color = in_color;
 
-    mat4 model_view = view * world;
-    mat4 world_view_projection = projection * model_view;
+    mat4 world_view_projection = projection * view * world;
     gl_Position = world_view_projection * vec4(in_vertex, 1.0);
 }

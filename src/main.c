@@ -15,6 +15,13 @@
 #include "shader.h"
 #include "mesh.h"
 
+typedef struct
+{
+    vector3 position;
+    float yaw;
+    float pitch;
+} fps_camera;
+
 int read_file(char* path, char* destination, int destination_size)
 {
     FILE* file = fopen(path, "rb");
@@ -40,6 +47,16 @@ int read_file(char* path, char* destination, int destination_size)
     return size;
 }
 
+void set_camera_uniforms(gl_functions* gl, GLuint program, fps_camera* camera)
+{
+    GLint view_matrix_location = gl->glGetUniformLocation(program, "view");
+    if(view_matrix_location != -1)
+    {
+	matrix4 view_matrix = matrix_look_fps(camera->position, camera->pitch, camera->yaw);
+	gl->glUniformMatrix4fv(view_matrix_location, 1, GL_FALSE, view_matrix.data);
+    }
+}
+
 void set_shader_uniforms(gl_functions* gl, GLuint program, int screen_width, int screen_height)
 {
     GLint projection_matrix_location = gl->glGetUniformLocation(program, "projection");
@@ -48,28 +65,15 @@ void set_shader_uniforms(gl_functions* gl, GLuint program, int screen_width, int
 	float right = (float)screen_width * 0.5f;
 	float top = (float)screen_height * 0.5f;
 	
-	matrix4 projection_matrix = matrix_perspective(60.0f, right / top, 0.01f, 100.0f);
+	matrix4 projection_matrix = matrix_perspective(80.0f, right / top, 0.01f, 100.0f);
 	gl->glUniformMatrix4fv(projection_matrix_location, 1, GL_FALSE, projection_matrix.data);
-    }
-
-    GLint view_matrix_location = gl->glGetUniformLocation(program, "view");
-    if(view_matrix_location != -1)
-    {
-	vector3 eye = (vector3){{{0.0f, 0.0f, -3.0f}}};
-
-	static float pitch = 0.0f;
-	static float yaw = 0.0f;
-	
-	matrix4 view_matrix = matrix_look_fps(eye, pitch, yaw);
-
-	gl->glUniformMatrix4fv(view_matrix_location, 1, GL_FALSE, view_matrix.data);
     }
 
     GLint world_matrix_location = gl->glGetUniformLocation(program, "world");
     if(world_matrix_location != -1)
     {
 	static float rotation = 0.0f;
-	rotation = rotation + 0.04f;
+	// rotation = rotation + 0.04f;
 
 	matrix4 world_matrix = matrix_rotation_y(rotation);
 	
@@ -116,14 +120,23 @@ int main(int argc, char* argv[])
     
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
+
+    fps_camera camera = (fps_camera){0};
+    camera.position = (vector3){{{0.0f, 0.0f, -2.0f}}};
     
     while(handle_window_events(&window_context, &keyboard, &mouse))
     {
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	camera.yaw -= (float)mouse.movement_delta_x * 0.5f;
+	camera.pitch -= (float)mouse.movement_delta_y * 0.5f;
+	if(camera.pitch < -90.0f) camera.pitch = -90.0f;
+	if(camera.pitch > 90.0f) camera.pitch = 90.0f;
+	
 	gl.glUseProgram(shader.program);
 	set_shader_uniforms(&gl, shader.program, window_context.width, window_context.height);
+	set_camera_uniforms(&gl, shader.program, &camera);
 	
 	gl.glBindVertexArray(mesh.vao);
 	gl.glBindBuffer(GL_ARRAY_BUFFER, mesh.vbo);
