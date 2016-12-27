@@ -47,7 +47,7 @@ int read_file(char* path, char* destination, int destination_size)
     return size;
 }
 
-void set_camera_uniforms(gl_functions* gl, GLuint program, fps_camera* camera)
+void set_view(gl_functions* gl, GLuint program, fps_camera* camera)
 {
     GLint view_matrix_location = gl->glGetUniformLocation(program, "view");
     if(view_matrix_location != -1)
@@ -57,7 +57,7 @@ void set_camera_uniforms(gl_functions* gl, GLuint program, fps_camera* camera)
     }
 }
 
-void set_shader_uniforms(gl_functions* gl, GLuint program, int screen_width, int screen_height)
+void set_projection(gl_functions* gl, GLuint program, int screen_width, int screen_height)
 {
     GLint projection_matrix_location = gl->glGetUniformLocation(program, "projection");
     if(projection_matrix_location != -1)
@@ -68,15 +68,14 @@ void set_shader_uniforms(gl_functions* gl, GLuint program, int screen_width, int
 	matrix4 projection_matrix = matrix_perspective(80.0f, right / top, 0.01f, 100.0f);
 	gl->glUniformMatrix4fv(projection_matrix_location, 1, GL_FALSE, projection_matrix.data);
     }
+}
 
+void set_world(gl_functions* gl, GLuint program, vector3 position)
+{
     GLint world_matrix_location = gl->glGetUniformLocation(program, "world");
     if(world_matrix_location != -1)
     {
-	static float rotation = 0.0f;
-	// rotation = rotation + 0.04f;
-
-	matrix4 world_matrix = matrix_rotation_y(rotation);
-	
+	matrix4 world_matrix = matrix_translate(position.x, position.y, position.z);
 	gl->glUniformMatrix4fv(world_matrix_location, 1, GL_FALSE, world_matrix.data);
     }
 }
@@ -123,7 +122,12 @@ int main(int argc, char* argv[])
 
     fps_camera camera = (fps_camera){0};
     camera.position = (vector3){{{0.0f, 0.0f, -2.0f}}};
-    
+
+    int created_cube_count = 0;
+
+    #define MAX_CUBES 1024
+    vector3 created_cube_positions[MAX_CUBES];
+
     while(handle_window_events(&window_context, &keyboard, &mouse))
     {
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
@@ -165,16 +169,47 @@ int main(int argc, char* argv[])
 	matrix4 camera_rotation = matrix_multiply(rotate_yaw, rotate_pitch);
 	
 	camera_movement = vector3_matrix_multiply(camera_rotation, camera_movement);
-
 	camera.position = vector3_add(camera.position, camera_movement);
+
+	vector3 camera_forward = (vector3){{{0.0f, 0.0f, 3.0f}}};
+	camera_forward = vector3_matrix_multiply(camera_rotation, camera_forward);
+
+	vector3 pointer_location = vector3_add(camera.position, camera_forward);
+
+	pointer_location.x = (int)pointer_location.x + 0.5f;
+	pointer_location.y = (int)pointer_location.y + 0.5f;
+	pointer_location.z = (int)pointer_location.z + 0.5f;
+
+	if(is_pressed(&keyboard, VKEY_Q))
+	{
+	    *(created_cube_positions + created_cube_count++) = pointer_location;
+	}
+
+	if(is_pressed(&keyboard, VKEY_Z) && created_cube_count > 0)
+	{
+	    created_cube_count -= 1;
+	}
 	
 	gl.glUseProgram(shader.program);
-	set_shader_uniforms(&gl, shader.program, window_context.width, window_context.height);
-	set_camera_uniforms(&gl, shader.program, &camera);
+	set_projection(&gl, shader.program, window_context.width, window_context.height);
+	set_view(&gl, shader.program, &camera);
 	
 	gl.glBindVertexArray(mesh.vao);
 	gl.glBindBuffer(GL_ARRAY_BUFFER, mesh.vbo);
+
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+	set_world(&gl, shader.program, pointer_location);
 	glDrawArrays(GL_TRIANGLES, 0, mesh.data.vertex_count);
+
+	glPolygonMode(GL_FRONT, GL_FILL);
+	
+	int i;
+	for(i = 0; i < created_cube_count; i++)
+	{
+	    set_world(&gl, shader.program, *(created_cube_positions + i));
+	    glDrawArrays(GL_TRIANGLES, 0, mesh.data.vertex_count);
+	}
 
 	redraw_window(&window_context);
 
