@@ -35,7 +35,7 @@ create_window_and_gl_context(int width, int height, char* title)
 
     XSetWindowAttributes set_window_attributes;
     set_window_attributes.colormap = color_map;
-    set_window_attributes.event_mask = ExposureMask | KeyPressMask | PointerMotionMask | StructureNotifyMask;
+    set_window_attributes.event_mask = ExposureMask | KeyPressMask | KeyReleaseMask | PointerMotionMask | StructureNotifyMask;
 
     Window window = XCreateWindow(display, root_window, 0, 0, width, height, 0, visual_info->depth, InputOutput,
 				  visual_info->visual, CWColormap | CWEventMask, &set_window_attributes);
@@ -85,7 +85,7 @@ redraw_window(window_and_gl_context* window_context)
 }
 
 int
-handle_window_events(window_and_gl_context* window_context, keycode_map* keyboard, mouse_input* mouse)
+handle_window_events(window_and_gl_context* window_context, keyboard_input* keyboard, mouse_input* mouse)
 {
     int window_is_open = 1;
 
@@ -96,9 +96,29 @@ handle_window_events(window_and_gl_context* window_context, keycode_map* keyboar
 
         if(event.type == KeyPress)
 	{
-	    if(keycode_is_symbol(keyboard, event.xkey.keycode, XK_Escape))
+	    keycode_state* state = (keyboard->state + event.xkey.keycode);
+	    if(!state->down)
 	    {
-		destroy_window(window_context);
+		state->down = 1;
+		state->pressed = 1;
+	    }
+	}
+	else if(event.type == KeyRelease)
+	{
+	    int was_auto_repeat = 0;
+	    // NOTE: Check for auto repeat
+	    if(XPending(window_context->display))
+	    {
+		XEvent next;
+		XPeekEvent(window_context->display, &next);
+		was_auto_repeat = (next.type == KeyPress && next.xkey.time == event.xkey.time && next.xkey.keycode == event.xkey.keycode);
+	    }
+
+	    if(!was_auto_repeat)
+	    {
+		keycode_state* state = (keyboard->state + event.xkey.keycode);
+		state->down = 0;
+		state->released = 1;
 	    }
 	}
 	else if(event.type == MotionNotify)

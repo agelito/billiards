@@ -11,4 +11,5 @@ typedef struct
 
 mouse_input init_mouse_input(Display* display, Window window);
 
+
 #endif // MOUSE_X11_H_INCLUDED

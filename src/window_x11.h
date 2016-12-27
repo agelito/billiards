@@ -32,6 +32,6 @@ void
 redraw_window(window_and_gl_context* window_context);
 
 int
-handle_window_events(window_and_gl_context* window_context, keycode_map* keyboard, mouse_input* mouse);
+handle_window_events(window_and_gl_context* window_context, keyboard_input* keyboard, mouse_input* mouse);
 
 #endif // WINDOW_X11_H_INCLUDED

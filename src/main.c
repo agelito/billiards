@@ -94,7 +94,7 @@ int main(int argc, char* argv[])
     
     window_and_gl_context window_context = create_window_and_gl_context(500, 500, "aren");
 
-    keycode_map keyboard = create_keycode_map(window_context.display);
+    keyboard_input keyboard = keyboard_init(window_context.display);
     mouse_input mouse = init_mouse_input(window_context.display, window_context.window);
     
     gl_functions gl = load_gl_functions();
@@ -129,6 +129,11 @@ int main(int argc, char* argv[])
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	if(is_released(&keyboard, VKEY_ESCAPE))
+	{
+	    destroy_window(&window_context);
+	}
+
 	camera.yaw -= (float)mouse.movement_delta_x * 0.5f;
 	camera.pitch -= (float)mouse.movement_delta_y * 0.5f;
 	if(camera.pitch < -90.0f) camera.pitch = -90.0f;
@@ -146,6 +151,8 @@ int main(int argc, char* argv[])
 
 	mouse.movement_delta_x = 0;
 	mouse.movement_delta_y = 0;
+
+	keyboard_reset_state(&keyboard);
 	
 	platform_sleep(1);
     }
