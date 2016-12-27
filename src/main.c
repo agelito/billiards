@@ -129,15 +129,44 @@ int main(int argc, char* argv[])
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	if(is_released(&keyboard, VKEY_ESCAPE))
-	{
-	    destroy_window(&window_context);
-	}
-
 	camera.yaw -= (float)mouse.movement_delta_x * 0.5f;
 	camera.pitch -= (float)mouse.movement_delta_y * 0.5f;
 	if(camera.pitch < -90.0f) camera.pitch = -90.0f;
 	if(camera.pitch > 90.0f) camera.pitch = 90.0f;
+	
+	if(is_pressed(&keyboard, VKEY_ESCAPE))
+	{
+	    destroy_window(&window_context);
+	}
+	
+	vector3 camera_movement = (vector3){0};
+	if(is_down(&keyboard, VKEY_W))
+	{
+	    camera_movement.z += 0.1f;
+	}
+
+	if(is_down(&keyboard, VKEY_S))
+	{
+	    camera_movement.z -= 0.1f;
+	}
+
+	if(is_down(&keyboard, VKEY_A))
+	{
+	    camera_movement.x -= 0.1f;
+	}
+
+	if(is_down(&keyboard, VKEY_D))
+	{
+	    camera_movement.x += 0.1f;
+	}
+
+	matrix4 rotate_yaw = matrix_rotation_y(camera.yaw);
+	matrix4 rotate_pitch = matrix_rotation_x(camera.pitch);
+	matrix4 camera_rotation = matrix_multiply(rotate_yaw, rotate_pitch);
+	
+	camera_movement = vector3_matrix_multiply(camera_rotation, camera_movement);
+
+	camera.position = vector3_add(camera.position, camera_movement);
 	
 	gl.glUseProgram(shader.program);
 	set_shader_uniforms(&gl, shader.program, window_context.width, window_context.height);
