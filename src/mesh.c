@@ -130,7 +130,7 @@ mesh_create_circle(float radius, int subdivisions)
 #include <string.h>
 
 mesh_data
-mesh_create_cube(float side)
+mesh_create_cube(float side, color vertex_color)
 {
     mesh_data data = (mesh_data){0};
     data.vertex_count = 36;
@@ -138,17 +138,6 @@ mesh_create_cube(float side)
     unsigned int vertex_data_size = data.vertex_count * sizeof(vertex);
 
     float half_side = side * 0.5f;
-
-    color colors[] = {
-	{1.0f, 0.0f, 0.0f},
-	{0.0f, 1.0f, 0.0f},
-	{0.0f, 0.0f, 1.0f},
-	{1.0f, 1.0f, 0.0f},
-	{0.0f, 1.0f, 1.0f},
-	{1.0f, 0.0f, 1.0f},
-	{1.0f, 1.0f, 1.0f},
-	{0.0f, 0.0f, 0.0f}
-    };
     
     data.vertices = (vertex*)malloc(vertex_data_size);
     memset(data.vertices, 0, vertex_data_size);
@@ -156,14 +145,14 @@ mesh_create_cube(float side)
     int vertex_index = 0;
 
     vertex corners[8] = {
-	{{{{half_side, half_side, half_side}}}, *(colors + 0)},    // [0]TOP RIGHT FRONT
-	{{{{half_side, half_side, -half_side}}}, *(colors + 1)},   // [1]TOP RIGHT BACK
-	{{{{half_side, -half_side, half_side}}}, *(colors + 2)},   // [2]BOTTOM RIGHT FRONT
-	{{{{half_side, -half_side, -half_side}}}, *(colors + 3)},  // [3]BOTTOM RIGHT BACK
-	{{{{-half_side, half_side, half_side}}}, *(colors + 4)},   // [4]TOP LEFT FRONT
-	{{{{-half_side, half_side, -half_side}}}, *(colors + 5)},  // [5]TOP LEFT BACK
-	{{{{-half_side, -half_side, half_side}}}, *(colors + 6)},  // [6]BOTTOM LEFT FRONT
-	{{{{-half_side, -half_side, -half_side}}}, *(colors + 7)}, // [7]BOTTOM LEFT BACK
+	{{{{half_side, half_side, half_side}}}, vertex_color},    // [0]TOP RIGHT FRONT
+	{{{{half_side, half_side, -half_side}}}, vertex_color},   // [1]TOP RIGHT BACK
+	{{{{half_side, -half_side, half_side}}}, vertex_color},   // [2]BOTTOM RIGHT FRONT
+	{{{{half_side, -half_side, -half_side}}}, vertex_color},  // [3]BOTTOM RIGHT BACK
+	{{{{-half_side, half_side, half_side}}}, vertex_color},   // [4]TOP LEFT FRONT
+	{{{{-half_side, half_side, -half_side}}}, vertex_color},  // [5]TOP LEFT BACK
+	{{{{-half_side, -half_side, half_side}}}, vertex_color},  // [6]BOTTOM LEFT FRONT
+	{{{{-half_side, -half_side, -half_side}}}, vertex_color}, // [7]BOTTOM LEFT BACK
     };
 
     // Right Side

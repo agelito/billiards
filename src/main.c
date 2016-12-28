@@ -57,6 +57,21 @@ void set_view(gl_functions* gl, GLuint program, fps_camera* camera)
     }
 }
 
+
+void set_view_ui(gl_functions* gl, GLuint program)
+{
+    GLint view_matrix_location = gl->glGetUniformLocation(program, "view");
+    if(view_matrix_location != -1)
+    {
+	vector3 eye = (vector3){{{0.0f, 0.0f, -1.0f}}};
+	vector3 at = (vector3){0};
+	vector3 up = (vector3){{{0.0f, 1.0f, 0.0f}}};
+	
+	matrix4 view_matrix = matrix_look_at(eye, at, up);
+	gl->glUniformMatrix4fv(view_matrix_location, 1, GL_FALSE, view_matrix.data);
+    }
+}
+
 void set_projection(gl_functions* gl, GLuint program, int screen_width, int screen_height)
 {
     GLint projection_matrix_location = gl->glGetUniformLocation(program, "projection");
@@ -66,6 +81,16 @@ void set_projection(gl_functions* gl, GLuint program, int screen_width, int scre
 	float top = (float)screen_height * 0.5f;
 	
 	matrix4 projection_matrix = matrix_perspective(80.0f, right / top, 0.01f, 100.0f);
+	gl->glUniformMatrix4fv(projection_matrix_location, 1, GL_FALSE, projection_matrix.data);
+    }
+}
+
+void set_projection_ui(gl_functions* gl, GLuint program, int screen_width, int screen_height)
+{
+    GLint projection_matrix_location = gl->glGetUniformLocation(program, "projection");
+    if(projection_matrix_location != -1)
+    {
+	matrix4 projection_matrix = matrix_orthographic((float)screen_width, (float)screen_height, 1.0f, 100.0f);
 	gl->glUniformMatrix4fv(projection_matrix_location, 1, GL_FALSE, projection_matrix.data);
     }
 }
@@ -109,8 +134,10 @@ int main(int argc, char* argv[])
 
     shader_program shader = load_shader(&gl, vertex_source, vertex_source_length, fragment_source, fragment_source_length);
 
-    //loaded_mesh mesh = load_mesh(&gl, mesh_create_circle(300.0f, 9));
-    loaded_mesh mesh = load_mesh(&gl, mesh_create_cube(1.0f));
+    loaded_mesh mesh = load_mesh(&gl, mesh_create_cube(1.0f, (color){1.0f, 1.0f, 1.0f}));
+    mesh_data_free(&mesh.data);
+
+    loaded_mesh pointer = load_mesh(&gl, mesh_create_circle(8.0f, 5));
     mesh_data_free(&mesh.data);
 
     //glEnable(GL_CULL_FACE);
@@ -176,10 +203,6 @@ int main(int argc, char* argv[])
 
 	vector3 pointer_location = vector3_add(camera.position, camera_forward);
 
-	pointer_location.x = (int)pointer_location.x + 0.5f;
-	pointer_location.y = (int)pointer_location.y + 0.5f;
-	pointer_location.z = (int)pointer_location.z + 0.5f;
-
 	if(is_pressed(&keyboard, VKEY_Q))
 	{
 	    *(created_cube_positions + created_cube_count++) = pointer_location;
@@ -210,6 +233,16 @@ int main(int argc, char* argv[])
 	    set_world(&gl, shader.program, *(created_cube_positions + i));
 	    glDrawArrays(GL_TRIANGLES, 0, mesh.data.vertex_count);
 	}
+
+	// NOTE: Draw UI
+	set_projection_ui(&gl, shader.program, window_context.width, window_context.height);
+	set_view_ui(&gl, shader.program);
+
+	set_world(&gl, shader.program, (vector3){{{0.0f, 0.0f, 0.0f}}});
+	
+	gl.glBindVertexArray(pointer.vao);
+	gl.glBindBuffer(GL_ARRAY_BUFFER, pointer.vbo);
+	glDrawArrays(GL_TRIANGLES, 0, pointer.data.vertex_count);
 
 	redraw_window(&window_context);
 
