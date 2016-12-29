@@ -26,6 +26,8 @@ gl_functions load_gl_functions()
     
     gl.glGetUniformLocation = GL_PROC_ADDR(glGetUniformLocation);
     gl.glUniformMatrix4fv = GL_PROC_ADDR(glUniformMatrix4fv);
+    gl.glUniform3fv = GL_PROC_ADDR(glUniform3fv);
+    gl.glGenerateMipmap = GL_PROC_ADDR(glGenerateMipmap);
 
     return gl;
 }

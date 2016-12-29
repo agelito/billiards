@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include <math.h>
 
-#define create_vertex(x, y, z, color) (vertex){{{{x, y, z}}}, color}
+#define create_vertex(x, y, z, color, uv_x, uv_y) (vertex){{{{x, y, z}}}, color, {{{uv_x, uv_y}}}}
 
 loaded_mesh
 load_mesh(gl_functions* gl, mesh_data data)
@@ -36,6 +36,9 @@ load_mesh(gl_functions* gl, mesh_data data)
     gl->glEnableVertexAttribArray(1);
     gl->glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(vertex), (void*)(sizeof(float) * 3));
 
+    gl->glEnableVertexAttribArray(2);
+    gl->glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(vertex), (void*)(sizeof(float) * 6));
+
     gl->glBindBuffer(GL_ARRAY_BUFFER, 0);
     gl->glBindVertexArray(0);
 
@@ -57,9 +60,9 @@ mesh_create_triangle(float side)
     color c3 = { 0.0f, 0.0f, 1.0f };
     
     data.vertices = (vertex*)malloc(vertex_data_size);
-    *(data.vertices + 0) = create_vertex(0.0f, half_side, 0.0f, c1);
-    *(data.vertices + 1) = create_vertex(-half_side, -half_side, 0.0f, c2);
-    *(data.vertices + 2) = create_vertex(half_side, -half_side, 0.0f, c3);
+    *(data.vertices + 0) = create_vertex(0.0f, half_side, 0.0f, c1, 0.5f, 1.0f);
+    *(data.vertices + 1) = create_vertex(-half_side, -half_side, 0.0f, c2, 0.0f, 0.0f);
+    *(data.vertices + 2) = create_vertex(half_side, -half_side, 0.0f, c3, 1.0f, 0.0f);
 
     return data;
 }
@@ -76,9 +79,8 @@ mesh_create_circle(float radius, int subdivisions)
     data.vertices = (vertex*)malloc(vertex_data_size);
     data.vertex_count = vertex_count;
 
-    color color_center = { 0.5f, 0.5f, 0.5f };
-    color color_outer = { 0.08f, 0.08f, 0.08f };
-    vertex center = create_vertex(0.0f, 0.0f, 0.0f, color_center);
+    color fill_color = { 1.0f, 1.0f, 1.0f };
+    vertex center = create_vertex(0.0f, 0.0f, 0.0f, fill_color, 0.0f, 0.0f);
 
     float segment_step = MATH_PIOVER2 / subdivisions;
 
@@ -92,32 +94,40 @@ mesh_create_circle(float radius, int subdivisions)
 	float circle_y2 = sin((segment + 1) * segment_step) * radius;
 
 	// side 0
-	vertex segment0_0 = create_vertex(circle_x1, circle_y1, 0.0f, color_outer);
-	vertex segment1_0 = create_vertex(circle_x2, circle_y2, 0.0f, color_outer);
+	vertex segment0_0 = create_vertex(circle_x1, circle_y1, 0.0f,
+					  fill_color, circle_x1, circle_y1);
+	vertex segment1_0 = create_vertex(circle_x2, circle_y2, 0.0f,
+					  fill_color, circle_x1, circle_y1);
 
 	*(data.vertices + vertex_index++) = center;
 	*(data.vertices + vertex_index++) = segment0_0;
 	*(data.vertices + vertex_index++) = segment1_0;
 
 	// side 1
-	vertex segment0_1 = create_vertex(circle_x1, -circle_y1, 0.0f, color_outer);
-	vertex segment1_1 = create_vertex(circle_x2, -circle_y2, 0.0f, color_outer);
+	vertex segment0_1 = create_vertex(circle_x1, -circle_y1, 0.0f,
+					  fill_color, circle_x1, -circle_y1);
+	vertex segment1_1 = create_vertex(circle_x2, -circle_y2, 0.0f,
+					  fill_color, circle_x1, -circle_y2);
 	
 	*(data.vertices + vertex_index++) = center;
 	*(data.vertices + vertex_index++) = segment1_1;
 	*(data.vertices + vertex_index++) = segment0_1;
 
 	// side 2
-	vertex segment0_2 = create_vertex(-circle_x1, circle_y1, 0.0f, color_outer);
-	vertex segment1_2 = create_vertex(-circle_x2, circle_y2, 0.0f, color_outer);
+	vertex segment0_2 = create_vertex(-circle_x1, circle_y1, 0.0f,
+					  fill_color, -circle_x1, circle_y1);
+	vertex segment1_2 = create_vertex(-circle_x2, circle_y2, 0.0f,
+					  fill_color, -circle_x1, circle_y2);
 
 	*(data.vertices + vertex_index++) = center;
 	*(data.vertices + vertex_index++) = segment1_2;
 	*(data.vertices + vertex_index++) = segment0_2;
 
 	// side 3
-	vertex segment0_3 = create_vertex(-circle_x1, -circle_y1, 0.0f, color_outer);
-	vertex segment1_3 = create_vertex(-circle_x2, -circle_y2, 0.0f, color_outer);
+	vertex segment0_3 = create_vertex(-circle_x1, -circle_y1, 0.0f,
+					  fill_color, -circle_x1, -circle_y1);
+	vertex segment1_3 = create_vertex(-circle_x2, -circle_y2, 0.0f,
+					  fill_color, -circle_x2, -circle_y2);
 
 	*(data.vertices + vertex_index++) = center;
 	*(data.vertices + vertex_index++) = segment0_3;
@@ -144,64 +154,122 @@ mesh_create_cube(float side, color vertex_color)
 
     int vertex_index = 0;
 
-    vertex corners[8] = {
-	{{{{half_side, half_side, half_side}}}, vertex_color},    // [0]TOP RIGHT FRONT
-	{{{{half_side, half_side, -half_side}}}, vertex_color},   // [1]TOP RIGHT BACK
-	{{{{half_side, -half_side, half_side}}}, vertex_color},   // [2]BOTTOM RIGHT FRONT
-	{{{{half_side, -half_side, -half_side}}}, vertex_color},  // [3]BOTTOM RIGHT BACK
-	{{{{-half_side, half_side, half_side}}}, vertex_color},   // [4]TOP LEFT FRONT
-	{{{{-half_side, half_side, -half_side}}}, vertex_color},  // [5]TOP LEFT BACK
-	{{{{-half_side, -half_side, half_side}}}, vertex_color},  // [6]BOTTOM LEFT FRONT
-	{{{{-half_side, -half_side, -half_side}}}, vertex_color}, // [7]BOTTOM LEFT BACK
+    // NOTE: Separated into each side for UV reasons. In the future I will consider
+    // separating the vertex, color, and UV into different streams.
+    
+    vertex side_right[4] = {
+	// [0]TOP RIGHT FRONT
+	{{{{half_side, half_side, half_side}}}, vertex_color, {{{0.0f, 1.0f}}}},
+	// [1]TOP RIGHT BACK
+	{{{{half_side, half_side, -half_side}}}, vertex_color, {{{1.0f, 1.0f}}}},
+	// [2]BOTTOM RIGHT FRONT
+	{{{{half_side, -half_side, half_side}}}, vertex_color, {{{0.0f, 0.0f}}}},
+	// [3]BOTTOM RIGHT BACK
+	{{{{half_side, -half_side, -half_side}}}, vertex_color, {{{1.0f, 0.0f}}}},
+    };
+
+    vertex side_left[4] = {
+	// [4]TOP LEFT FRONT
+	{{{{-half_side, half_side, half_side}}}, vertex_color, {{{1.0f, 1.0f}}}},
+	// [5]TOP LEFT BACK
+	{{{{-half_side, half_side, -half_side}}}, vertex_color, {{{0.0f, 1.0f}}}},
+	// [6]BOTTOM LEFT FRONT
+	{{{{-half_side, -half_side, half_side}}}, vertex_color, {{{1.0f, 0.0f}}}},
+	// [7]BOTTOM LEFT BACK
+	{{{{-half_side, -half_side, -half_side}}}, vertex_color, {{{0.0f, 0.0f}}}}
+    };
+
+    vertex side_top[4] = {
+	// [0]TOP RIGHT FRONT
+	{{{{half_side, half_side, half_side}}}, vertex_color, {{{1.0f, 0.0f}}}},
+	// [1]TOP RIGHT BACK
+	{{{{half_side, half_side, -half_side}}}, vertex_color, {{{1.0f, 1.0f}}}},
+	// [4]TOP LEFT FRONT
+	{{{{-half_side, half_side, half_side}}}, vertex_color, {{{0.0f, 0.0f}}}},
+	// [5]TOP LEFT BACK
+	{{{{-half_side, half_side, -half_side}}}, vertex_color, {{{0.0f, 1.0f}}}},
+    };
+
+    vertex side_bottom[4] = {
+	// [2]BOTTOM RIGHT FRONT
+	{{{{half_side, -half_side, half_side}}}, vertex_color, {{{1.0f, 1.0f}}}},
+	// [3]BOTTOM RIGHT BACK
+	{{{{half_side, -half_side, -half_side}}}, vertex_color, {{{1.0f, 0.0f}}}},
+	// [6]BOTTOM LEFT FRONT
+	{{{{-half_side, -half_side, half_side}}}, vertex_color, {{{0.0f, 1.0f}}}},
+	// [7]BOTTOM LEFT BACK
+	{{{{-half_side, -half_side, -half_side}}}, vertex_color, {{{0.0f, 0.0f}}}}
+    };
+
+    vertex side_front[4] = {
+	// [0]TOP RIGHT FRONT
+	{{{{half_side, half_side, half_side}}}, vertex_color, {{{1.0f, 1.0f}}}},
+	// [2]BOTTOM RIGHT FRONT
+	{{{{half_side, -half_side, half_side}}}, vertex_color, {{{1.0f, 0.0f}}}},
+	// [4]TOP LEFT FRONT
+	{{{{-half_side, half_side, half_side}}}, vertex_color, {{{0.0f, 1.0f}}}},
+	// [6]BOTTOM LEFT FRONT
+	{{{{-half_side, -half_side, half_side}}}, vertex_color, {{{0.0f, 0.0f}}}},
+    };
+
+    vertex side_back[4] = {
+	// [1]TOP RIGHT BACK
+	{{{{half_side, half_side, -half_side}}}, vertex_color, {{{0.0f, 1.0f}}}},
+	// [3]BOTTOM RIGHT BACK
+	{{{{half_side, -half_side, -half_side}}}, vertex_color, {{{0.0f, 0.0f}}}},
+	// [5]TOP LEFT BACK
+	{{{{-half_side, half_side, -half_side}}}, vertex_color, {{{1.0f, 1.0f}}}},
+	// [7]BOTTOM LEFT BACK
+	{{{{-half_side, -half_side, -half_side}}}, vertex_color, {{{1.0f, 0.0f}}}}
     };
 
     // Right Side
-    *(data.vertices + vertex_index++) = *(corners + 0);
-    *(data.vertices + vertex_index++) = *(corners + 1);
-    *(data.vertices + vertex_index++) = *(corners + 2);
-    *(data.vertices + vertex_index++) = *(corners + 2);
-    *(data.vertices + vertex_index++) = *(corners + 1);
-    *(data.vertices + vertex_index++) = *(corners + 3);
+    *(data.vertices + vertex_index++) = *(side_right + 0);
+    *(data.vertices + vertex_index++) = *(side_right + 1);
+    *(data.vertices + vertex_index++) = *(side_right + 2);
+    *(data.vertices + vertex_index++) = *(side_right + 2);
+    *(data.vertices + vertex_index++) = *(side_right + 1);
+    *(data.vertices + vertex_index++) = *(side_right + 3);
 
     // Left Side
-    *(data.vertices + vertex_index++) = *(corners + 5);
-    *(data.vertices + vertex_index++) = *(corners + 4);
-    *(data.vertices + vertex_index++) = *(corners + 6);
-    *(data.vertices + vertex_index++) = *(corners + 6);
-    *(data.vertices + vertex_index++) = *(corners + 7);
-    *(data.vertices + vertex_index++) = *(corners + 5);
+    *(data.vertices + vertex_index++) = *(side_left + 1);
+    *(data.vertices + vertex_index++) = *(side_left + 0);
+    *(data.vertices + vertex_index++) = *(side_left + 2);
+    *(data.vertices + vertex_index++) = *(side_left + 2);
+    *(data.vertices + vertex_index++) = *(side_left + 3);
+    *(data.vertices + vertex_index++) = *(side_left + 1);
     
     // Top Side
-    *(data.vertices + vertex_index++) = *(corners + 4);
-    *(data.vertices + vertex_index++) = *(corners + 5);
-    *(data.vertices + vertex_index++) = *(corners + 1);
-    *(data.vertices + vertex_index++) = *(corners + 1);
-    *(data.vertices + vertex_index++) = *(corners + 0);
-    *(data.vertices + vertex_index++) = *(corners + 4);
+    *(data.vertices + vertex_index++) = *(side_top + 2);
+    *(data.vertices + vertex_index++) = *(side_top + 3);
+    *(data.vertices + vertex_index++) = *(side_top + 1);
+    *(data.vertices + vertex_index++) = *(side_top + 1);
+    *(data.vertices + vertex_index++) = *(side_top + 0);
+    *(data.vertices + vertex_index++) = *(side_top + 2);
     
     // Bottom Side
-    *(data.vertices + vertex_index++) = *(corners + 6);
-    *(data.vertices + vertex_index++) = *(corners + 3);
-    *(data.vertices + vertex_index++) = *(corners + 7);
-    *(data.vertices + vertex_index++) = *(corners + 3);
-    *(data.vertices + vertex_index++) = *(corners + 6);
-    *(data.vertices + vertex_index++) = *(corners + 2);
+    *(data.vertices + vertex_index++) = *(side_bottom + 2);
+    *(data.vertices + vertex_index++) = *(side_bottom + 1);
+    *(data.vertices + vertex_index++) = *(side_bottom + 3);
+    *(data.vertices + vertex_index++) = *(side_bottom + 1);
+    *(data.vertices + vertex_index++) = *(side_bottom + 2);
+    *(data.vertices + vertex_index++) = *(side_bottom + 0);
 
     // Front Side
-    *(data.vertices + vertex_index++) = *(corners + 6);
-    *(data.vertices + vertex_index++) = *(corners + 4);
-    *(data.vertices + vertex_index++) = *(corners + 2);
-    *(data.vertices + vertex_index++) = *(corners + 4);
-    *(data.vertices + vertex_index++) = *(corners + 0);
-    *(data.vertices + vertex_index++) = *(corners + 2);
+    *(data.vertices + vertex_index++) = *(side_front + 3);
+    *(data.vertices + vertex_index++) = *(side_front + 2);
+    *(data.vertices + vertex_index++) = *(side_front + 1);
+    *(data.vertices + vertex_index++) = *(side_front + 2);
+    *(data.vertices + vertex_index++) = *(side_front + 0);
+    *(data.vertices + vertex_index++) = *(side_front + 1);
     
     // Back Side
-    *(data.vertices + vertex_index++) = *(corners + 7);
-    *(data.vertices + vertex_index++) = *(corners + 1);
-    *(data.vertices + vertex_index++) = *(corners + 5);
-    *(data.vertices + vertex_index++) = *(corners + 1);
-    *(data.vertices + vertex_index++) = *(corners + 7);
-    *(data.vertices + vertex_index++) = *(corners + 3);
+    *(data.vertices + vertex_index++) = *(side_back + 3);
+    *(data.vertices + vertex_index++) = *(side_back + 0);
+    *(data.vertices + vertex_index++) = *(side_back + 2);
+    *(data.vertices + vertex_index++) = *(side_back + 0);
+    *(data.vertices + vertex_index++) = *(side_back + 3);
+    *(data.vertices + vertex_index++) = *(side_back + 1);
 
     return data;
 }

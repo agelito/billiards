@@ -12,6 +12,17 @@ typedef struct
 	struct {
 	    float x;
 	    float y;
+	};
+	float data[2];
+    };
+} vector2;
+
+typedef struct
+{
+    union {
+	struct {
+	    float x;
+	    float y;
 	    float z;
 	};
 	float data[3];

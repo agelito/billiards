@@ -14,6 +14,7 @@
 #include "math.h"
 #include "shader.h"
 #include "mesh.h"
+#include "texture.h"
 
 typedef struct
 {
@@ -105,6 +106,15 @@ void set_world(gl_functions* gl, GLuint program, vector3 position)
     }
 }
 
+void set_color(gl_functions* gl, GLuint program, color color)
+{
+    GLint color_location = gl->glGetUniformLocation(program, "tint_color");
+    if(color_location != -1)
+    {
+	gl->glUniform3fv(color_location, 1, &color.r);
+    }
+}
+
 int main(int argc, char* argv[])
 {
     UNUSED(argc);
@@ -137,12 +147,18 @@ int main(int argc, char* argv[])
     loaded_mesh mesh = load_mesh(&gl, mesh_create_cube(1.0f, (color){1.0f, 1.0f, 1.0f}));
     mesh_data_free(&mesh.data);
 
-    loaded_mesh pointer = load_mesh(&gl, mesh_create_circle(8.0f, 5));
+    loaded_mesh pointer = load_mesh(&gl, mesh_create_circle(2.0f, 5));
     mesh_data_free(&mesh.data);
 
-    //glEnable(GL_CULL_FACE);
-    //glCullFace(GL_BACK);
+    loaded_texture texture = load_texture(&gl, texture_create_checker(2, 2));
+    texture_data_free(&texture.data);
+
+#if 1
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+#else
     glPolygonMode(GL_BACK, GL_LINE);
+#endif
     
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
@@ -154,6 +170,8 @@ int main(int argc, char* argv[])
 
     #define MAX_CUBES 1024
     vector3 created_cube_positions[MAX_CUBES];
+
+    glBindTexture(GL_TEXTURE_2D, texture.handle);
 
     while(handle_window_events(&window_context, &keyboard, &mouse))
     {
@@ -216,16 +234,11 @@ int main(int argc, char* argv[])
 	gl.glUseProgram(shader.program);
 	set_projection(&gl, shader.program, window_context.width, window_context.height);
 	set_view(&gl, shader.program, &camera);
+
+	set_color(&gl, shader.program, (color){0.87f, 0.82f, 0.86f});
 	
 	gl.glBindVertexArray(mesh.vao);
 	gl.glBindBuffer(GL_ARRAY_BUFFER, mesh.vbo);
-
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
-	set_world(&gl, shader.program, pointer_location);
-	glDrawArrays(GL_TRIANGLES, 0, mesh.data.vertex_count);
-
-	glPolygonMode(GL_FRONT, GL_FILL);
 	
 	int i;
 	for(i = 0; i < created_cube_count; i++)
@@ -233,6 +246,8 @@ int main(int argc, char* argv[])
 	    set_world(&gl, shader.program, *(created_cube_positions + i));
 	    glDrawArrays(GL_TRIANGLES, 0, mesh.data.vertex_count);
 	}
+
+	set_color(&gl, shader.program, (color){1.0f, 1.0f, 1.0f});
 
 	// NOTE: Draw UI
 	set_projection_ui(&gl, shader.program, window_context.width, window_context.height);

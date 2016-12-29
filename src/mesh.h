@@ -14,6 +14,7 @@ typedef struct
 {
     vector3 p;
     color c;
+    vector2 uv;
 } vertex;
 
 typedef struct

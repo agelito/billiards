@@ -28,6 +28,8 @@ GL_PROC_DEC(glGetProgramInfoLog, GLuint program, GLsizei maxLength, GLsizei* len
 GL_PROC_DEC(glUseProgram, GLuint program);
 GL_PROC_DEC2(glGetUniformLocation, GLint, GLuint program, const GLchar* name);
 GL_PROC_DEC(glUniformMatrix4fv, GLint location, GLsizei count, GLboolean transpose, const GLfloat* value);
+GL_PROC_DEC(glUniform3fv, GLint location, GLsizei count, const GLfloat* value);
+GL_PROC_DEC(glGenerateMipmap, GLenum target);
 
 typedef struct
 {
@@ -50,6 +52,8 @@ typedef struct
     GL_PROC_DEF(glUseProgram);
     GL_PROC_DEF(glGetUniformLocation);
     GL_PROC_DEF(glUniformMatrix4fv);
+    GL_PROC_DEF(glUniform3fv);
+    GL_PROC_DEF(glGenerateMipmap);
 } gl_functions;
 
 gl_functions load_gl_functions();
