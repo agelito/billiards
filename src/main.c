@@ -168,8 +168,24 @@ int main(int argc, char* argv[])
 
     int created_cube_count = 0;
 
-    #define MAX_CUBES 1024
+    #define MAX_CUBES 2048
     vector3 created_cube_positions[MAX_CUBES];
+
+    int i;
+    for(i = 0; i < MAX_CUBES; i++)
+    {
+	float x = (float)rand() / RAND_MAX;
+	float y = (float)rand() / RAND_MAX;
+	float z = (float)rand() / RAND_MAX;
+
+	x = (x * 180.0f) - 60.0f;
+	y = (y * 180.0f) - 60.0f;
+	z = (z * 180.0f) - 60.0f;
+
+	vector3 random_position = (vector3){{{x, y, z}}};
+	*(created_cube_positions + i) = random_position;
+    }
+    created_cube_count = MAX_CUBES;
 
     glBindTexture(GL_TEXTURE_2D, texture.handle);
 
@@ -221,7 +237,7 @@ int main(int argc, char* argv[])
 
 	vector3 pointer_location = vector3_add(camera.position, camera_forward);
 
-	if(is_pressed(&keyboard, VKEY_Q))
+	if(is_pressed(&keyboard, VKEY_Q) && created_cube_count < MAX_CUBES)
 	{
 	    *(created_cube_positions + created_cube_count++) = pointer_location;
 	}
