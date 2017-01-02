@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "aren.h"
+#include "racera.h"
 #include "platform.h"
 #include "opengl.h"
 
