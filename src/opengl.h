@@ -1,5 +1,5 @@
-#ifndef GL_EXTENSIONS_H_INCLUDED
-#define GL_EXTENSIONS_H_INCLUDED
+#ifndef OPENGL_H_INCLUDED
+#define OPENGL_H_INCLUDED
 
 #include <GL/gl.h>
 #include <GL/glx.h>
@@ -58,4 +58,4 @@ typedef struct
 
 gl_functions load_gl_functions();
 
-#endif // GL_EXTENSIONS_H_INCLUDED
+#endif // OPENGL_H_INCLUDED

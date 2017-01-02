@@ -5,7 +5,7 @@
 
 #include "aren.h"
 #include "platform.h"
-#include "gl_extensions.h"
+#include "opengl.h"
 
 #include "window_x11.h"
 #include "keyboard_x11.h"

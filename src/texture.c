@@ -1,6 +1,6 @@
 // texture.c
 
-#include "gl_extensions.h"
+#include "opengl.h"
 #include "texture.h"
 
 #include <stdlib.h>

@@ -1,6 +1,6 @@
 // shader.c
 
-#include "gl_extensions.h"
+#include "opengl.h"
 #include "shader.h"
 
 #include <stdio.h>

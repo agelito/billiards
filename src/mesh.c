@@ -1,6 +1,6 @@
 // mesh.c
 
-#include "gl_extensions.h"
+#include "opengl.h"
 #include "mesh.h"
 
 // TODO: Use platform for memory allocation instead of stdlib.

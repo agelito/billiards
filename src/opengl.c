@@ -1,6 +1,6 @@
-// gl_extensions.c
+// opengl.c
 
-#include "gl_extensions.h"
+#include "opengl.h"
 
 gl_functions load_gl_functions()
 {
