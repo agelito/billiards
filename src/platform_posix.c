@@ -1,6 +1,7 @@
 // platform_posix.c
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include <errno.h>
@@ -126,4 +127,30 @@ platform_read_file(char* path, char* destination, int destination_size)
     close(file);
 
     return total_bytes_read;
+}
+
+void
+platform_random_seed(int seed)
+{
+    srandom((unsigned int)seed);
+}
+
+int platform_random(int min, int max)
+{
+    long int random_number = random();
+    
+    int delta = (max - min);
+    int range = delta * ((float)random_number / RAND_MAX);
+    
+    return (min + range);
+}
+
+float platform_randomf(float min, float max)
+{
+    long int random_number = random();
+
+    float delta = (max - min);
+    float range = delta * ((float)random_number / RAND_MAX);
+    
+    return (min + range);
 }

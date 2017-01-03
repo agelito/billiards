@@ -9,4 +9,10 @@ void platform_sleep(int milliseconds);
 
 int platform_read_file(char* path, char* destination, int destination_size);
 
+void platform_random_seed(int seed);
+
+int platform_random(int min, int max);
+
+float platform_randomf(float min, float max);
+
 #endif // PLATFORM_H_INCLUDED

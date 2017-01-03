@@ -1,7 +1,5 @@
 // main.c
 
-#include <stdlib.h>
-
 #include "racera.h"
 #include "platform.h"
 #include "opengl.h"
@@ -148,13 +146,9 @@ int main(int argc, char* argv[])
     int i;
     for(i = 0; i < MAX_CUBES; i++)
     {
-	float x = (float)rand() / RAND_MAX;
-	float y = (float)rand() / RAND_MAX;
-	float z = (float)rand() / RAND_MAX;
-
-	x = (x * 180.0f) - 60.0f;
-	y = (y * 180.0f) - 60.0f;
-	z = (z * 180.0f) - 60.0f;
+	float x = platform_randomf(-90.0f, 90.0f);
+	float y = platform_randomf(-90.0f, 90.0f);
+	float z = platform_randomf(-90.0f, 90.0f);
 
 	vector3 random_position = (vector3){{{x, y, z}}};
 	*(created_cube_positions + i) = random_position;
