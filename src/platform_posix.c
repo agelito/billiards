@@ -71,14 +71,14 @@ platform_read_file(char* path, char* destination, int destination_size)
     int file = open(path, O_RDONLY);
     if(file == -1)
     {
-	printf("can't open file %s (error %d)\n", path, errno);
+	printf("can't open file %s (%s)\n", path, strerror(errno));
 	return 0;
     }
 
     off_t file_size = lseek(file, 0, SEEK_END);
     if(file_size == -1)
     {
-	printf("error retrieving file size %s (error %d)\n", path, errno);
+	printf("error retrieving file size %s (%s)\n", path, strerror(errno));
 	close(file);
 	return 0;
     }
@@ -112,7 +112,7 @@ platform_read_file(char* path, char* destination, int destination_size)
 	ssize_t bytes_read = read(file, destination, read_size);
 	if(bytes_read == -1)
 	{
-	    printf("error reading file %s (error %d)\n", path, errno);
+	    printf("error reading file %s (%s)\n", path, strerror(errno));
 	    *(destination + total_bytes_read) = 0;
 	    close(file);
 	    return total_bytes_read;
