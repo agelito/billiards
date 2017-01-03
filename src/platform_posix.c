@@ -2,6 +2,9 @@
 
 #include <stdio.h>
 #include <string.h>
+
+#include <errno.h>
+#include <fcntl.h>
 #include <unistd.h>
 
 #include "racera.h"
@@ -60,4 +63,67 @@ void
 platform_sleep(int milliseconds)
 {
     usleep(milliseconds * 1000);
+}
+
+int
+platform_read_file(char* path, char* destination, int destination_size)
+{
+    int file = open(path, O_RDONLY);
+    if(file == -1)
+    {
+	printf("can't open file %s (error %d)\n", path, errno);
+	return 0;
+    }
+
+    off_t file_size = lseek(file, 0, SEEK_END);
+    if(file_size == -1)
+    {
+	printf("error retrieving file size %s (error %d)\n", path, errno);
+	close(file);
+	return 0;
+    }
+
+    lseek(file, 0, SEEK_SET);
+
+    if(destination == 0 || destination_size == 0)
+    {
+	close(file);
+	return file_size;
+    }
+
+    ssize_t bytes_to_read = file_size;
+    if(bytes_to_read >= destination_size)
+    {
+	bytes_to_read = (destination_size - 1);
+    }
+
+    ssize_t total_bytes_read = 0;
+    while(total_bytes_read < bytes_to_read)
+    {
+	int MAX_READ_CHUNK = 4096;
+	int bytes_left = (bytes_to_read - total_bytes_read);
+	int read_size = MAX_READ_CHUNK;
+	
+	if(read_size > bytes_left)
+	{
+	    read_size = bytes_left;
+	}
+	
+	ssize_t bytes_read = read(file, destination, read_size);
+	if(bytes_read == -1)
+	{
+	    printf("error reading file %s (error %d)\n", path, errno);
+	    *(destination + total_bytes_read) = 0;
+	    close(file);
+	    return total_bytes_read;
+	}
+
+	total_bytes_read += bytes_read;
+    }
+
+    *(destination + total_bytes_read) = 0;
+
+    close(file);
+
+    return total_bytes_read;
 }

@@ -1,6 +1,5 @@
 // main.c
 
-#include <stdio.h>
 #include <stdlib.h>
 
 #include "racera.h"
@@ -22,31 +21,6 @@ typedef struct
     float yaw;
     float pitch;
 } fps_camera;
-
-int read_file(char* path, char* destination, int destination_size)
-{
-    FILE* file = fopen(path, "rb");
-    if(!file)
-    {
-	printf("can't open file %s\n", path);
-	return 0;
-    }
-
-    fseek(file, 0, SEEK_END);
-    int size = ftell(file);
-
-    if(size >= destination_size)
-    {
-	size = (destination_size - 1);
-    }
-    
-    fseek(file, 0, SEEK_SET);
-    fread(destination, 1, size, file);
-    fclose(file);
-
-    destination[size] = 0;
-    return size;
-}
 
 void set_view(gl_functions* gl, GLuint program, fps_camera* camera)
 {
@@ -134,13 +108,13 @@ int main(int argc, char* argv[])
     gl_functions gl = load_gl_functions();
 
     char vertex_source[1024];
-    int vertex_source_length = 0;
+    int vertex_source_length = 1024;
     
     char fragment_source[1024];
-    int fragment_source_length = 0;
+    int fragment_source_length = 1024;
 
-    vertex_source_length = read_file("simple.vert", vertex_source, vertex_source_length);
-    fragment_source_length = read_file("simple.frag", fragment_source, fragment_source_length);
+    vertex_source_length = platform_read_file("simple.vert", vertex_source, vertex_source_length);
+    fragment_source_length = platform_read_file("simple.frag", fragment_source, fragment_source_length);
 
     shader_program shader = load_shader(&gl, vertex_source, vertex_source_length, fragment_source, fragment_source_length);
 
