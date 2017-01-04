@@ -1,8 +1,8 @@
 // simple.vert
 
-in vec3 in_vertex;
-in vec3 in_color;
-in vec2 in_uv;
+attribute vec3 in_vertex;
+attribute vec3 in_color;
+attribute vec2 in_uv;
 
 uniform mat4 world;
 uniform mat4 view;
