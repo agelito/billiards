@@ -2,8 +2,23 @@
 
 #include "opengl.h"
 
+#include <stdio.h>
+
+static void
+print_gl_info()
+{
+    const GLubyte* vendor = glGetString(GL_VENDOR);
+    const GLubyte* renderer = glGetString(GL_RENDERER);
+    const GLubyte* version = glGetString(GL_VERSION);
+    const GLubyte* glsl_version = glGetString(GL_SHADING_LANGUAGE_VERSION);
+
+    printf("%s (%s) %s (glsl %s)\n", version, vendor, renderer, glsl_version);
+}
+
 gl_functions load_gl_functions()
 {
+    print_gl_info();
+    
     gl_functions gl = (gl_functions){0};
     gl.glGenVertexArrays = GL_PROC_ADDR(glGenVertexArrays);
     gl.glBindVertexArray = GL_PROC_ADDR(glBindVertexArray);
@@ -17,6 +32,7 @@ gl_functions load_gl_functions()
     gl.glShaderSource = GL_PROC_ADDR(glShaderSource);
     gl.glCompileShader = GL_PROC_ADDR(glCompileShader);
     gl.glGetShaderiv = GL_PROC_ADDR(glGetShaderiv);
+    gl.glGetShaderInfoLog = GL_PROC_ADDR(glGetShaderInfoLog);
     gl.glCreateProgram = GL_PROC_ADDR(glCreateProgram);
     gl.glAttachShader = GL_PROC_ADDR(glAttachShader);
     gl.glLinkProgram = GL_PROC_ADDR(glLinkProgram);

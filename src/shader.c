@@ -5,6 +5,22 @@
 
 #include <stdio.h>
 
+static void
+print_shader_error(gl_functions* gl, GLuint shader)
+{
+    GLchar info_log[1024];
+    gl->glGetShaderInfoLog(shader, 1024, NULL, info_log);
+    printf("%s\n\n", info_log);
+}
+
+static void
+print_program_error(gl_functions* gl, GLuint program)
+{
+    char info_log[1024];
+    gl->glGetProgramInfoLog(program, 1024, NULL, (GLchar*)info_log);
+    printf("%s\n\n", info_log);
+}
+
 shader_program
 load_shader(gl_functions* gl, char* vertex_source, int vertex_source_length, char* fragment_source, int fragment_source_length)
 {
@@ -22,14 +38,16 @@ load_shader(gl_functions* gl, char* vertex_source, int vertex_source_length, cha
     gl->glGetShaderiv(shader.vertex, GL_COMPILE_STATUS, &successful_compile);
     if(!successful_compile)
     {
-	printf("failed to compile vertex shader:\n %s\n", vertex_source);
+        printf("failed to compile vertex shader:\n");
+        print_shader_error(gl, shader.vertex);
     }
 
     gl->glCompileShader(shader.fragment);
     gl->glGetShaderiv(shader.fragment, GL_COMPILE_STATUS, &successful_compile);
     if(!successful_compile)
     {
-	printf("failed to compile fragment shader:\n %s\n", fragment_source);
+        printf("failed to compile fragment shader:\n");
+        print_shader_error(gl, shader.fragment);
     }
 
     shader.program = gl->glCreateProgram();
@@ -41,11 +59,8 @@ load_shader(gl_functions* gl, char* vertex_source, int vertex_source_length, cha
     gl->glGetProgramiv(shader.program, GL_LINK_STATUS, &successful_link);
     if(!successful_link)
     {
-	GLsizei info_log_length;
-	char info_log[1024];
-	gl->glGetProgramInfoLog(shader.program, 1024, &info_log_length, (GLchar*)info_log);
-	printf("failed to link shader program:\n%s\n\n", info_log);
-	printf("sources:\n%s\n\n%s\n\n", vertex_source, fragment_source);
+        printf("failed to link shader program:\n");
+        print_program_error(gl, shader.program);
     }
 
     return shader;

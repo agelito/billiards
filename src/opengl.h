@@ -20,6 +20,7 @@ GL_PROC_DEC2(glCreateShader, GLuint, GLenum );
 GL_PROC_DEC(glShaderSource, GLuint shader, GLsizei count, const GLchar** string, const GLint* length);
 GL_PROC_DEC(glCompileShader, GLuint shader);
 GL_PROC_DEC(glGetShaderiv, GLuint shader, GLenum pname, GLint* params);
+GL_PROC_DEC(glGetShaderInfoLog, GLuint shader, GLsizei maxLength, GLsizei* length, GLchar* infoLog);
 GL_PROC_DEC2(glCreateProgram, GLuint, void);
 GL_PROC_DEC(glAttachShader, GLuint program, GLuint shader);
 GL_PROC_DEC(glLinkProgram, GLuint program);
@@ -44,6 +45,7 @@ typedef struct
     GL_PROC_DEF(glShaderSource);
     GL_PROC_DEF(glCompileShader);
     GL_PROC_DEF(glGetShaderiv);
+    GL_PROC_DEF(glGetShaderInfoLog);
     GL_PROC_DEF(glCreateProgram);
     GL_PROC_DEF(glAttachShader);
     GL_PROC_DEF(glLinkProgram);
