@@ -112,7 +112,9 @@ int main(int argc, char* argv[])
     int fragment_source_length = 1024;
 
     vertex_source_length = platform_read_file("simple.vert", vertex_source, vertex_source_length);
+    *(vertex_source + vertex_source_length) = 0;
     fragment_source_length = platform_read_file("simple.frag", fragment_source, fragment_source_length);
+    *(fragment_source + fragment_source_length) = 0;
 
     shader_program shader = load_shader(&gl, vertex_source, vertex_source_length, fragment_source, fragment_source_length);
 
