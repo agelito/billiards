@@ -35,6 +35,7 @@ loaded_mesh load_mesh(gl_functions* gl, mesh_data data);
 mesh_data mesh_create_triangle(float side);
 mesh_data mesh_create_circle(float radius, int subdivisions);
 mesh_data mesh_create_cube(float side, color vertex_color);
+mesh_data mesh_create_plane_xz(float side, int subdivisions, color vertex_color);
 void mesh_data_free(mesh_data* data);
 
 #endif // MESH_H_INCLUDED

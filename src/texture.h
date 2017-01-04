@@ -16,7 +16,7 @@ typedef struct
 
 loaded_texture load_texture(gl_functions* gl, texture_data data);
 
-texture_data texture_create_checker(int width, int height);
+texture_data texture_create_checker(int width, int height, int checker_size);
 
 void texture_data_free(texture_data* data);
 

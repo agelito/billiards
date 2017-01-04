@@ -14,8 +14,8 @@ load_texture(gl_functions* gl, texture_data data)
     glGenTextures(1, &handle);
     glBindTexture(GL_TEXTURE_2D, handle);
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -33,7 +33,7 @@ load_texture(gl_functions* gl, texture_data data)
 }
 
 texture_data
-texture_create_checker(int width, int height)
+texture_create_checker(int width, int height, int checker_size)
 {
     texture_data data = (texture_data){0};
 
@@ -44,21 +44,22 @@ texture_create_checker(int width, int height)
     data.height = height;
     data.colors = malloc(pixel_size * width * height);
 
-    // TODO: generate checker pattern
     int i, pixels = width * height;
     for(i = 0; i < pixels; i++)
     {
 	char* pixel = (data.colors + i * pixel_size);
 
+	int checker_index = i / checker_size;
+	
 	int black = 0;
-	int row = (i / width) % 2;
+	int row = (checker_index / width) % 2;
 	if(row)
 	{
-	    black = (i % 2 == 0);
+	    black = (checker_index % 2 == 0);
 	}
 	else
 	{
-	    black = !(i % 2 == 0);
+	    black = !(checker_index % 2 == 0);
 	}
 
 	

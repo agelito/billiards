@@ -274,6 +274,63 @@ mesh_create_cube(float side, color vertex_color)
     return data;
 }
 
+mesh_data
+mesh_create_plane_xz(float side, int subdivisions, color vertex_color)
+{
+    mesh_data data = (mesh_data){0};
+    data.vertex_count = (subdivisions * subdivisions) * 6;
+
+    unsigned int vertex_data_size = data.vertex_count * sizeof(vertex);
+    
+    data.vertices = (vertex*)malloc(vertex_data_size);
+    memset(data.vertices, 0, vertex_data_size);
+
+    float half_side = side * 0.5f;
+    float quad_side = side / subdivisions;
+
+    vertex corners[4] = {
+	{{{{0.0f, 0.0f, 1.0f}}}, vertex_color, {{{0.0f, 1.0f}}}},
+	{{{{1.0f, 0.0f, 1.0f}}}, vertex_color, {{{1.0f, 1.0f}}}},
+	{{{{0.0f, 0.0f, 0.0f}}}, vertex_color, {{{0.0f, 0.0f}}}},
+	{{{{1.0f, 0.0f, 0.0f}}}, vertex_color, {{{1.0f, 0.0f}}}},
+    };
+
+    int vertex_index = 0;
+    
+    int x, y;
+    for(y = 0; y < subdivisions; y++)
+    {
+	float z0 = (y * quad_side) - half_side;
+	float z1 = ((y + 1) * quad_side) - half_side;
+
+	corners[0].p.z = z1;
+	corners[1].p.z = z1;
+	corners[2].p.z = z0;
+	corners[3].p.z = z0;
+	
+	for(x = 0; x < subdivisions; x++)
+	{
+	    float x0 = (x * quad_side) - half_side;
+	    float x1 = ((x + 1) * quad_side) - half_side;
+	
+	    corners[0].p.x = x0;
+	    corners[1].p.x = x1;
+	    corners[2].p.x = x0;
+	    corners[3].p.x = x1;
+	    
+	    *(data.vertices + vertex_index++) = *(corners + 2);
+	    *(data.vertices + vertex_index++) = *(corners + 3);
+	    *(data.vertices + vertex_index++) = *(corners + 0);
+
+	    *(data.vertices + vertex_index++) = *(corners + 0);
+	    *(data.vertices + vertex_index++) = *(corners + 3);
+	    *(data.vertices + vertex_index++) = *(corners + 1);
+	}
+    }
+
+    return data;
+}
+
 void
 mesh_data_free(mesh_data* data)
 {

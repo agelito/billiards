@@ -118,13 +118,16 @@ int main(int argc, char* argv[])
 
     shader_program shader = load_shader(&gl, vertex_source, vertex_source_length, fragment_source, fragment_source_length);
 
+    loaded_mesh ground = load_mesh(&gl, mesh_create_plane_xz(100.0f, 100, (color){1.0f, 1.0f, 1.0f}));
+    mesh_data_free(&ground.data);
+    
     loaded_mesh mesh = load_mesh(&gl, mesh_create_cube(1.0f, (color){1.0f, 1.0f, 1.0f}));
     mesh_data_free(&mesh.data);
 
     loaded_mesh pointer = load_mesh(&gl, mesh_create_circle(2.0f, 5));
     mesh_data_free(&mesh.data);
 
-    loaded_texture texture = load_texture(&gl, texture_create_checker(2, 2));
+    loaded_texture texture = load_texture(&gl, texture_create_checker(128, 128, 64));
     texture_data_free(&texture.data);
 
 #if 1
@@ -144,19 +147,7 @@ int main(int argc, char* argv[])
 
     #define MAX_CUBES 2048
     vector3 created_cube_positions[MAX_CUBES];
-
-    int i;
-    for(i = 0; i < MAX_CUBES; i++)
-    {
-	float x = platform_randomf(-90.0f, 90.0f);
-	float y = platform_randomf(-90.0f, 90.0f);
-	float z = platform_randomf(-90.0f, 90.0f);
-
-	vector3 random_position = (vector3){{{x, y, z}}};
-	*(created_cube_positions + i) = random_position;
-    }
-    created_cube_count = MAX_CUBES;
-
+    
     glBindTexture(GL_TEXTURE_2D, texture.handle);
 
     while(handle_window_events(&window_context, &keyboard, &mouse))
@@ -222,6 +213,12 @@ int main(int argc, char* argv[])
 	set_view(&gl, shader.program, &camera);
 
 	set_color(&gl, shader.program, (color){0.87f, 0.82f, 0.86f});
+
+	gl.glBindVertexArray(ground.vao);
+	gl.glBindBuffer(GL_ARRAY_BUFFER, ground.vbo);
+
+	set_world(&gl, shader.program, (vector3){{{0.0f, 0.0f, 0.0f}}});
+	glDrawArrays(GL_TRIANGLES, 0, ground.data.vertex_count);
 	
 	gl.glBindVertexArray(mesh.vao);
 	gl.glBindBuffer(GL_ARRAY_BUFFER, mesh.vbo);
