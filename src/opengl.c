@@ -12,7 +12,7 @@ print_gl_info()
     const GLubyte* version = glGetString(GL_VERSION);
     const GLubyte* glsl_version = glGetString(GL_SHADING_LANGUAGE_VERSION);
 
-    printf("%s (%s) %s (glsl %s)\n", version, vendor, renderer, glsl_version);
+    printf("%s (glsl %s)\n%s (%s)\n", version, glsl_version, renderer, vendor);
 }
 
 gl_functions load_gl_functions()
