@@ -35,7 +35,7 @@ create_window(int width, int height, char* title)
 
     XSetWindowAttributes set_window_attributes;
     set_window_attributes.colormap = color_map;
-    set_window_attributes.event_mask = ExposureMask | KeyPressMask | KeyReleaseMask | PointerMotionMask | StructureNotifyMask;
+    set_window_attributes.event_mask = ExposureMask | KeyPressMask | KeyReleaseMask | PointerMotionMask | StructureNotifyMask | FocusChangeMask;
 
     Window window = XCreateWindow(display, root_window, 0, 0, width, height, 0, visual_info->depth, InputOutput,
                                   visual_info->visual, CWColormap | CWEventMask, &set_window_attributes);
@@ -158,15 +158,26 @@ handle_window_events(window_x11* window_context, keyboard_input* keyboard, mouse
         }
         else if(event.type == MotionNotify)
         {
-            int delta_x = event.xmotion.x - mouse->relative_x;
-            int delta_y = event.xmotion.y - mouse->relative_y;
+	    int mouse_x = event.xmotion.x;
+	    int mouse_y = event.xmotion.y;
+    
+	    int delta_x = mouse_x - mouse->position_x;
+	    int delta_y = mouse_y - mouse->position_y;
 	    
-            mouse->relative_x = event.xmotion.x;
-            mouse->relative_y = event.xmotion.y;
+	    mouse->position_x = mouse_x;
+	    mouse->position_y = mouse_y;
 
-            mouse->movement_delta_x = delta_x;
-            mouse->movement_delta_y = delta_y;
+	    mouse->movement_delta_x = delta_x;
+	    mouse->movement_delta_y = delta_y;
         }
+	else if(event.type == FocusIn)
+	{
+	    mouse_grab(window_context->display, window_context->window);
+	}
+	else if(event.type == FocusOut)
+	{
+	    mouse_ungrab(window_context->display);
+	}
         else if(event.type == ConfigureNotify)
         {
             resize_viewport(window_context);
