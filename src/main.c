@@ -141,7 +141,7 @@ int main(int argc, char* argv[])
     glDepthFunc(GL_LEQUAL);
 
     fps_camera camera = (fps_camera){0};
-    camera.position = (vector3){{{0.0f, 0.0f, -2.0f}}};
+    camera.position = (vector3){{{0.0f, 1.0f, -2.0f}}};
 
     int created_cube_count = 0;
 
