@@ -44,6 +44,29 @@ create_window(int width, int height, char* title)
 
     XStoreName(display, window, title);
 
+    XClassHint* class_hint = XAllocClassHint();
+    if(class_hint)
+    {
+	class_hint->res_name = title;
+	class_hint->res_class = title;
+
+	XSetClassHint(display, window, class_hint);
+	XFree(class_hint);
+    }
+
+    XSizeHints* size_hints = XAllocSizeHints();
+    if(size_hints)
+    {
+	size_hints->flags = PMinSize | PMaxSize;
+	size_hints->min_width = width;
+	size_hints->max_width = width;
+	size_hints->min_height = height;
+	size_hints->max_height = height;
+
+	XSetWMNormalHints(display, window, size_hints);
+	XFree(size_hints);
+    }
+
     GLXContext gl_context = glXCreateContext(display, visual_info, NULL, GL_TRUE);
     glXMakeCurrent(display, window, gl_context);
 
