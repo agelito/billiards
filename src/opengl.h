@@ -2,12 +2,11 @@
 #define OPENGL_H_INCLUDED
 
 #include <GL/gl.h>
-#include <GL/glx.h>
 
 #define GL_PROC_DEC(function, ...) typedef void (APIENTRYP GL_PROC_##function) (__VA_ARGS__)
 #define GL_PROC_DEC2(function, return_type, ...) typedef return_type (APIENTRYP GL_PROC_##function) (__VA_ARGS__)
 #define GL_PROC_DEF(function) GL_PROC_##function function
-#define GL_PROC_ADDR(function) (GL_PROC_##function)glXGetProcAddress((const GLubyte*)#function)
+#define GL_PROC_ADDR(function) (GL_PROC_##function)gl_get_address((const GLubyte*)#function)
 
 GL_PROC_DEC(glGenVertexArrays, GLsizei n, GLuint* arrays);
 GL_PROC_DEC(glBindVertexArray, GLuint array);
@@ -57,6 +56,8 @@ typedef struct
     GL_PROC_DEF(glUniform3fv);
     GL_PROC_DEF(glGenerateMipmap);
 } gl_functions;
+
+void* gl_get_address(const GLubyte* function);
 
 gl_functions load_gl_functions();
 
