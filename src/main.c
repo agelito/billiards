@@ -98,7 +98,7 @@ int main(int argc, char* argv[])
     exe_dir_length = platform_executable_directory(exe_dir, exe_dir_length);
     platform_set_working_directory(exe_dir);
     
-    window_x11 window_context = create_window(500, 500, "racera");
+    window_x11 window_context = create_window(1280, 720, "racera");
 
     keyboard_input keyboard = keyboard_init(window_context.display);
     mouse_input mouse = init_mouse_input(window_context.display, window_context.window);
