@@ -130,12 +130,8 @@ int main(int argc, char* argv[])
     loaded_texture texture = load_texture(&gl, texture_create_checker(128, 128, 64));
     texture_data_free(&texture.data);
 
-#if 1
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
-#else
-    glPolygonMode(GL_BACK, GL_LINE);
-#endif
     
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
