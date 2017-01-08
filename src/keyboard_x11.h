@@ -1,40 +1,10 @@
 #ifndef KEYBOARD_X11_H_INCLUDED
 #define KEYBOARD_X11_H_INCLUDED
 
+#include "keyboard.h"
+
 #define MAX_KEYCODE_COUNT 256
 #define MAX_KEYSYM_PER_KEYCODE 16
-
-typedef enum
-{
-    VKEY_A,
-    VKEY_B,
-    VKEY_C,
-    VKEY_D,
-    VKEY_E,
-    VKEY_F,
-    VKEY_G,
-    VKEY_H,
-    VKEY_I,
-    VKEY_J,
-    VKEY_K,
-    VKEY_L,
-    VKEY_M,
-    VKEY_N,
-    VKEY_O,
-    VKEY_P,
-    VKEY_Q,
-    VKEY_R,
-    VKEY_S,
-    VKEY_T,
-    VKEY_U,
-    VKEY_V,
-    VKEY_W,
-    VKEY_X,
-    VKEY_Y,
-    VKEY_Z,
-    VKEY_ESCAPE,
-    VKEY_COUNT
-} virtual_key;
 
 typedef struct
 {
@@ -59,15 +29,15 @@ typedef struct
     keycode_state state[MAX_KEYCODE_COUNT];
 
     int vkey_to_keycode[VKEY_COUNT];
-} keyboard_input;
+} keyboard_x11;
 
-keyboard_input keyboard_init(Display* display);
-void keyboard_reset_state(keyboard_input* keyboard);
+keyboard_x11 keyboard_x11_init(Display* display);
 
-int keycode_is_symbol(keyboard_input* keyboard, int keycode, KeySym symbol);
+void keyboard_x11_reset(keyboard_x11* keyboard);
 
-int is_down(keyboard_input* keyboard, virtual_key key);
-int is_pressed(keyboard_input* keyboard, virtual_key key);
-int is_released(keyboard_input* keyboard, virtual_key key);
+int keyboard_x11_is_symbol(keyboard_x11* keyboard, int keycode, KeySym symbol);
+int keyboard_x11_is_down(keyboard_x11* keyboard, virtual_key key);
+int keyboard_x11_is_pressed(keyboard_x11* keyboard, virtual_key key);
+int keyboard_x11_is_released(keyboard_x11* keyboard, virtual_key key);
 
 #endif // KEYBOARD_X11_H_INCLUDED

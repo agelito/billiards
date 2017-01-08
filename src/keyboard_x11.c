@@ -8,7 +8,7 @@
 #include <stdio.h>
 
 static void
-create_keycode_map(Display* display, keyboard_input* keyboard)
+create_keycode_map(Display* display, keyboard_x11* keyboard)
 {
     int keycode_min, keycode_max;
     XDisplayKeycodes(display, &keycode_min, &keycode_max);
@@ -76,7 +76,7 @@ keyboard_symbols_contains(keysym_list* symbols, KeySym symbol)
 }
 
 static void
-keyboard_map_virtual_key(keyboard_input* keyboard, KeySym symbol, virtual_key key)
+keyboard_map_virtual_key(keyboard_x11* keyboard, KeySym symbol, virtual_key key)
 {
     int keycode_index;
     for(keycode_index = 0; keycode_index < keyboard->keycode_count; keycode_index++)
@@ -92,10 +92,10 @@ keyboard_map_virtual_key(keyboard_input* keyboard, KeySym symbol, virtual_key ke
     }
 }
 
-keyboard_input
-keyboard_init(Display* display)
+keyboard_x11
+keyboard_x11_init(Display* display)
 {
-    keyboard_input input = (keyboard_input){0};
+    keyboard_x11 input = (keyboard_x11){0};
     create_keycode_map(display, &input);
 
     int i;
@@ -115,7 +115,7 @@ keyboard_init(Display* display)
 }
 
 void
-keyboard_reset_state(keyboard_input* keyboard)
+keyboard_x11_reset(keyboard_x11* keyboard)
 {
     int i;
     for(i = 0; i < MAX_KEYCODE_COUNT; i++)
@@ -127,7 +127,7 @@ keyboard_reset_state(keyboard_input* keyboard)
 }
 
 int
-keycode_is_symbol(keyboard_input* keyboard, int keycode, KeySym symbol)
+keyboard_x11_is_symbol(keyboard_x11* keyboard, int keycode, KeySym symbol)
 {
     int keycode_index = (keycode - keyboard->keycode_min);
     if(keycode_index < 0 || keycode_index >= keyboard->keycode_count)
@@ -155,19 +155,19 @@ keycode_is_symbol(keyboard_input* keyboard, int keycode, KeySym symbol)
     return symbol_match;
 }
 
-int is_down(keyboard_input* keyboard, virtual_key key)
+int keyboard_x11_is_down(keyboard_x11* keyboard, virtual_key key)
 {
     int keycode = *(keyboard->vkey_to_keycode + key);
     return (keyboard->state + keycode)->down;
 }
 
-int is_pressed(keyboard_input* keyboard, virtual_key key)
+int keyboard_x11_is_pressed(keyboard_x11* keyboard, virtual_key key)
 {
     int keycode = *(keyboard->vkey_to_keycode + key);
     return (keyboard->state + keycode)->pressed;
 }
 
-int is_released(keyboard_input* keyboard, virtual_key key)
+int keyboard_x11_is_released(keyboard_x11* keyboard, virtual_key key)
 {
     int keycode = *(keyboard->vkey_to_keycode + key);
     return (keyboard->state + keycode)->released;

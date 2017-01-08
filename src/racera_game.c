@@ -129,37 +129,32 @@ game_update_and_render(game_state* state)
     if(state->camera.pitch < -90.0f) state->camera.pitch = -90.0f;
     if(state->camera.pitch > 90.0f) state->camera.pitch = 90.0f;
 
-#if 0
-    if(is_pressed(&keyboard, VKEY_ESCAPE))
+    if(keyboard_is_pressed(&state->keyboard, VKEY_ESCAPE))
     {
-	destroy_window(&window_context);
-        break;
+	state->should_quit = 1;
     }
-#endif
 	
     vector3 camera_movement = (vector3){0};
     
-#if 0
-    if(is_down(&keyboard, VKEY_W))
+    if(keyboard_is_down(&state->keyboard, VKEY_W))
     {
 	camera_movement.z += 0.1f;
     }
 
-    if(is_down(&keyboard, VKEY_S))
+    if(keyboard_is_down(&state->keyboard, VKEY_S))
     {
 	camera_movement.z -= 0.1f;
     }
 
-    if(is_down(&keyboard, VKEY_A))
+    if(keyboard_is_down(&state->keyboard, VKEY_A))
     {
 	camera_movement.x -= 0.1f;
     }
 
-    if(is_down(&keyboard, VKEY_D))
+    if(keyboard_is_down(&state->keyboard, VKEY_D))
     {
 	camera_movement.x += 0.1f;
     }
-#endif
 
     matrix4 rotate_yaw = matrix_rotation_y(state->camera.yaw);
     matrix4 rotate_pitch = matrix_rotation_x(state->camera.pitch);
@@ -171,18 +166,16 @@ game_update_and_render(game_state* state)
     vector3 camera_forward = (vector3){{{0.0f, 0.0f, 3.0f}}};
     camera_forward = vector3_matrix_multiply(camera_rotation, camera_forward);
 
-#if 0
-    vector3 pointer_location = vector3_add(camera.position, camera_forward);
-    if(is_pressed(&keyboard, VKEY_Q) && created_cube_count < MAX_CUBES)
+    vector3 pointer_location = vector3_add(state->camera.position, camera_forward);
+    if(keyboard_is_pressed(&state->keyboard, VKEY_Q) && state->created_cube_count < MAX_CUBES)
     {
-	*(created_cube_positions + created_cube_count++) = pointer_location;
+	*(state->created_cube_positions + state->created_cube_count++) = pointer_location;
     }
 
-    if(is_pressed(&keyboard, VKEY_Z) && created_cube_count > 0)
+    if(keyboard_is_pressed(&state->keyboard, VKEY_Z) && state->created_cube_count > 0)
     {
-	created_cube_count -= 1;
+	state->created_cube_count -= 1;
     }
-#endif
 
     gl_functions* gl = &state->gl;
     

@@ -22,7 +22,7 @@ int main(int argc, char* argv[])
     
     window_x11 window_context = create_window(1280, 720, "racera");
 
-    keyboard_input keyboard = keyboard_init(window_context.display);
+    keyboard_x11 keyboard = keyboard_x11_init(window_context.display);
     xinput2 mouse_raw = xinput2_init(window_context.display);
 
     glEnable(GL_CULL_FACE);
@@ -37,16 +37,29 @@ int main(int argc, char* argv[])
     {
 	racera_state.screen_width = window_context.width;
 	racera_state.screen_height = window_context.height;
+
+	int key;
+	for(key = 0; key < VKEY_COUNT; key++)
+	{
+	    *(racera_state.keyboard.down + key) = keyboard_x11_is_down(&keyboard, key);
+	    *(racera_state.keyboard.pressed + key) = keyboard_x11_is_pressed(&keyboard, key);
+	    *(racera_state.keyboard.released + key) = keyboard_x11_is_released(&keyboard, key);
+	}
 	
 	xinput2_mouse mouse_axis = xinput2_get_default_axis(&mouse_raw);
 	mouse_apply_relative(&racera_state.mouse, mouse_axis.x, mouse_axis.y, mouse_axis.wheel);
 	mouse_clamp_to_window(&racera_state.mouse, window_context.width, window_context.height);
 	
 	game_update_and_render(&racera_state);
+	if(racera_state.should_quit)
+	{
+	    destroy_window(&window_context);
+	    break;
+	}
 
 	redraw_window(&window_context);
 
-	keyboard_reset_state(&keyboard);
+	keyboard_x11_reset(&keyboard);
 	xinput2_reset_axis_data(&mouse_raw);
 	
 	platform_sleep(1);

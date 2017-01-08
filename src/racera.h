@@ -13,6 +13,7 @@
 #include "texture.h"
 
 #include "mouse.h"
+#include "keyboard.h"
 
 #define MAX_CUBES 2048
 
@@ -25,7 +26,10 @@ typedef struct
 
 typedef struct
 {
+    int should_quit;
+    
     mouse_state mouse;
+    keyboard_state keyboard;
 
     int screen_width;
     int screen_height;
