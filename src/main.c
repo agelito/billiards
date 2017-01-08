@@ -7,6 +7,7 @@
 #include "window_x11.h"
 #include "keyboard_x11.h"
 #include "mouse_x11.h"
+#include "mouse_xi2.h"
 
 #include "math.h"
 #include "shader.h"
@@ -102,6 +103,8 @@ int main(int argc, char* argv[])
 
     keyboard_input keyboard = keyboard_init(window_context.display);
     mouse_input mouse = init_mouse_input(window_context.display, window_context.window);
+
+    xinput2 raw_mouse = xinput2_init(window_context.display);
     
     gl_functions gl = load_gl_functions();
 
@@ -146,7 +149,7 @@ int main(int argc, char* argv[])
     
     glBindTexture(GL_TEXTURE_2D, texture.handle);
 
-    while(handle_window_events(&window_context, &keyboard, &mouse))
+    while(handle_window_events(&window_context, &keyboard, &mouse, &raw_mouse))
     {
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -245,6 +248,7 @@ int main(int argc, char* argv[])
 	mouse.movement_delta_y = 0;
 
 	keyboard_reset_state(&keyboard);
+	xinput2_reset_axis_data(&raw_mouse);
 	
 	platform_sleep(1);
     }

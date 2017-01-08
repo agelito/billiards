@@ -120,7 +120,8 @@ redraw_window(window_x11* window_context)
 }
 
 int
-handle_window_events(window_x11* window_context, keyboard_input* keyboard, mouse_input* mouse)
+handle_window_events(window_x11* window_context, keyboard_input* keyboard, mouse_input* mouse,
+		     xinput2* xinput)
 {
     int window_is_open = 1;
 
@@ -129,66 +130,73 @@ handle_window_events(window_x11* window_context, keyboard_input* keyboard, mouse
         XEvent event;
         XNextEvent(window_context->display, &event);
 
-        if(event.type == KeyPress)
-        {
-            keycode_state* state = (keyboard->state + event.xkey.keycode);
-            if(!state->down)
-            {
-                state->down = 1;
-                state->pressed = 1;
-            }
-        }
-        else if(event.type == KeyRelease)
-        {
-            int was_auto_repeat = 0;
-            // NOTE: Check for auto repeat
-            if(XPending(window_context->display))
-            {
-                XEvent next;
-                XPeekEvent(window_context->display, &next);
-                was_auto_repeat = (next.type == KeyPress && next.xkey.time == event.xkey.time && next.xkey.keycode == event.xkey.keycode);
-            }
+	if(xinput2_process_event(window_context->display, xinput, &event))
+	{
 
-            if(!was_auto_repeat)
-            {
-                keycode_state* state = (keyboard->state + event.xkey.keycode);
-                state->down = 0;
-                state->released = 1;
-            }
-        }
-        else if(event.type == MotionNotify)
-        {
-	    int mouse_x = event.xmotion.x;
-	    int mouse_y = event.xmotion.y;
+	}
+	
+	{
+	    if(event.type == KeyPress)
+	    {
+		keycode_state* state = (keyboard->state + event.xkey.keycode);
+		if(!state->down)
+		{
+		    state->down = 1;
+		    state->pressed = 1;
+		}
+	    }
+	    else if(event.type == KeyRelease)
+	    {
+		int was_auto_repeat = 0;
+		// NOTE: Check for auto repeat
+		if(XPending(window_context->display))
+		{
+		    XEvent next;
+		    XPeekEvent(window_context->display, &next);
+		    was_auto_repeat = (next.type == KeyPress && next.xkey.time == event.xkey.time && next.xkey.keycode == event.xkey.keycode);
+		}
+
+		if(!was_auto_repeat)
+		{
+		    keycode_state* state = (keyboard->state + event.xkey.keycode);
+		    state->down = 0;
+		    state->released = 1;
+		}
+	    }
+	    else if(event.type == MotionNotify)
+	    {
+		int mouse_x = event.xmotion.x;
+		int mouse_y = event.xmotion.y;
     
-	    int delta_x = mouse_x - mouse->position_x;
-	    int delta_y = mouse_y - mouse->position_y;
+		int delta_x = mouse_x - mouse->position_x;
+		int delta_y = mouse_y - mouse->position_y;
 	    
-	    mouse->position_x = mouse_x;
-	    mouse->position_y = mouse_y;
+		mouse->position_x = mouse_x;
+		mouse->position_y = mouse_y;
 
-	    mouse->movement_delta_x = delta_x;
-	    mouse->movement_delta_y = delta_y;
-        }
-	else if(event.type == FocusIn)
-	{
-	    mouse_grab(window_context->display, window_context->window);
-	}
-	else if(event.type == FocusOut)
-	{
-	    mouse_ungrab(window_context->display);
-	}
-        else if(event.type == ConfigureNotify)
-        {
-            resize_viewport(window_context);
-        }
-        else if(event.type == DestroyNotify)
-        {
-            destroy_current_gl_context(window_context);
+		mouse->movement_delta_x = delta_x;
+		mouse->movement_delta_y = delta_y;
+	    }
+	    else if(event.type == FocusIn)
+	    {
+		mouse_grab(window_context->display, window_context->window);
+	    }
+	    else if(event.type == FocusOut)
+	    {
+		mouse_ungrab(window_context->display);
+	    }
+	    else if(event.type == ConfigureNotify)
+	    {
+		resize_viewport(window_context);
+	    }
+	    else if(event.type == DestroyNotify)
+	    {
+		destroy_current_gl_context(window_context);
             
-            window_context->window = 0;
-            window_is_open = 0;
-        }
+		window_context->window = 0;
+		window_is_open = 0;
+	    }
+	}
     }
 
     return window_is_open;

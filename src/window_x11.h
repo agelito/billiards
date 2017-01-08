@@ -5,6 +5,7 @@
 
 #include "keyboard_x11.h"
 #include "mouse_x11.h"
+#include "mouse_xi2.h"
 
 typedef struct
 {
@@ -28,6 +29,6 @@ void
 redraw_window(window_x11* window_context);
 
 int
-handle_window_events(window_x11* window_context, keyboard_input* keyboard, mouse_input* mouse);
+handle_window_events(window_x11* window_context, keyboard_input* keyboard, mouse_input* mouse, xinput2* xinput);
 
 #endif // WINDOW_X11_H_INCLUDED

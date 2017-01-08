@@ -1,9 +1,9 @@
 #!/bin/sh
 
 CFLAGS="-Wall -Wextra -g"
-LDLIBS="-lGL -lm -lX11"
+LDLIBS="-lGL -lm -lX11 -lXi"
 
-SRC_FILES="src/main.c src/window_x11.c src/opengl.c src/opengl_glx.c src/platform_posix.c src/keyboard_x11.c src/mouse_x11.c src/mesh.c src/texture.c src/shader.c src/math.c"
+SRC_FILES="src/main.c src/window_x11.c src/opengl.c src/opengl_glx.c src/platform_posix.c src/keyboard_x11.c src/mouse_xi2.c src/mouse_x11.c src/mesh.c src/texture.c src/shader.c src/math.c"
 
 OUTPUT_FILE=racera
 
