@@ -4,7 +4,6 @@
 #include <X11/Xlib.h>
 
 #include "keyboard_x11.h"
-#include "mouse_x11.h"
 #include "mouse_xi2.h"
 
 typedef struct

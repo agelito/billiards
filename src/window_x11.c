@@ -8,6 +8,7 @@
 #include <GL/glx.h>
 
 #include "window_x11.h"
+#include "mouse_x11.h"
 
 window_x11
 create_window(int width, int height, char* title)
