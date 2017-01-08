@@ -6,6 +6,8 @@
 
 #include "window_x11.h"
 #include "keyboard_x11.h"
+
+#include "mouse.h"
 #include "mouse_x11.h"
 #include "mouse_xi2.h"
 
@@ -102,9 +104,10 @@ int main(int argc, char* argv[])
     window_x11 window_context = create_window(1280, 720, "racera");
 
     keyboard_input keyboard = keyboard_init(window_context.display);
-    mouse_input mouse = init_mouse_input(window_context.display, window_context.window);
-
-    xinput2 raw_mouse = xinput2_init(window_context.display);
+    
+    xinput2 mouse_raw = xinput2_init(window_context.display);
+    
+    mouse_state mouse = (mouse_state){0};
     
     gl_functions gl = load_gl_functions();
 
@@ -149,13 +152,18 @@ int main(int argc, char* argv[])
     
     glBindTexture(GL_TEXTURE_2D, texture.handle);
 
-    while(handle_window_events(&window_context, &keyboard, &mouse, &raw_mouse))
+    while(handle_window_events(&window_context, &keyboard, &mouse_raw))
     {
+	xinput2_mouse mouse_axis = xinput2_get_default_axis(&mouse_raw);
+	mouse_apply_relative(&mouse, mouse_axis.x, mouse_axis.y, mouse_axis.wheel);
+	
+	mouse_clamp_to_window(&mouse, window_context.width, window_context.height);
+	
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	camera.yaw -= (float)mouse.movement_delta_x * 0.5f;
-	camera.pitch -= (float)mouse.movement_delta_y * 0.5f;
+	camera.yaw -= (float)mouse.relative_x * 0.5f;
+	camera.pitch -= (float)mouse.relative_y * 0.5f;
 	if(camera.pitch < -90.0f) camera.pitch = -90.0f;
 	if(camera.pitch > 90.0f) camera.pitch = 90.0f;
 	
@@ -244,11 +252,8 @@ int main(int argc, char* argv[])
 
 	redraw_window(&window_context);
 
-	mouse.movement_delta_x = 0;
-	mouse.movement_delta_y = 0;
-
 	keyboard_reset_state(&keyboard);
-	xinput2_reset_axis_data(&raw_mouse);
+	xinput2_reset_axis_data(&mouse_raw);
 	
 	platform_sleep(1);
     }

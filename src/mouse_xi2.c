@@ -141,3 +141,20 @@ xinput2_reset_axis_data(xinput2* input)
 	*(input->axis_raw_data + i) = 0.0;
     }
 }
+
+xinput2_mouse
+xinput2_get_default_axis(xinput2* input)
+{
+    xinput2_mouse mouse_axis = (xinput2_mouse){0};
+    if(input->axis_count >= 2)
+    {
+	mouse_axis.x = *(input->axis_raw_data + 0);
+	mouse_axis.y = *(input->axis_raw_data + 1);
+    }
+    if(input->axis_count >= 3)
+    {
+	mouse_axis.wheel = *(input->axis_raw_data + 2);
+    }
+
+    return mouse_axis;
+}

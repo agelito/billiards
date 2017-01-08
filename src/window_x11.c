@@ -35,7 +35,7 @@ create_window(int width, int height, char* title)
 
     XSetWindowAttributes set_window_attributes;
     set_window_attributes.colormap = color_map;
-    set_window_attributes.event_mask = ExposureMask | KeyPressMask | KeyReleaseMask | PointerMotionMask | StructureNotifyMask | FocusChangeMask;
+    set_window_attributes.event_mask = ExposureMask | KeyPressMask | KeyReleaseMask | StructureNotifyMask | FocusChangeMask;
 
     Window window = XCreateWindow(display, root_window, 0, 0, width, height, 0, visual_info->depth, InputOutput,
                                   visual_info->visual, CWColormap | CWEventMask, &set_window_attributes);
@@ -67,12 +67,22 @@ create_window(int width, int height, char* title)
 	XFree(size_hints);
     }
 
+    XColor cursor_color = (XColor){0};
+    char cursor_color_data[] = {0};
+
+    Pixmap cursor_pixmap = XCreateBitmapFromData(display, window, cursor_color_data, 1, 1);
+    Cursor empty_cursor = XCreatePixmapCursor(display, cursor_pixmap, cursor_pixmap, &cursor_color,
+					      &cursor_color, 0, 0);
+
+    XFreePixmap(display, cursor_pixmap);
+
     GLXContext gl_context = glXCreateContext(display, visual_info, NULL, GL_TRUE);
     glXMakeCurrent(display, window, gl_context);
 
     window_x11 window_context;
     window_context.display = display;
     window_context.window = window;
+    window_context.empty_cursor = empty_cursor;
 
     return window_context;
 }
@@ -92,6 +102,8 @@ destroy_current_gl_context(window_x11* window_context)
 void
 destroy_window(window_x11* window_context)
 {
+    XFreeCursor(window_context->display, window_context->empty_cursor);
+    
     destroy_current_gl_context(window_context);
 
     if(window_context->window)
@@ -120,8 +132,7 @@ redraw_window(window_x11* window_context)
 }
 
 int
-handle_window_events(window_x11* window_context, keyboard_input* keyboard, mouse_input* mouse,
-		     xinput2* xinput)
+handle_window_events(window_x11* window_context, keyboard_input* keyboard, xinput2* xinput)
 {
     int window_is_open = 1;
 
@@ -134,7 +145,7 @@ handle_window_events(window_x11* window_context, keyboard_input* keyboard, mouse
 	{
 
 	}
-	
+	else
 	{
 	    if(event.type == KeyPress)
 	    {
@@ -163,27 +174,25 @@ handle_window_events(window_x11* window_context, keyboard_input* keyboard, mouse
 		    state->released = 1;
 		}
 	    }
-	    else if(event.type == MotionNotify)
-	    {
-		int mouse_x = event.xmotion.x;
-		int mouse_y = event.xmotion.y;
-    
-		int delta_x = mouse_x - mouse->position_x;
-		int delta_y = mouse_y - mouse->position_y;
-	    
-		mouse->position_x = mouse_x;
-		mouse->position_y = mouse_y;
-
-		mouse->movement_delta_x = delta_x;
-		mouse->movement_delta_y = delta_y;
-	    }
 	    else if(event.type == FocusIn)
 	    {
-		mouse_grab(window_context->display, window_context->window);
+		if(!window_context->pointer_is_grabbed)
+		{
+		    window_context->pointer_is_grabbed =
+			mouse_x11_grab(window_context->display, window_context->window);
+
+		    mouse_x11_set_cursor(window_context->display, window_context->empty_cursor);
+		}
 	    }
 	    else if(event.type == FocusOut)
 	    {
-		mouse_ungrab(window_context->display);
+		if(window_context->pointer_is_grabbed)
+		{
+		    mouse_x11_ungrab(window_context->display);
+		    window_context->pointer_is_grabbed = 0;
+
+		    mouse_x11_set_cursor(window_context->display, None);
+		}
 	    }
 	    else if(event.type == ConfigureNotify)
 	    {
