@@ -97,8 +97,8 @@ game_update_and_render(game_state* state)
 						    fragment_source_length);
 	*(fragment_source + fragment_source_length) = 0;
 
-	state->shader = load_shader(gl, vertex_source, vertex_source_length, fragment_source,
-				    fragment_source_length);
+	state->shader = load_shader(gl, vertex_source, vertex_source_length,
+				    fragment_source, fragment_source_length);
 
 	state->ground =
 	    load_mesh(gl, mesh_create_plane_xz(100.0f, 100, (color){1.0f, 1.0f, 1.0f}));

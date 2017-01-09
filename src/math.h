@@ -12,7 +12,7 @@ typedef struct
 	struct {
 	    float x;
 	    float y;
-	};
+	} position;
 	float data[2];
     };
 } vector2;

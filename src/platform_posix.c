@@ -1,12 +1,14 @@
 // platform_posix.c
 
+#define _DEFAULT_SOURCE
+#include <unistd.h>
+#undef _DEFAULT_SOURCE
+
+#include <fcntl.h>
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#include <errno.h>
-#include <fcntl.h>
-#include <unistd.h>
 
 #include "racera.h"
 #include "platform.h"
@@ -26,8 +28,9 @@ platform_executable_directory(char* destination, long destination_size)
     }
 
     path_store[result] = 0;
-    
-    for(int i = result; i > 0; i--)
+
+    int i;
+    for(i = result; i > 0; i--)
     {
         if(path_store[i] == '/')
         {
