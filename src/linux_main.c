@@ -1,4 +1,4 @@
-// main.c
+// linux_main.c
 
 #include "platform.h"
 #include "racera.h"
