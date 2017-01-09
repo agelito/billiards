@@ -41,8 +41,22 @@ gl_functions load_gl_functions()
     gl.glUseProgram = GL_PROC_ADDR(glUseProgram);
     
     gl.glGetUniformLocation = GL_PROC_ADDR(glGetUniformLocation);
+    gl.glGetActiveUniform = GL_PROC_ADDR(glGetActiveUniform);
+
+    gl.glUniformMatrix2fv = GL_PROC_ADDR(glUniformMatrix2fv);
+    gl.glUniformMatrix3fv = GL_PROC_ADDR(glUniformMatrix3fv);
     gl.glUniformMatrix4fv = GL_PROC_ADDR(glUniformMatrix4fv);
+
+    gl.glUniform1fv = GL_PROC_ADDR(glUniform1fv);
+    gl.glUniform2fv = GL_PROC_ADDR(glUniform2fv);
     gl.glUniform3fv = GL_PROC_ADDR(glUniform3fv);
+    gl.glUniform4fv = GL_PROC_ADDR(glUniform4fv);
+
+    gl.glUniform1iv = GL_PROC_ADDR(glUniform1iv);
+    gl.glUniform2iv = GL_PROC_ADDR(glUniform2iv);
+    gl.glUniform3iv = GL_PROC_ADDR(glUniform3iv);
+    gl.glUniform4iv = GL_PROC_ADDR(glUniform4iv);
+    
     gl.glGenerateMipmap = GL_PROC_ADDR(glGenerateMipmap);
 
     return gl;

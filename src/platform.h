@@ -15,4 +15,6 @@ int platform_random(int min, int max);
 
 float platform_randomf(float min, float max);
 
+void platform_copy_memory(void* destination, void* source, long size);
+
 #endif // PLATFORM_H_INCLUDED

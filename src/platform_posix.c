@@ -135,7 +135,8 @@ platform_random_seed(int seed)
     srandom((unsigned int)seed);
 }
 
-int platform_random(int min, int max)
+int
+platform_random(int min, int max)
 {
     long int random_number = random();
     
@@ -145,7 +146,8 @@ int platform_random(int min, int max)
     return (min + range);
 }
 
-float platform_randomf(float min, float max)
+float
+platform_randomf(float min, float max)
 {
     long int random_number = random();
 
@@ -153,4 +155,10 @@ float platform_randomf(float min, float max)
     float range = delta * ((float)random_number / RAND_MAX);
     
     return (min + range);
+}
+
+void
+platform_copy_memory(void* destination, void* source, long size)
+{
+    memcpy(destination, source, size);
 }
