@@ -6,6 +6,10 @@
 #define invalid_code *((int*)0) = 0
 #define array_count(array) (sizeof(array) / sizeof(array[0]))
 
+#define KB(kilo_bytes) (kilo_bytes * 1024)
+#define MB(mega_bytes) (KB(mega_bytes) * 1024)
+#define GB(giga_bytes) (MB(giga_bytes) * 1024)
+
 #include "opengl.h"
 #include "math.h"
 #include "shader.h"
@@ -38,6 +42,9 @@ typedef struct
     
     gl_functions gl;
     shader_program shader;
+
+    shader_uniform_group per_frame_uniforms;
+    shader_uniform_group per_object_uniforms;
 
     loaded_mesh ground;
     loaded_mesh cube;

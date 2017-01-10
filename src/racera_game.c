@@ -4,76 +4,88 @@
 #include "opengl.h"
 #include "racera.h"
 
+#include "renderer.h"
+
 static void
-set_view(gl_functions* gl, GLuint program, fps_camera* camera)
+set_view(shader_program* shader, shader_uniform_group* uniform_group, fps_camera* camera)
 {
-    GLint view_matrix_location = gl->glGetUniformLocation(program, "view");
-    if(view_matrix_location != -1)
-    {
+    shader_uniform* uniform_info = shader_get_uniform(&shader->info, "view");
+    if(uniform_info != 0)
+    { 
 	matrix4 view_matrix = matrix_look_fps(camera->position, camera->pitch, camera->yaw);
-	gl->glUniformMatrix4fv(view_matrix_location, 1, GL_FALSE, view_matrix.data);
+	shader_uniform_set_data(uniform_group, uniform_info->location,
+				view_matrix.data, sizeof(matrix4));
     }
 }
 
 
 static void
-set_view_ui(gl_functions* gl, GLuint program)
+set_view_ui(shader_program* shader, shader_uniform_group* uniform_group)
 {
-    GLint view_matrix_location = gl->glGetUniformLocation(program, "view");
-    if(view_matrix_location != -1)
-    {
+    shader_uniform* uniform_info = shader_get_uniform(&shader->info, "view");
+    if(uniform_info != 0)
+    { 
 	vector3 eye = (vector3){{{0.0f, 0.0f, -1.0f}}};
 	vector3 at = (vector3){0};
 	vector3 up = (vector3){{{0.0f, 1.0f, 0.0f}}};
 	
 	matrix4 view_matrix = matrix_look_at(eye, at, up);
-	gl->glUniformMatrix4fv(view_matrix_location, 1, GL_FALSE, view_matrix.data);
+	shader_uniform_set_data(uniform_group, uniform_info->location,
+				view_matrix.data, sizeof(matrix4));
     }
 }
 
 static void
-set_projection(gl_functions* gl, GLuint program, int screen_width, int screen_height)
+set_projection(shader_program* shader, shader_uniform_group* uniform_group,
+	       int screen_width, int screen_height)
 {
-    GLint projection_matrix_location = gl->glGetUniformLocation(program, "projection");
-    if(projection_matrix_location != -1)
+    shader_uniform* uniform_info = shader_get_uniform(&shader->info, "projection");
+    if(uniform_info != 0)
     {
 	float right = (float)screen_width * 0.5f;
 	float top = (float)screen_height * 0.5f;
 	
 	matrix4 projection_matrix = matrix_perspective(80.0f, right / top, 0.01f, 100.0f);
-	gl->glUniformMatrix4fv(projection_matrix_location, 1, GL_FALSE, projection_matrix.data);
+	shader_uniform_set_data(uniform_group, uniform_info->location,
+				projection_matrix.data, sizeof(matrix4));
     }
 }
 
 static void
-set_projection_ui(gl_functions* gl, GLuint program, int screen_width, int screen_height)
+set_projection_ui(shader_program* shader, shader_uniform_group* uniform_group,
+		  int screen_width, int screen_height)
 {
-    GLint projection_matrix_location = gl->glGetUniformLocation(program, "projection");
-    if(projection_matrix_location != -1)
+    shader_uniform* uniform_info = shader_get_uniform(&shader->info, "projection");
+    if(uniform_info != 0)
     {
-	matrix4 projection_matrix = matrix_orthographic((float)screen_width, (float)screen_height, 1.0f, 100.0f);
-	gl->glUniformMatrix4fv(projection_matrix_location, 1, GL_FALSE, projection_matrix.data);
+	matrix4 projection_matrix =
+	    matrix_orthographic((float)screen_width, (float)screen_height, 1.0f, 100.0f);
+	shader_uniform_set_data(uniform_group, uniform_info->location,
+				projection_matrix.data, sizeof(matrix4));
     }
 }
 
 static void
-set_world(gl_functions* gl, GLuint program, vector3 position)
+set_world(shader_program* shader, shader_uniform_group* uniform_group, vector3 position)
 {
-    GLint world_matrix_location = gl->glGetUniformLocation(program, "world");
-    if(world_matrix_location != -1)
+    shader_uniform* uniform_info = shader_get_uniform(&shader->info, "world");
+    if(uniform_info != 0)
     {
 	matrix4 world_matrix = matrix_translate(position.x, position.y, position.z);
-	gl->glUniformMatrix4fv(world_matrix_location, 1, GL_FALSE, world_matrix.data);
+	
+	shader_uniform_set_data(uniform_group, uniform_info->location,
+				world_matrix.data, sizeof(matrix4));
     }
 }
 
 static void
-set_color(gl_functions* gl, GLuint program, color color)
+set_color(shader_program* shader, shader_uniform_group* uniform_group, color color)
 {
-    GLint color_location = gl->glGetUniformLocation(program, "tint_color");
-    if(color_location != -1)
+    shader_uniform* uniform_info = shader_get_uniform(&shader->info, "tint_color");
+    if(uniform_info != 0)
     {
-	gl->glUniform3fv(color_location, 1, &color.r);
+	shader_uniform_set_data(uniform_group, uniform_info->location,
+				&color, sizeof(color));
     }
 }
 
@@ -100,7 +112,8 @@ game_update_and_render(game_state* state)
 	state->shader = load_shader(gl, vertex_source, vertex_source_length,
 				    fragment_source, fragment_source_length);
 
-	shader_reflect(gl, &state->shader);
+	state->per_frame_uniforms = shader_uniform_group_create(KB(1));
+	state->per_object_uniforms = shader_uniform_group_create(KB(1));
 
 	state->ground =
 	    load_mesh(gl, mesh_create_plane_xz(100.0f, 100, (color){1.0f, 1.0f, 1.0f}));
@@ -180,17 +193,22 @@ game_update_and_render(game_state* state)
     }
 
     gl_functions* gl = &state->gl;
-    
     gl->glUseProgram(state->shader.program);
-    set_projection(gl, state->shader.program, state->screen_width, state->screen_height);
-    set_view(gl, state->shader.program, &state->camera);
 
-    set_color(gl, state->shader.program, (color){0.87f, 0.82f, 0.86f});
+    // NOTE: Draw scene
+    set_projection(&state->shader, &state->per_frame_uniforms,
+		   state->screen_width, state->screen_height);
+    set_view(&state->shader, &state->per_frame_uniforms, &state->camera);
+    renderer_apply_uniforms(gl, &state->shader, &state->per_frame_uniforms);
+
+    set_color(&state->shader, &state->per_object_uniforms, (color){0.87f, 0.82f, 0.86f});
 
     gl->glBindVertexArray(state->ground.vao);
     gl->glBindBuffer(GL_ARRAY_BUFFER, state->ground.vbo);
 
-    set_world(gl, state->shader.program, (vector3){{{0.0f, 0.0f, 0.0f}}});
+    set_world(&state->shader, &state->per_object_uniforms, (vector3){{{0.0f, 0.0f, 0.0f}}});
+    
+    renderer_apply_uniforms(gl, &state->shader, &state->per_object_uniforms);
     glDrawArrays(GL_TRIANGLES, 0, state->ground.data.vertex_count);
 	
     gl->glBindVertexArray(state->cube.vao);
@@ -199,19 +217,24 @@ game_update_and_render(game_state* state)
     int i;
     for(i = 0; i < state->created_cube_count; i++)
     {
-	set_world(gl, state->shader.program, *(state->created_cube_positions + i));
+	set_world(&state->shader, &state->per_object_uniforms, *(state->created_cube_positions + i));
+	renderer_apply_uniforms(gl, &state->shader, &state->per_object_uniforms);
 	glDrawArrays(GL_TRIANGLES, 0, state->cube.data.vertex_count);
     }
 
-    set_color(gl, state->shader.program, (color){1.0f, 1.0f, 1.0f});
+    set_color(&state->shader, &state->per_object_uniforms, (color){1.0f, 1.0f, 1.0f});
 
     // NOTE: Draw UI
-    set_projection_ui(gl, state->shader.program, state->screen_width, state->screen_height);
-    set_view_ui(gl, state->shader.program);
+    set_projection_ui(&state->shader, &state->per_frame_uniforms,
+		      state->screen_width, state->screen_height);
+    set_view_ui(&state->shader, &state->per_frame_uniforms);
+    renderer_apply_uniforms(gl, &state->shader, &state->per_frame_uniforms);
 
-    set_world(gl, state->shader.program, (vector3){{{0.0f, 0.0f, 0.0f}}});
+    set_world(&state->shader, &state->per_object_uniforms, (vector3){{{0.0f, 0.0f, 0.0f}}});
 	
     gl->glBindVertexArray(state->pointer.vao);
     gl->glBindBuffer(GL_ARRAY_BUFFER, state->pointer.vbo);
+    
+    renderer_apply_uniforms(gl, &state->shader, &state->per_object_uniforms);
     glDrawArrays(GL_TRIANGLES, 0, state->pointer.data.vertex_count);
 }

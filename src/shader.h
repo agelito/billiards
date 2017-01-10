@@ -1,12 +1,9 @@
 #ifndef SHADER_H_INCLUDED
 #define SHADER_H_INCLUDED
 
-typedef struct
-{
-    GLuint vertex;
-    GLuint fragment;
-    GLuint program;
-} shader_program;
+typedef struct shader_uniform shader_uniform;
+typedef struct shader_reflection shader_reflection;
+typedef struct shader_uniform_data shader_uniform_data;
 
 typedef enum
 {
@@ -24,19 +21,33 @@ typedef enum
     shader_data_unknown,
 } shader_data_type;
 
-typedef struct
+struct shader_uniform
 {
     char* name;
     int location;
-    int count;
+    size_t size_per_element;
     shader_data_type type;
-} shader_uniform;
+};
 
-typedef struct
+struct shader_uniform_data
+{
+    size_t size;
+    unsigned char* data;
+};
+
+struct shader_reflection
 {
     int uniform_count;
     shader_uniform* uniforms;
-} shader_reflection;
+};
+
+typedef struct
+{
+    GLuint vertex;
+    GLuint fragment;
+    GLuint program;
+    shader_reflection info;
+} shader_program;
 
 typedef struct uniform_data_location_list
 {
@@ -73,5 +84,8 @@ shader_uniform_group_create(size_t data_capacity);
 void
 shader_uniform_set_data(shader_uniform_group* uniform_group, int location,
 			 void* data, size_t data_size);
+
+shader_uniform_data
+shader_uniform_get_data(shader_uniform_group* uniform_group, int location);
 
 #endif // SHADER_H_INCLUDED

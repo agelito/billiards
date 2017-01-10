@@ -76,6 +76,8 @@ load_shader(gl_functions* gl, char* vertex_source, int vertex_source_length, cha
         print_program_error(gl, shader.program);
     }
 
+    shader.info = shader_reflect(gl, &shader);
+
     return shader;
 }
 
@@ -154,7 +156,6 @@ shader_reflect(gl_functions* gl, shader_program* shader)
         platform_copy_memory(uniform_data.name, uniform_name, name_length + 1);
 	
         uniform_data.location = uniform_index;
-        uniform_data.count = uniform_count;
 
         shader_data_type data_type = shader_type_from_gl(type);
         if(data_type == shader_data_unknown)
@@ -165,6 +166,8 @@ shader_reflect(gl_functions* gl, shader_program* shader)
         }
 
         uniform_data.type = data_type;
+	uniform_data.size_per_element = 
+	    shader_data_type_size(data_type, 1);
 
         *(group.uniforms + uniform_index) = uniform_data;
     }
@@ -194,12 +197,24 @@ shader_get_uniform(shader_reflection* reflection, char* uniform_name)
     return result;
 }
 
+static void
+allocate_uniform_list(uniform_data_location_list* uniform_list)
+{
+    uniform_list->locations =
+	(uniform_data_location*)malloc(sizeof(uniform_data_location) * UNIFORM_BLOCK_CAPACITY);
+			       
+    uniform_list->count = 0;
+    uniform_list->next = 0;
+}
+
 shader_uniform_group
 shader_uniform_group_create(size_t data_capacity)
 {
     shader_uniform_group group = (shader_uniform_group){0};
     group.data_capacity = data_capacity;
     group.data = malloc(data_capacity);
+
+    allocate_uniform_list(&group.uniform_list);
 
     return group;
 }
@@ -242,11 +257,7 @@ uniform_data_location_list_reserve(uniform_data_location_list* sentinel)
         uniform_data_location_list* add_list =
             (uniform_data_location_list*)malloc(sizeof(uniform_data_location_list));
 
-        add_list->locations =
-            (uniform_data_location*)malloc(sizeof(uniform_data_location) * UNIFORM_BLOCK_CAPACITY);
-			       
-        add_list->count = 0;
-        add_list->next = 0;
+	allocate_uniform_list(add_list);
 
         last->next = add_list;
         last = add_list;
@@ -294,4 +305,20 @@ shader_uniform_set_data(shader_uniform_group* uniform_group, int location,
 
         platform_copy_memory(data_destination, data, data_size);
     }
+}
+
+shader_uniform_data
+shader_uniform_get_data(shader_uniform_group* uniform_group, int location)
+{
+    shader_uniform_data data = (shader_uniform_data){0};
+    
+    uniform_data_location* data_location =
+        uniform_group_find(&uniform_group->uniform_list, location);
+    if(data_location)
+    {
+	data.size = data_location->size;
+	data.data = (uniform_group->data + data_location->offset);
+    }
+
+    return data;
 }
