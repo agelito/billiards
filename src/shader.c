@@ -5,6 +5,8 @@
 #include "shader.h"
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #define UNIFORM_BLOCK_CAPACITY 32
 
@@ -77,8 +79,6 @@ load_shader(gl_functions* gl, char* vertex_source, int vertex_source_length, cha
     return shader;
 }
 
-#include <stdlib.h>
-
 static shader_data_type
 shader_type_from_gl(GLenum type)
 {
@@ -141,47 +141,57 @@ shader_reflect(gl_functions* gl, shader_program* shader)
     int uniform_index;
     for(uniform_index = 0; uniform_index < uniform_count; ++uniform_index)
     {
-	int name_length;
-	int uniform_count;
-	GLenum type;
+        int name_length;
+        int uniform_count;
+        GLenum type;
 
-	gl->glGetActiveUniform(shader->program, uniform_index, max_name_length,
-			       &name_length, &uniform_count, &type, uniform_name);
-	*(uniform_name + name_length) = 0;
+        gl->glGetActiveUniform(shader->program, uniform_index, max_name_length,
+                               &name_length, &uniform_count, &type, uniform_name);
+        *(uniform_name + name_length) = 0;
 
-	shader_uniform uniform_data = (shader_uniform){0};
-	uniform_data.name = (char*)malloc(name_length + 1);
-	platform_copy_memory(uniform_data.name, uniform_name, name_length + 1);
+        shader_uniform uniform_data = (shader_uniform){0};
+        uniform_data.name = (char*)malloc(name_length + 1);
+        platform_copy_memory(uniform_data.name, uniform_name, name_length + 1);
 	
-	uniform_data.location = uniform_index;
-	uniform_data.count = uniform_count;
+        uniform_data.location = uniform_index;
+        uniform_data.count = uniform_count;
 
-	shader_data_type data_type = shader_type_from_gl(type);
-	if(data_type == shader_data_unknown)
-	{
-	    fprintf(stderr, "unrecognized uniform %s at %d, type: %d\n",
-		    uniform_name, uniform_index, type);
-	    continue;
-	}
+        shader_data_type data_type = shader_type_from_gl(type);
+        if(data_type == shader_data_unknown)
+        {
+            fprintf(stderr, "unrecognized uniform %s at %d, type: %d\n",
+                    uniform_name, uniform_index, type);
+            continue;
+        }
 
-	uniform_data.type = data_type;
+        uniform_data.type = data_type;
 
-	#if 0
-	size_t data_size = shader_type_get_size(data_type, uniform_count);
-	if(data_size > 0)
-	{
-	    uniform_data.size = data_size;
-	    uniform_data.data = (unsigned char*)malloc(data_size);
-	}
-	#endif
-
-	*(group.uniforms + uniform_index) = uniform_data;
+        *(group.uniforms + uniform_index) = uniform_data;
     }
 
     free(uniform_name);
     uniform_name = 0;
 
     return group;
+}
+
+shader_uniform*
+shader_get_uniform(shader_reflection* reflection, char* uniform_name)
+{
+    shader_uniform* result = 0;
+    
+    int i;
+    for(i = 0; i < reflection->uniform_count; i++)
+    {
+        shader_uniform* search = (reflection->uniforms + i);
+        if(strcmp(search->name, uniform_name) == 0)
+        {
+            result = search;
+            break;
+        }
+    }
+    
+    return result;
 }
 
 shader_uniform_group
@@ -229,17 +239,17 @@ uniform_data_location_list_reserve(uniform_data_location_list* sentinel)
 
     if(last->count >= UNIFORM_BLOCK_CAPACITY)
     {
-	uniform_data_location_list* add_list =
-	    (uniform_data_location_list*)malloc(sizeof(uniform_data_location_list));
+        uniform_data_location_list* add_list =
+            (uniform_data_location_list*)malloc(sizeof(uniform_data_location_list));
 
-	add_list->locations =
-	    (uniform_data_location*)malloc(sizeof(uniform_data_location) * UNIFORM_BLOCK_CAPACITY);
+        add_list->locations =
+            (uniform_data_location*)malloc(sizeof(uniform_data_location) * UNIFORM_BLOCK_CAPACITY);
 			       
-	add_list->count = 0;
-	add_list->next = 0;
+        add_list->count = 0;
+        add_list->next = 0;
 
-	last->next = add_list;
-	last = add_list;
+        last->next = add_list;
+        last = add_list;
     }
 
     return (last->locations + last->count++);
@@ -253,13 +263,13 @@ uniform_group_push(shader_uniform_group* uniform_group, int location, size_t dat
     size_t size_after_push = (uniform_group->data_reserved + data_size);
     if(size_after_push <= uniform_group->data_capacity)
     {
-	data_offset = uniform_group->data_reserved;
-	uniform_group->data_reserved += data_size;
+        data_offset = uniform_group->data_reserved;
+        uniform_group->data_reserved += data_size;
 
-	result = uniform_data_location_list_reserve(&uniform_group->uniform_list);
-	result->location = location;
-	result->offset = data_offset;
-	result->size = data_size;
+        result = uniform_data_location_list_reserve(&uniform_group->uniform_list);
+        result->location = location;
+        result->offset = data_offset;
+        result->size = data_size;
     }
 
     return result;
@@ -267,21 +277,21 @@ uniform_group_push(shader_uniform_group* uniform_group, int location, size_t dat
 
 void
 shader_uniform_set_data(shader_uniform_group* uniform_group, int location,
-			 void* data, size_t data_size)
+                        void* data, size_t data_size)
 {
     uniform_data_location* data_location =
-	uniform_group_find(&uniform_group->uniform_list, location);
+        uniform_group_find(&uniform_group->uniform_list, location);
     if(!data_location)
     {
-	data_location =
-	    uniform_group_push(uniform_group, location, data_size);
+        data_location =
+            uniform_group_push(uniform_group, location, data_size);
     }
     
     if(data_location && data_size <= data_location->size)
     {
-	unsigned char* data_destination =
-	    (uniform_group->data + data_location->offset);
+        unsigned char* data_destination =
+            (uniform_group->data + data_location->offset);
 
-	platform_copy_memory(data_destination, data, data_size);
+        platform_copy_memory(data_destination, data, data_size);
     }
 }

@@ -64,6 +64,9 @@ shader_data_type_size(shader_data_type type, int count);
 shader_reflection
 shader_reflect(gl_functions* gl, shader_program* shader);
 
+shader_uniform*
+shader_get_uniform(shader_reflection* reflection, char* uniform_name);
+
 shader_uniform_group
 shader_uniform_group_create(size_t data_capacity);
 
