@@ -201,28 +201,20 @@ game_update_and_render(game_state* state)
     set_view(&state->shader, &state->per_frame_uniforms, &state->camera);
     renderer_apply_uniforms(gl, &state->shader, &state->per_frame_uniforms);
 
-    set_color(&state->shader, &state->per_object_uniforms, (color){0.87f, 0.82f, 0.86f});
-
-    gl->glBindVertexArray(state->ground.vao);
-    gl->glBindBuffer(GL_ARRAY_BUFFER, state->ground.vbo);
-
+    set_color(&state->shader, &state->per_object_uniforms, (color){1.0f, 1.0f, 1.0f});
     set_world(&state->shader, &state->per_object_uniforms, (vector3){{{0.0f, 0.0f, 0.0f}}});
-    
     renderer_apply_uniforms(gl, &state->shader, &state->per_object_uniforms);
-    glDrawArrays(GL_TRIANGLES, 0, state->ground.data.vertex_count);
-	
-    gl->glBindVertexArray(state->cube.vao);
-    gl->glBindBuffer(GL_ARRAY_BUFFER, state->cube.vbo);
+
+    renderer_draw_mesh(gl, &state->ground);
 	
     int i;
     for(i = 0; i < state->created_cube_count; i++)
     {
 	set_world(&state->shader, &state->per_object_uniforms, *(state->created_cube_positions + i));
 	renderer_apply_uniforms(gl, &state->shader, &state->per_object_uniforms);
-	glDrawArrays(GL_TRIANGLES, 0, state->cube.data.vertex_count);
-    }
 
-    set_color(&state->shader, &state->per_object_uniforms, (color){1.0f, 1.0f, 1.0f});
+	renderer_draw_mesh(gl, &state->cube);
+    }
 
     // NOTE: Draw UI
     set_projection_ui(&state->shader, &state->per_frame_uniforms,
@@ -230,11 +222,9 @@ game_update_and_render(game_state* state)
     set_view_ui(&state->shader, &state->per_frame_uniforms);
     renderer_apply_uniforms(gl, &state->shader, &state->per_frame_uniforms);
 
+    set_color(&state->shader, &state->per_object_uniforms, (color){1.0f, 1.0f, 1.0f});
     set_world(&state->shader, &state->per_object_uniforms, (vector3){{{0.0f, 0.0f, 0.0f}}});
-	
-    gl->glBindVertexArray(state->pointer.vao);
-    gl->glBindBuffer(GL_ARRAY_BUFFER, state->pointer.vbo);
-    
     renderer_apply_uniforms(gl, &state->shader, &state->per_object_uniforms);
-    glDrawArrays(GL_TRIANGLES, 0, state->pointer.data.vertex_count);
+
+    renderer_draw_mesh(gl, &state->pointer);
 }

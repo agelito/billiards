@@ -84,6 +84,8 @@ create_window(int width, int height, char* title)
     window_context.display = display;
     window_context.window = window;
     window_context.empty_cursor = empty_cursor;
+    window_context.pointer_is_grabbed =
+	mouse_x11_grab(display, window);
 
     return window_context;
 }

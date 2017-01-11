@@ -64,3 +64,18 @@ renderer_apply_uniforms(gl_functions* gl, shader_program* shader, shader_uniform
 	renderer_upload_uniform(gl, uniform, count, data.data);
     }
 }
+
+static void
+renderer_bind_mesh_buffers(gl_functions* gl, loaded_mesh* mesh)
+{
+    gl->glBindVertexArray(mesh->vao);
+    gl->glBindBuffer(GL_ARRAY_BUFFER, mesh->vbo);
+}
+
+void
+renderer_draw_mesh(gl_functions* gl, loaded_mesh* mesh)
+{
+    renderer_bind_mesh_buffers(gl, mesh);
+
+    glDrawArrays(GL_TRIANGLES, 0, mesh->data.vertex_count);
+}
