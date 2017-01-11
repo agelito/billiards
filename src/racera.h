@@ -43,7 +43,7 @@ typedef struct
     gl_functions gl;
     shader_program shader;
 
-    shader_uniform_group per_frame_uniforms;
+    shader_uniform_group per_scene_uniforms;
     shader_uniform_group per_object_uniforms;
 
     loaded_mesh ground;

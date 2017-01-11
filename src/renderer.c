@@ -57,7 +57,7 @@ renderer_apply_uniforms(gl_functions* gl, shader_program* shader, shader_uniform
     for(uniform_slot = 0; uniform_slot < info->uniform_count; ++uniform_slot)
     {
 	shader_uniform* uniform = (info->uniforms + uniform_slot);
-	shader_uniform_data data = shader_uniform_get_data(group, uniform->location);
+	shader_uniform_data data = shader_uniform_get_data(group, uniform->name_hash);
 	if(!data.size) continue;
 
 	int count = data.size / uniform->size_per_element;

@@ -264,3 +264,21 @@ matrix_look_fps(vector3 eye, float pitch, float yaw)
 
     return result;
 }
+
+unsigned int
+hash_string(char* input)
+{
+    static unsigned int prime = 16777619;
+
+    unsigned int hash = 2166136261;
+
+    char octet;
+    while((octet = *input++))
+    {
+	hash ^= octet;
+	hash *= prime;
+    }
+
+    return hash;
+    
+}

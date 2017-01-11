@@ -23,6 +23,7 @@ typedef enum
 
 struct shader_uniform
 {
+    unsigned int name_hash;
     char* name;
     int location;
     size_t size_per_element;
@@ -75,17 +76,14 @@ shader_data_type_size(shader_data_type type, int count);
 shader_reflection
 shader_reflect(gl_functions* gl, shader_program* shader);
 
-shader_uniform*
-shader_get_uniform(shader_reflection* reflection, char* uniform_name);
-
 shader_uniform_group
 shader_uniform_group_create(size_t data_capacity);
 
 void
-shader_uniform_set_data(shader_uniform_group* uniform_group, int location,
+shader_uniform_set_data(shader_uniform_group* uniform_group, unsigned int name_hash,
 			 void* data, size_t data_size);
 
 shader_uniform_data
-shader_uniform_get_data(shader_uniform_group* uniform_group, int location);
+shader_uniform_get_data(shader_uniform_group* uniform_group, unsigned int name_hash);
 
 #endif // SHADER_H_INCLUDED

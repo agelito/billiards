@@ -55,4 +55,6 @@ matrix4 matrix_orthographic(float width, float height, float near, float far);
 matrix4 matrix_look_at(vector3 eye, vector3 at, vector3 up);
 matrix4 matrix_look_fps(vector3 eye, float pitch, float yaw);
 
+unsigned int hash_string(char* input);
+
 #endif // MATH_H_INCLUDED

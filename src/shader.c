@@ -4,16 +4,18 @@
 #include "opengl.h"
 #include "shader.h"
 
+#include "math.h"
+
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
 #define UNIFORM_BLOCK_CAPACITY 32
 
 typedef struct uniform_data_location uniform_data_location;
 struct uniform_data_location
 {
-    int location;
+    unsigned int name_hash;
+    
     size_t offset;
     size_t size;
 };
@@ -154,6 +156,8 @@ shader_reflect(gl_functions* gl, shader_program* shader)
         shader_uniform uniform_data = (shader_uniform){0};
         uniform_data.name = (char*)malloc(name_length + 1);
         platform_copy_memory(uniform_data.name, uniform_name, name_length + 1);
+
+	uniform_data.name_hash = hash_string(uniform_name);
 	
         uniform_data.location = uniform_index;
 
@@ -176,25 +180,6 @@ shader_reflect(gl_functions* gl, shader_program* shader)
     uniform_name = 0;
 
     return group;
-}
-
-shader_uniform*
-shader_get_uniform(shader_reflection* reflection, char* uniform_name)
-{
-    shader_uniform* result = 0;
-    
-    int i;
-    for(i = 0; i < reflection->uniform_count; i++)
-    {
-        shader_uniform* search = (reflection->uniforms + i);
-        if(strcmp(search->name, uniform_name) == 0)
-        {
-            result = search;
-            break;
-        }
-    }
-    
-    return result;
 }
 
 static void
@@ -220,7 +205,7 @@ shader_uniform_group_create(size_t data_capacity)
 }
 
 static uniform_data_location*
-uniform_group_find(uniform_data_location_list* sentinel, int location)
+uniform_group_find(uniform_data_location_list* sentinel, unsigned int name_hash)
 {
     uniform_data_location* result = 0;
     
@@ -233,7 +218,7 @@ uniform_group_find(uniform_data_location_list* sentinel, int location)
 	{
 	    uniform_data_location* search_location =
 		(search->locations + search_index);
-	    if(search_location->location == location)
+	    if(search_location->name_hash == name_hash)
 	    {
 		result = search_location;
 		break;
@@ -267,7 +252,7 @@ uniform_data_location_list_reserve(uniform_data_location_list* sentinel)
 }
 
 static uniform_data_location*
-uniform_group_push(shader_uniform_group* uniform_group, int location, size_t data_size)
+uniform_group_push(shader_uniform_group* uniform_group, int name_hash, size_t data_size)
 {
     uniform_data_location* result = 0;
     size_t data_offset = 0;
@@ -278,7 +263,7 @@ uniform_group_push(shader_uniform_group* uniform_group, int location, size_t dat
         uniform_group->data_reserved += data_size;
 
         result = uniform_data_location_list_reserve(&uniform_group->uniform_list);
-        result->location = location;
+        result->name_hash = name_hash;
         result->offset = data_offset;
         result->size = data_size;
     }
@@ -287,15 +272,15 @@ uniform_group_push(shader_uniform_group* uniform_group, int location, size_t dat
 }
 
 void
-shader_uniform_set_data(shader_uniform_group* uniform_group, int location,
+shader_uniform_set_data(shader_uniform_group* uniform_group, unsigned int name_hash,
                         void* data, size_t data_size)
 {
     uniform_data_location* data_location =
-        uniform_group_find(&uniform_group->uniform_list, location);
+        uniform_group_find(&uniform_group->uniform_list, name_hash);
     if(!data_location)
     {
         data_location =
-            uniform_group_push(uniform_group, location, data_size);
+            uniform_group_push(uniform_group, name_hash, data_size);
     }
     
     if(data_location && data_size <= data_location->size)
@@ -308,12 +293,12 @@ shader_uniform_set_data(shader_uniform_group* uniform_group, int location,
 }
 
 shader_uniform_data
-shader_uniform_get_data(shader_uniform_group* uniform_group, int location)
+shader_uniform_get_data(shader_uniform_group* uniform_group, unsigned int name_hash)
 {
     shader_uniform_data data = (shader_uniform_data){0};
     
     uniform_data_location* data_location =
-        uniform_group_find(&uniform_group->uniform_list, location);
+        uniform_group_find(&uniform_group->uniform_list, name_hash);
     if(data_location)
     {
 	data.size = data_location->size;
