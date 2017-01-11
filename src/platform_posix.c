@@ -69,14 +69,16 @@ platform_sleep(int milliseconds)
     usleep(milliseconds * 1000);
 }
 
-int
-platform_read_file(char* path, char* destination, int destination_size)
+read_file
+platform_read_file(char* path, int append_null)
 {
+    read_file result = (read_file){0};
+    
     int file = open(path, O_RDONLY);
     if(file == -1)
     {
         printf("can't open file %s (%s)\n", path, strerror(errno));
-        return 0;
+        return result;
     }
 
     off_t file_size = lseek(file, 0, SEEK_END);
@@ -84,30 +86,21 @@ platform_read_file(char* path, char* destination, int destination_size)
     {
         printf("error retrieving file size %s (%s)\n", path, strerror(errno));
         close(file);
-        return 0;
+        return result;
     }
 
     lseek(file, 0, SEEK_SET);
 
-    if(destination == 0 || destination_size == 0)
-    {
-        close(file);
-        return file_size;
-    }
-
-    ssize_t bytes_to_read = file_size;
-    if(bytes_to_read > destination_size)
-    {
-        bytes_to_read = destination_size;
-    }
+    size_t data_size = file_size + (append_null ? 1 : 0);
+    char* destination = (char*)malloc(data_size);
 
     ssize_t total_bytes_read = 0;
-    while(total_bytes_read < bytes_to_read)
+    while(total_bytes_read < file_size)
     {
         int MAX_READ_CHUNK = 4096;
-        int bytes_left = (bytes_to_read - total_bytes_read);
-        int read_size = MAX_READ_CHUNK;
+        int bytes_left = (file_size - total_bytes_read);
 	
+        int read_size = MAX_READ_CHUNK;
         if(read_size > bytes_left)
         {
             read_size = bytes_left;
@@ -117,8 +110,10 @@ platform_read_file(char* path, char* destination, int destination_size)
         if(bytes_read == -1)
         {
             printf("error reading file %s (%s)\n", path, strerror(errno));
+	    free(destination);
             close(file);
-            return total_bytes_read;
+
+            return result;
         }
 
         total_bytes_read += bytes_read;
@@ -126,7 +121,26 @@ platform_read_file(char* path, char* destination, int destination_size)
 
     close(file);
 
-    return total_bytes_read;
+    if(append_null)
+    {
+	*(destination + file_size) = 0;
+    }
+
+    result.size = file_size;
+    result.data = destination;
+
+    return result;
+}
+
+void
+platform_free_file(read_file* file)
+{
+    if(file->data)
+    {
+	free(file->data);
+    }
+
+    *file = (read_file){0};
 }
 
 void

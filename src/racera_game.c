@@ -74,20 +74,14 @@ game_update_and_render(game_state* state)
 	state->gl = load_gl_functions();
 	gl_functions* gl = &state->gl;
 	
-	char vertex_source[1024];
-	int vertex_source_length = 1024;
-    
-	char fragment_source[1024];
-	int fragment_source_length = 1024;
+	read_file vertex_source = platform_read_file("simple.vert", 1);
+	read_file fragment_source = platform_read_file("simple.frag", 1);
 
-	vertex_source_length = platform_read_file("simple.vert", vertex_source, vertex_source_length);
-	*(vertex_source + vertex_source_length) = 0;
-	fragment_source_length = platform_read_file("simple.frag", fragment_source,
-						    fragment_source_length);
-	*(fragment_source + fragment_source_length) = 0;
+	state->shader = load_shader(gl, vertex_source.data, vertex_source.size,
+				    fragment_source.data, fragment_source.size);
 
-	state->shader = load_shader(gl, vertex_source, vertex_source_length,
-				    fragment_source, fragment_source_length);
+	platform_free_file(&vertex_source);
+	platform_free_file(&fragment_source);
 
 	state->per_scene_uniforms = shader_uniform_group_create(KB(1));
 	state->per_object_uniforms = shader_uniform_group_create(KB(1));
@@ -124,7 +118,6 @@ game_update_and_render(game_state* state)
     }
 	
     vector3 camera_movement = (vector3){0};
-    
     if(keyboard_is_down(&state->keyboard, VKEY_W))
     {
 	camera_movement.z += 0.1f;
