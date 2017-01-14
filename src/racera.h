@@ -49,8 +49,7 @@ typedef struct
     shader_uniform_group per_scene_uniforms;
     shader_uniform_group per_object_uniforms;
 
-    render_queue world_queue;
-    render_queue ui_queue;
+    render_queue render_queue;
 
     loaded_mesh ground;
     loaded_mesh cube;

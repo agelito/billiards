@@ -23,8 +23,7 @@ game_update_and_render(game_state* state)
 	state->gl = load_gl_functions();
 	gl_functions* gl = &state->gl;
 
-	state->world_queue = renderer_queue_create(gl, KB(64));
-	state->ui_queue = renderer_queue_create(gl, KB(64));
+	state->render_queue = renderer_queue_create(gl, KB(64));
 	
 	read_file vertex_source = platform_read_file("simple.vert", 1);
 	read_file fragment_source = platform_read_file("simple.frag", 1);
@@ -41,9 +40,6 @@ game_update_and_render(game_state* state)
 
 	platform_free_file(&fragment_source);
 	platform_free_file(&vertex_source);				       
-
-	state->per_scene_uniforms = shader_uniform_group_create(KB(1));
-	state->per_object_uniforms = shader_uniform_group_create(KB(1));
 
 	state->ground =
 	    load_mesh(gl, mesh_create_plane_xz(100.0f, 100, (color){1.0f, 1.0f, 1.0f}));
@@ -119,7 +115,7 @@ game_update_and_render(game_state* state)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     { // NOTE: Draw scene
-	renderer_queue_push(&state->world_queue, &state->ground,
+	renderer_queue_push(&state->render_queue, &state->ground,
 			    &state->simple_shader, matrix_identity());
 	
 	int i;
@@ -128,7 +124,7 @@ game_update_and_render(game_state* state)
 	    vector3 position = *(state->created_cube_positions + i);
 	    matrix4 transform = matrix_translate(position.x, position.y, position.z);
 	
-	    renderer_queue_push(&state->world_queue, &state->cube, &state->simple_shader, transform);
+	    renderer_queue_push(&state->render_queue, &state->cube, &state->simple_shader, transform);
 	}
 
 	float right = (float)state->screen_width * 0.5f;
@@ -138,13 +134,13 @@ game_update_and_render(game_state* state)
 	fps_camera* camera = &state->camera;
 	matrix4 view = matrix_look_fps(camera->position, camera->pitch, camera->yaw);
 
-	renderer_queue_process(&state->world_queue, projection, view);
-	renderer_queue_clear(&state->world_queue);
+	renderer_queue_process(&state->render_queue, projection, view);
+	renderer_queue_clear(&state->render_queue);
     }
 
     { // NOTE: Draw UI
 	matrix4 transform = matrix_identity();
-	renderer_queue_push(&state->ui_queue, &state->pointer, &state->simple_shader, transform);
+	renderer_queue_push(&state->render_queue, &state->pointer, &state->simple_shader, transform);
 
 	matrix4 projection =
 	    matrix_orthographic((float)state->screen_width, (float)state->screen_height, 1.0f, 100.0f);
@@ -155,8 +151,8 @@ game_update_and_render(game_state* state)
 	
 	matrix4 view = matrix_look_at(eye, at, up);
     
-	renderer_queue_process(&state->ui_queue, projection, view);
-	renderer_queue_clear(&state->ui_queue);
+	renderer_queue_process(&state->render_queue, projection, view);
+	renderer_queue_clear(&state->render_queue);
     }
 }
 
