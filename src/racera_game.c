@@ -6,64 +6,13 @@
 
 #include "renderer.h"
 
-static void
-set_view(shader_uniform_group* uniform_group, fps_camera* camera)
+static matrix4
+camera_rotation_matrix(fps_camera* camera)
 {
-    matrix4 view_matrix = matrix_look_fps(camera->position, camera->pitch, camera->yaw);
-    shader_uniform_set_data(uniform_group, hash_string("view"),
-			    view_matrix.data, sizeof(matrix4));
-}
-
-
-static void
-set_view_ui(shader_uniform_group* uniform_group)
-{
-    vector3 eye = (vector3){{{0.0f, 0.0f, -1.0f}}};
-    vector3 at = (vector3){0};
-    vector3 up = (vector3){{{0.0f, 1.0f, 0.0f}}};
-	
-    matrix4 view_matrix = matrix_look_at(eye, at, up);
-    shader_uniform_set_data(uniform_group, hash_string("view"),
-			    view_matrix.data, sizeof(matrix4));
-}
-
-static void
-set_projection(shader_uniform_group* uniform_group,
-	       int screen_width, int screen_height)
-{
-    float right = (float)screen_width * 0.5f;
-    float top = (float)screen_height * 0.5f;
-	
-    matrix4 projection_matrix = matrix_perspective(80.0f, right / top, 0.01f, 100.0f);
-    shader_uniform_set_data(uniform_group, hash_string("projection"),
-			    projection_matrix.data, sizeof(matrix4));
-}
-
-static void
-set_projection_ui(shader_uniform_group* uniform_group,
-		  int screen_width, int screen_height)
-{
-    matrix4 projection_matrix =
-	matrix_orthographic((float)screen_width, (float)screen_height, 1.0f, 100.0f);
-    shader_uniform_set_data(uniform_group, hash_string("projection"),
-			    projection_matrix.data, sizeof(matrix4));
-}
-
-static void
-set_world(shader_uniform_group* uniform_group, vector3 position)
-{
-
-    matrix4 world_matrix = matrix_translate(position.x, position.y, position.z);
-	
-    shader_uniform_set_data(uniform_group, hash_string("world"),
-			    world_matrix.data, sizeof(matrix4));
-}
-
-static void
-set_color(shader_uniform_group* uniform_group, color color)
-{
-    shader_uniform_set_data(uniform_group, hash_string("tint_color"),
-			    &color, sizeof(color));
+    matrix4 rotate_yaw = matrix_rotation_y(camera->yaw);
+    matrix4 rotate_pitch = matrix_rotation_x(camera->pitch);
+    matrix4 camera_rotation = matrix_multiply(rotate_yaw, rotate_pitch);
+    return camera_rotation;
 }
 
 void
@@ -73,15 +22,25 @@ game_update_and_render(game_state* state)
     {
 	state->gl = load_gl_functions();
 	gl_functions* gl = &state->gl;
+
+	state->world_queue = renderer_queue_create(gl, KB(64));
+	state->ui_queue = renderer_queue_create(gl, KB(64));
 	
 	read_file vertex_source = platform_read_file("simple.vert", 1);
 	read_file fragment_source = platform_read_file("simple.frag", 1);
 
-	state->shader = load_shader(gl, vertex_source.data, vertex_source.size,
+	state->simple_shader = load_shader(gl, vertex_source.data, vertex_source.size,
 				    fragment_source.data, fragment_source.size);
 
-	platform_free_file(&vertex_source);
+
 	platform_free_file(&fragment_source);
+
+	fragment_source = platform_read_file("uv_visualize.frag", 1);
+	state->uv_shader = load_shader(gl, vertex_source.data, vertex_source.size,
+				       fragment_source.data, fragment_source.size);
+
+	platform_free_file(&fragment_source);
+	platform_free_file(&vertex_source);				       
 
 	state->per_scene_uniforms = shader_uniform_group_create(KB(1));
 	state->per_object_uniforms = shader_uniform_group_create(KB(1));
@@ -138,10 +97,7 @@ game_update_and_render(game_state* state)
 	camera_movement.x += 0.1f;
     }
 
-    matrix4 rotate_yaw = matrix_rotation_y(state->camera.yaw);
-    matrix4 rotate_pitch = matrix_rotation_x(state->camera.pitch);
-    matrix4 camera_rotation = matrix_multiply(rotate_yaw, rotate_pitch);
-	
+    matrix4 camera_rotation = camera_rotation_matrix(&state->camera);
     camera_movement = vector3_matrix_multiply(camera_rotation, camera_movement);
     state->camera.position = vector3_add(state->camera.position, camera_movement);
 
@@ -159,40 +115,48 @@ game_update_and_render(game_state* state)
 	state->created_cube_count -= 1;
     }
 
-    gl_functions* gl = &state->gl;
-    gl->glUseProgram(state->shader.program);
-
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    // NOTE: Draw scene
-    set_projection(&state->per_scene_uniforms, state->screen_width, state->screen_height);
-    set_view(&state->per_scene_uniforms, &state->camera);
-    renderer_apply_uniforms(gl, &state->shader, &state->per_scene_uniforms);
-
-    set_color(&state->per_object_uniforms, (color){1.0f, 1.0f, 1.0f});
-    set_world(&state->per_object_uniforms, (vector3){{{0.0f, 0.0f, 0.0f}}});
-    renderer_apply_uniforms(gl, &state->shader, &state->per_object_uniforms);
-
-    renderer_draw_mesh(gl, &state->ground);
+    { // NOTE: Draw scene
+	renderer_queue_push(&state->world_queue, &state->ground,
+			    &state->simple_shader, matrix_identity());
 	
-    int i;
-    for(i = 0; i < state->created_cube_count; i++)
-    {
-	set_world(&state->per_object_uniforms, *(state->created_cube_positions + i));
-	renderer_apply_uniforms(gl, &state->shader, &state->per_object_uniforms);
+	int i;
+	for(i = 0; i < state->created_cube_count; i++)
+	{
+	    vector3 position = *(state->created_cube_positions + i);
+	    matrix4 transform = matrix_translate(position.x, position.y, position.z);
+	
+	    renderer_queue_push(&state->world_queue, &state->cube, &state->simple_shader, transform);
+	}
 
-	renderer_draw_mesh(gl, &state->cube);
+	float right = (float)state->screen_width * 0.5f;
+	float top = (float)state->screen_height * 0.5f;
+	matrix4 projection = matrix_perspective(80.0f, right / top, 0.01f, 100.0f);
+
+	fps_camera* camera = &state->camera;
+	matrix4 view = matrix_look_fps(camera->position, camera->pitch, camera->yaw);
+
+	renderer_queue_process(&state->world_queue, projection, view);
+	renderer_queue_clear(&state->world_queue);
     }
 
-    // NOTE: Draw UI
-    set_projection_ui(&state->per_scene_uniforms, state->screen_width, state->screen_height);
-    set_view_ui(&state->per_scene_uniforms);
-    renderer_apply_uniforms(gl, &state->shader, &state->per_scene_uniforms);
+    { // NOTE: Draw UI
+	matrix4 transform = matrix_identity();
+	renderer_queue_push(&state->ui_queue, &state->pointer, &state->simple_shader, transform);
 
-    set_color(&state->per_object_uniforms, (color){1.0f, 1.0f, 1.0f});
-    set_world(&state->per_object_uniforms, (vector3){{{0.0f, 0.0f, 0.0f}}});
-    renderer_apply_uniforms(gl, &state->shader, &state->per_object_uniforms);
+	matrix4 projection =
+	    matrix_orthographic((float)state->screen_width, (float)state->screen_height, 1.0f, 100.0f);
 
-    renderer_draw_mesh(gl, &state->pointer);
+	vector3 eye = (vector3){{{0.0f, 0.0f, -1.0f}}};
+	vector3 at = (vector3){0};
+	vector3 up = (vector3){{{0.0f, 1.0f, 0.0f}}};
+	
+	matrix4 view = matrix_look_at(eye, at, up);
+    
+	renderer_queue_process(&state->ui_queue, projection, view);
+	renderer_queue_clear(&state->ui_queue);
+    }
 }
+

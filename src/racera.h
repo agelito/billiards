@@ -6,14 +6,16 @@
 #define invalid_code *((int*)0) = 0
 #define array_count(array) (sizeof(array) / sizeof(array[0]))
 
+#define for_range(n, count) for(n = 0; n < count; ++n)
+
 #define KB(kilo_bytes) (kilo_bytes * 1024)
 #define MB(mega_bytes) (KB(mega_bytes) * 1024)
 #define GB(giga_bytes) (MB(giga_bytes) * 1024)
 
 #include "opengl.h"
 #include "math.h"
-#include "shader.h"
-#include "mesh.h"
+#include "renderer.h"
+
 #include "texture.h"
 
 #include "mouse.h"
@@ -41,10 +43,14 @@ typedef struct
     int loaded_graphics;
     
     gl_functions gl;
-    shader_program shader;
+    shader_program simple_shader;
+    shader_program uv_shader;
 
     shader_uniform_group per_scene_uniforms;
     shader_uniform_group per_object_uniforms;
+
+    render_queue world_queue;
+    render_queue ui_queue;
 
     loaded_mesh ground;
     loaded_mesh cube;

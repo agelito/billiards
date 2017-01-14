@@ -146,6 +146,7 @@ shader_reflect(gl_functions* gl, shader_program* shader)
     for(uniform_index = 0; uniform_index < uniform_count; ++uniform_index)
     {
         int name_length;
+	int name_hash;
         int uniform_count;
         GLenum type;
 
@@ -157,15 +158,16 @@ shader_reflect(gl_functions* gl, shader_program* shader)
         uniform_data.name = (char*)malloc(name_length + 1);
         platform_copy_memory(uniform_data.name, uniform_name, name_length + 1);
 
-	uniform_data.name_hash = hash_string(uniform_name);
+	name_hash = hash_string(uniform_name);
+	uniform_data.name_hash = name_hash;
 	
         uniform_data.location = uniform_index;
 
         shader_data_type data_type = shader_type_from_gl(type);
         if(data_type == shader_data_unknown)
         {
-            fprintf(stderr, "unrecognized uniform %s at %d, type: %d\n",
-                    uniform_name, uniform_index, type);
+            fprintf(stderr, "unrecognized uniform %s (0x%08x) index %d, type: %d\n",
+                    uniform_name, name_hash, uniform_index, type);
             continue;
         }
 

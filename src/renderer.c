@@ -2,6 +2,9 @@
 
 #include "opengl.h"
 #include "renderer.h"
+#include "racera.h"
+
+#include <stdlib.h>
 
 #define glUniformScalar(type, u, c, d) gl->type(u->location, c, (void*)d)
 #define glUniformMatrix(type, u, c, d) gl->type(u->location, c, GL_FALSE, (void*)d)
@@ -78,4 +81,86 @@ renderer_draw_mesh(gl_functions* gl, loaded_mesh* mesh)
     renderer_bind_mesh_buffers(gl, mesh);
 
     glDrawArrays(GL_TRIANGLES, 0, mesh->data.vertex_count);
+}
+
+render_queue
+renderer_queue_create(gl_functions* gl, int capacity)
+{
+    render_queue queue = (render_queue){0};
+    
+    queue.gl = gl;
+    queue.capacity = capacity;
+
+    size_t queue_size = (sizeof(render_queue_item) * capacity);
+    queue.items= (render_queue_item*)malloc(queue_size);
+
+    queue.uniforms = shader_uniform_group_create(KB(1));
+    queue.uniforms_per_object = shader_uniform_group_create(KB(1));
+
+    return queue;
+}
+
+void
+renderer_queue_push(render_queue* queue, loaded_mesh* mesh,
+		    shader_program* shader, matrix4 transform)
+{
+    render_queue_item item;
+    item.mesh = mesh;
+    item.shader = shader;
+    item.transform = transform;
+    
+    *(queue->items + queue->count++) = item;
+}
+
+void
+renderer_queue_clear(render_queue* queue)
+{
+    queue->count = 0;
+}
+
+void
+renderer_queue_process(render_queue* queue, matrix4 projection, matrix4 view)
+{
+    gl_functions* gl = queue->gl;
+    
+    loaded_mesh* bound_mesh = 0;
+    shader_program* bound_shader = 0;
+
+    shader_uniform_set_data(&queue->uniforms, hash_string("projection"),
+			    projection.data, sizeof(matrix4));
+    shader_uniform_set_data(&queue->uniforms, hash_string("view"),
+			    view.data, sizeof(matrix4));
+
+    vector3 tint_color = (vector3){{{1.0f, 1.0f, 1.0f}}};
+    shader_uniform_set_data(&queue->uniforms, hash_string("tint_color"),
+			    &tint_color, sizeof(vector3));
+    
+    int i;
+    for_range(i, queue->count)
+    {
+	render_queue_item* item = (queue->items + i);
+
+	shader_program* shader = item->shader;
+	if(shader != bound_shader)
+	{
+	    gl->glUseProgram(shader->program);
+	    renderer_apply_uniforms(gl, shader, &queue->uniforms);
+	    
+	    bound_shader = shader;
+	}
+	
+	loaded_mesh* mesh = item->mesh;
+	if(mesh != bound_mesh)
+	{
+	    renderer_bind_mesh_buffers(gl, mesh);
+	    bound_mesh = mesh;
+	}
+
+	shader_uniform_set_data(&queue->uniforms_per_object, hash_string("world"),
+				item->transform.data, sizeof(matrix4));
+
+	renderer_apply_uniforms(gl, shader, &queue->uniforms_per_object);
+	
+	glDrawArrays(GL_TRIANGLES, 0, mesh->data.vertex_count);
+    }
 }
