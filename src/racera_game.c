@@ -15,6 +15,8 @@ camera_rotation_matrix(fps_camera* camera)
     return camera_rotation;
 }
 
+#include <stdio.h>
+
 void
 game_update_and_render(game_state* state)
 {
@@ -50,11 +52,11 @@ game_update_and_render(game_state* state)
 
 	state->pointer = load_mesh(gl, mesh_create_circle(2.0f, 5));
 	mesh_data_free(&state->pointer.data);
-
-	state->texture = load_texture(gl, texture_create_checker(128, 128, 64));
-	texture_data_free(&state->texture.data);
-
-	state->smiley = load_texture(gl, texture_create_from_tga("smiley.tga"));
+	
+	state->checker = load_texture(gl, texture_create_checker(128, 128, 64));
+	texture_data_free(&state->checker.data);
+	
+	state->smiley = load_texture(gl, texture_create_from_tga("smiley_rle.tga"));
 	texture_data_free(&state->smiley.data);
 
 	glBindTexture(GL_TEXTURE_2D, state->smiley.handle);

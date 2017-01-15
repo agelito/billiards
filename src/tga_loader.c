@@ -6,6 +6,10 @@
 #define TGA_DATA_BITMASK 0x7
 #define TGA_RLE_BITMASK  0x8
 
+#define TGA_RLE_PACKET_BITMASK 0x80
+#define TGA_RLE_PACKET_SHIFT 7
+
+
 typedef enum tga_data_type
 {
     TGA_DATA_NONE = 0,
@@ -103,47 +107,56 @@ tga_decode_image(tga_header* header, unsigned char* input_bytes, unsigned char* 
 
     assert(decoder != 0);
 
-    int use_rle = (header->data_type_code & TGA_DATA_BITMASK);
+    int use_rle = (header->data_type_code & TGA_RLE_BITMASK) == TGA_RLE_BITMASK;
 
     unsigned char* read_at = input_bytes;
     unsigned char* out_at = output_bytes;
     
-    unsigned int pixel;
+    unsigned int pixel = 0;
     unsigned int pixel_count = (header->width * header->height);
     
     if(use_rle)
     {
 	while(pixel < pixel_count)
 	{
-	    char rle_header = *(read_at++);
-	    char rle_count = (rle_header & 0x7f);
-	    if((rle_header & 0x80))
+	    unsigned char rle_header = *(read_at++);
+	    unsigned char rle_count = (rle_header & 0x7f);
+	    unsigned char rle_packet = (rle_header & TGA_RLE_PACKET_BITMASK) >> TGA_RLE_PACKET_SHIFT;
+
+	    int decoded_bytes = decoder(read_at, out_at);
+	    out_at += decoded_bytes;
+	    read_at += in_pixel_stride;
+	    pixel++;
+	    
+	    if(rle_packet)
 	    {
-		unsigned char* copy_from = out_at;
-		int decoded_bytes = decoder(read_at, out_at);
-		
-		read_at += in_pixel_stride;
-		out_at += decoded_bytes;
-		
-		while(--rle_count)
+		unsigned char* copy_from = (out_at - decoded_bytes);
+
+		int i;
+		for_range(i, rle_count)
 		{
 		    memcpy(out_at, copy_from, decoded_bytes);
-		    out_at = (out_at + decoded_bytes);
+		    out_at += decoded_bytes;
 		}
 
-		pixel += (rle_count + 1);
+		pixel += rle_count;
 	    }
 	    else
 	    {
-		while(--rle_count)
+		int i;
+		for_range(i, rle_count)
 		{
-		    int decoded_bytes = decoder(read_at, out_at);
-		    read_at += in_pixel_stride;
+		    decoded_bytes = decoder(read_at, out_at);
 		    out_at += decoded_bytes;
+		    read_at += in_pixel_stride;
 		}
-		pixel += (rle_count + 1);
+
+		pixel += rle_count;
 	    }
 	}
+
+	assert(pixel == pixel_count);
+
     }
     else
     {
@@ -153,5 +166,7 @@ tga_decode_image(tga_header* header, unsigned char* input_bytes, unsigned char* 
 	    read_at += in_pixel_stride;
 	    out_at += decoded_bytes;
 	}
+
+	assert(pixel == pixel_count);
     }
 }

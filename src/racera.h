@@ -56,7 +56,7 @@ typedef struct
     loaded_mesh cube;
     loaded_mesh pointer;
 
-    loaded_texture texture;
+    loaded_texture checker;
     loaded_texture smiley;
 
     fps_camera camera;
