@@ -54,7 +54,10 @@ game_update_and_render(game_state* state)
 	state->texture = load_texture(gl, texture_create_checker(128, 128, 64));
 	texture_data_free(&state->texture.data);
 
-	glBindTexture(GL_TEXTURE_2D, state->texture.handle);
+	state->smiley = load_texture(gl, texture_create_from_tga("smiley.tga"));
+	texture_data_free(&state->smiley.data);
+
+	glBindTexture(GL_TEXTURE_2D, state->smiley.handle);
 
 	state->camera = (fps_camera){0};
 	state->camera.position = (vector3){{{0.0f, 1.0f, -2.0f}}};
@@ -62,15 +65,15 @@ game_update_and_render(game_state* state)
 	state->loaded_graphics = 1;
     }
 
-    state->camera.yaw -= (float)state->mouse.relative_x * 0.5f;
-    state->camera.pitch -= (float)state->mouse.relative_y * 0.5f;
-    if(state->camera.pitch < -90.0f) state->camera.pitch = -90.0f;
-    if(state->camera.pitch > 90.0f) state->camera.pitch = 90.0f;
-
     if(keyboard_is_pressed(&state->keyboard, VKEY_ESCAPE))
     {
 	state->should_quit = 1;
     }
+
+    state->camera.yaw -= (float)state->mouse.relative_x * 0.5f;
+    state->camera.pitch -= (float)state->mouse.relative_y * 0.5f;
+    if(state->camera.pitch < -90.0f) state->camera.pitch = -90.0f;
+    if(state->camera.pitch > 90.0f) state->camera.pitch = 90.0f;
 	
     vector3 camera_movement = (vector3){0};
     if(keyboard_is_down(&state->keyboard, VKEY_W))

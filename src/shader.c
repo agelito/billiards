@@ -37,7 +37,8 @@ print_program_error(gl_functions* gl, GLuint program)
 }
 
 shader_program
-load_shader(gl_functions* gl, char* vertex_source, int vertex_source_length, char* fragment_source, int fragment_source_length)
+load_shader(gl_functions* gl, unsigned char* vertex_source, int vertex_source_length,
+	    unsigned char* fragment_source, int fragment_source_length)
 {
     shader_program shader;
 

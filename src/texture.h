@@ -5,7 +5,7 @@ typedef struct
 {
     int width;
     int height;
-    char* colors;
+    unsigned char* colors;
 } texture_data;
 
 typedef struct
@@ -17,6 +17,7 @@ typedef struct
 loaded_texture load_texture(gl_functions* gl, texture_data data);
 
 texture_data texture_create_checker(int width, int height, int checker_size);
+texture_data texture_create_from_tga(char* path);
 
 void texture_data_free(texture_data* data);
 

@@ -2,8 +2,12 @@
 
 #include "opengl.h"
 #include "texture.h"
+#include "racera.h"
+#include "platform.h"
 
 #include <stdlib.h>
+
+#include "tga_loader.c"
 
 loaded_texture
 load_texture(gl_functions* gl, texture_data data)
@@ -47,7 +51,7 @@ texture_create_checker(int width, int height, int checker_size)
     int i, pixels = width * height;
     for(i = 0; i < pixels; i++)
     {
-	char* pixel = (data.colors + i * pixel_size);
+	unsigned char* pixel = (data.colors + i * pixel_size);
 
 	int checker_index = i / checker_size;
 	
@@ -77,6 +81,46 @@ texture_create_checker(int width, int height, int checker_size)
     }
     
     return data;
+}
+
+texture_data
+texture_create_from_tga(char* path)
+{
+    texture_data texture = (texture_data){0};
+
+    read_file file =  platform_read_file(path, 1);
+    assert(file.size > sizeof(tga_header));
+    
+    tga_header header = *((tga_header*)file.data);
+    
+    unsigned char* image_data = (file.data + (sizeof(tga_header) + header.id_length));
+    
+    int components_per_pixel = 0;
+    switch(header.bits_per_pixel)
+    {
+    case 8:
+    case 24:
+	components_per_pixel = 3;
+	break;
+    case 16:
+    case 32:
+	components_per_pixel = 4;
+	break;
+    }
+
+    assert(components_per_pixel != 0);
+
+    texture.width = header.width;
+    texture.height = header.height;
+    
+    int pixel_size = components_per_pixel * sizeof(char);
+    texture.colors = malloc(pixel_size * header.width * header.height);
+
+    tga_decode_image(&header, image_data, texture.colors);
+    
+    platform_free_file(&file);
+
+    return texture;
 }
 
 void
