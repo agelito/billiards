@@ -4,6 +4,7 @@
 #define UNUSED(variable) (void)(variable)
 
 #define invalid_code *((int*)0) = 0
+#define assert(expr) if(!(expr)) { fprintf(stderr, "assertion! %s:%d\n", __FILE__, __LINE__); invalid_code; }
 #define array_count(array) (sizeof(array) / sizeof(array[0]))
 
 #define for_range(n, count) for(n = 0; n < count; ++n)
@@ -56,6 +57,7 @@ typedef struct
     loaded_mesh pointer;
 
     loaded_texture texture;
+    loaded_texture smiley;
 
     fps_camera camera;
     
