@@ -92,7 +92,7 @@ platform_read_file(char* path, int append_null)
     lseek(file, 0, SEEK_SET);
 
     size_t data_size = file_size + (append_null ? 1 : 0);
-    char* destination = (char*)malloc(data_size);
+    unsigned char* destination = (unsigned char*)malloc(data_size);
 
     ssize_t total_bytes_read = 0;
     while(total_bytes_read < file_size)
@@ -105,8 +105,9 @@ platform_read_file(char* path, int append_null)
         {
             read_size = bytes_left;
         }
-	
-        ssize_t bytes_read = read(file, destination, read_size);
+
+	unsigned char* read_to = (destination + total_bytes_read);
+        ssize_t bytes_read = read(file, read_to, read_size);
         if(bytes_read == -1)
         {
             printf("error reading file %s (%s)\n", path, strerror(errno));

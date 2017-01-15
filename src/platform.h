@@ -5,8 +5,8 @@ typedef struct read_file read_file;
 
 struct read_file
 {
-    long size;
-    char* data;
+    unsigned long size;
+    unsigned char* data;
 };
 
 long platform_executable_directory(char* destination, long destination_size);
