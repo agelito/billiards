@@ -10,7 +10,7 @@ if not exist obj (
    mkdir obj
 )
 
-set SRC_FILES=src/win32_main.c
+set SRC_FILES=src/win32_main.c src/window_win32.c
 set LIBRARIES=kernel32.lib user32.lib opengl32.lib
 
 echo "Compiling..."
