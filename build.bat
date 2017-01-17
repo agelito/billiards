@@ -11,7 +11,7 @@ if not exist obj (
 )
 
 set SRC_FILES=src/win32_main.c src/window_win32.c
-set LIBRARIES=kernel32.lib user32.lib opengl32.lib
+set LIBRARIES=kernel32.lib gdi32.lib user32.lib opengl32.lib
 
 echo "Compiling..."
 cl -EHa- /Od /Zi /W3 /D_CRT_SECURE_NO_WARNINGS /Isrc /Foobj/ /Febin/racera.exe %SRC_FILES% %LIBRARIES% /link /subsystem:windows

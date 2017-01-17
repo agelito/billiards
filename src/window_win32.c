@@ -46,6 +46,7 @@ window_win32_create(int width, int height, char* title)
     window_class.lpfnWndProc = window_win32_message_callback;
     window_class.cbClsExtra = 0;
     window_class.cbWndExtra = 8;
+    window_class.style = CS_OWNDC;
     window_class.hInstance = hinstance;
     window_class.hIcon = LoadIcon(hinstance, MAKEINTRESOURCE(IDI_APPLICATION));
     window_class.hCursor = LoadCursor(NULL, IDC_ARROW);
@@ -70,9 +71,46 @@ window_win32_create(int width, int height, char* title)
         return 0;
     }
 
+    PIXELFORMATDESCRIPTOR pixel_format = {
+        sizeof(PIXELFORMATDESCRIPTOR),
+        1,
+        PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER,
+        PFD_TYPE_RGBA,
+        32,
+        0, 0, 0, 0, 0, 0,
+        0, 
+        0, 
+        0, 
+        0, 0, 0, 0,
+        24,
+        8,
+        0,
+        PFD_MAIN_PLANE,
+        0,
+        0, 0, 0
+    };
+
+    HDC device_context = GetDC(window_handle);
+    int chosen_pixel_format = ChoosePixelFormat(device_context, &pixel_format);
+    if(chosen_pixel_format == 0)
+    {
+        MessageBox(NULL, "failed to select suitable pixel format", "error!", 0);
+        return 0;
+    }
+
+    if(!SetPixelFormat(device_context, chosen_pixel_format, &pixel_format))
+    {
+        MessageBox(NULL, "failed to set pixel format", "error!", 0);
+        return 0;
+    }
+
+    HGLRC gl_context = wglCreateContext(device_context);
+    wglMakeCurrent(device_context, gl_context);
+
     window_win32* window = (window_win32*)malloc(sizeof(window_win32));
 
     window->handle = window_handle;
+    window->gl_context = gl_context;
     window->width = width;
     window->height = height;
 
@@ -89,6 +127,13 @@ window_win32_create(int width, int height, char* title)
 void
 window_win32_destroy(window_win32* window)
 {
+    if(window->gl_context)
+    {
+        HDC device_context = GetDC(window->handle);
+        wglMakeCurrent(device_context, 0);
+        wglDeleteContext(window->gl_context);
+    }
+
     if(window->handle)
     {
         DestroyWindow(window->handle);

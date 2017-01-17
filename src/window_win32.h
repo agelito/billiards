@@ -6,6 +6,7 @@ typedef struct window_win32 window_win32;
 struct window_win32
 {
     HWND handle;
+    HGLRC gl_context;
     int is_open;
     int width;
     int height;
