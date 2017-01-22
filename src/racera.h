@@ -1,12 +1,26 @@
 #ifndef RACERA_H_INCLUDED
 #define RACERA_H_INCLUDED
 
+#include <stdint.h>
+
+typedef int8_t int8;
+typedef int16_t int16;
+typedef int32_t int32;
+typedef int64_t int64;
+
+typedef uint8_t uint8;
+typedef uint16_t uint16;
+typedef uint32_t uint32;
+typedef uint64_t uint64;
+
+typedef uint32 bool32;
+
 #define UNUSED(variable) (void)(variable)
 
 #define invalid_code *((int*)0) = 0
 #define assert(expr) if(!(expr)) { fprintf(stderr, "assertion! %s:%d\n", __FILE__, __LINE__); invalid_code; }
-#define array_count(array) (sizeof(array) / sizeof(array[0]))
 
+#define array_count(array) (sizeof(array) / sizeof(array[0]))
 #define for_range(n, count) for(n = 0; n < count; ++n)
 
 #define KB(kilo_bytes) (kilo_bytes * 1024)
@@ -33,7 +47,7 @@ typedef struct
 
 typedef struct
 {
-    int should_quit;
+    bool32 should_quit;
     
     mouse_state mouse;
     keyboard_state keyboard;
@@ -41,7 +55,7 @@ typedef struct
     int screen_width;
     int screen_height;
     
-    int loaded_graphics;
+    bool32 loaded_graphics;
     
     gl_functions gl;
     shader_program simple_shader;
@@ -61,7 +75,7 @@ typedef struct
 
     fps_camera camera;
     
-    int created_cube_count;
+    int32 created_cube_count;
     vector3 created_cube_positions[MAX_CUBES];
 } game_state;
 
