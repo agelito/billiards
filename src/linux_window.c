@@ -1,16 +1,18 @@
-// window_x11.c
+// linux_window.c
 
-#include <stdlib.h>
-#include <stdio.h>
+typedef struct
+{
+    Display* display;
+    Window window;
+    
+    int width;
+    int height;
 
-#include <X11/Xlib.h>
-#include <GL/gl.h>
-#include <GL/glx.h>
+    int pointer_is_grabbed;
+    Cursor empty_cursor;
+}  window_x11;
 
-#include "window_x11.h"
-#include "mouse_x11.h"
-
-window_x11
+static window_x11
 create_window(int width, int height, char* title)
 {
     Display* display = XOpenDisplay(NULL);
@@ -102,7 +104,7 @@ destroy_current_gl_context(window_x11* window_context)
 }
 
 
-void
+static void
 destroy_window(window_x11* window_context)
 {
     XFreeCursor(window_context->display, window_context->empty_cursor);
@@ -118,7 +120,7 @@ destroy_window(window_x11* window_context)
     XCloseDisplay(window_context->display);
 }
 
-void
+static void
 resize_viewport(window_x11* window_context)
 {
     XWindowAttributes window_attributes;
@@ -128,13 +130,13 @@ resize_viewport(window_x11* window_context)
     window_context->height = window_attributes.height;
 }
 
-void
+static void
 redraw_window(window_x11* window_context)
 {
     glXSwapBuffers(window_context->display, window_context->window);
 }
 
-int
+static int
 handle_window_events(window_x11* window_context, keyboard_x11* keyboard, xinput2* xinput)
 {
     int window_is_open = 1;

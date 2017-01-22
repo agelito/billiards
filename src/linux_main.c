@@ -1,18 +1,56 @@
 // linux_main.c
 
+#define _XOPEN_SOURCE 600
+#include <unistd.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include <string.h>
+#undef _XOPEN_SOURCE
+
+#include <GL/gl.h>
+#include <GL/glx.h>
+
+#include <X11/Xlib.h>
+#include <X11/keysym.h>
+#include <X11/extensions/XInput2.h>
+
+typedef int8_t int8;
+typedef int16_t int16;
+typedef int32_t int32;
+typedef int64_t int64;
+
+typedef uint8_t uint8;
+typedef uint16_t uint16;
+typedef uint32_t uint32;
+typedef uint64_t uint64;
+
+typedef uint32 bool32;
+
+#define unused_arg(arg) (void)arg;
+#define array_count(array) (sizeof(array) / sizeof(array[0]))
+#define invalid_code *(int*)0 = 0
+
+#include "linux_cpu.c"
 #include "platform.h"
+
+#include "linux_platform.c"
+#include "linux_mouse.c"
+#include "linux_mouse_raw.c"
+#include "linux_keyboard.c"
+#include "linux_window.c"
+
 #include "racera.h"
 
-#include "window_x11.h"
-#include "keyboard_x11.h"
-
-#include "mouse_x11.h"
-#include "mouse_xi2.h"
+extern void
+game_update_and_render(struct game_state* state);
 
 int main(int argc, char* argv[])
 {
-    UNUSED(argc);
-    UNUSED(argv);
+    unused_arg(argc);
+    unused_arg(argv);
 
     char exe_dir[1024];
     int exe_dir_length = 1024;
@@ -66,4 +104,9 @@ int main(int argc, char* argv[])
     }
 
     return 0;
+}
+
+void* gl_get_address(const GLubyte* function)
+{
+    return (void*)glXGetProcAddress(function);
 }

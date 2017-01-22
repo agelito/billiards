@@ -1,9 +1,10 @@
 #ifndef RENDERER_H_INCLUDED
 #define RENDERER_H_INCLUDED
 
+#include "opengl.h"
 #include "shader.h"
+#include "texture.h"
 #include "mesh.h"
-#include "math.h"
 
 typedef struct render_queue render_queue;
 typedef struct render_queue_item render_queue_item;

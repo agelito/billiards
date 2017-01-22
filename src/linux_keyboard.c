@@ -1,11 +1,34 @@
-// keyboard_x11.c
+// linux_keyboard.c
 
-#include <X11/Xlib.h>
-#include <X11/keysym.h>
-#include "keyboard_x11.h"
+#include "keyboard.h"
 
-// TODO: Depend on platform for logging instead of stdio.
-#include <stdio.h>
+#define MAX_KEYCODE_COUNT 256
+#define MAX_KEYSYM_PER_KEYCODE 16
+
+typedef struct
+{
+    int symbol_count;
+    KeySym symbols[MAX_KEYSYM_PER_KEYCODE];
+} keysym_list;
+
+typedef struct
+{
+    int down;
+    int pressed;
+    int released;
+} keycode_state;
+
+typedef struct
+{
+    int keycode_min;
+    int keycode_max;
+    int keycode_count;
+    
+    keysym_list map[MAX_KEYCODE_COUNT];
+    keycode_state state[MAX_KEYCODE_COUNT];
+
+    int vkey_to_keycode[VKEY_COUNT];
+} keyboard_x11;
 
 static void
 create_keycode_map(Display* display, keyboard_x11* keyboard)
@@ -60,7 +83,7 @@ create_keycode_map(Display* display, keyboard_x11* keyboard)
     }
 }
 
-static int
+static bool32
 keyboard_symbols_contains(keysym_list* symbols, KeySym symbol)
 {
     int i;
@@ -92,7 +115,7 @@ keyboard_map_virtual_key(keyboard_x11* keyboard, KeySym symbol, virtual_key key)
     }
 }
 
-keyboard_x11
+static keyboard_x11
 keyboard_x11_init(Display* display)
 {
     keyboard_x11 input = (keyboard_x11){0};
@@ -114,7 +137,7 @@ keyboard_x11_init(Display* display)
     return input;
 }
 
-void
+static void
 keyboard_x11_reset(keyboard_x11* keyboard)
 {
     int i;
@@ -126,48 +149,22 @@ keyboard_x11_reset(keyboard_x11* keyboard)
     }
 }
 
-int
-keyboard_x11_is_symbol(keyboard_x11* keyboard, int keycode, KeySym symbol)
-{
-    int keycode_index = (keycode - keyboard->keycode_min);
-    if(keycode_index < 0 || keycode_index >= keyboard->keycode_count)
-    {
-	printf("warning: keycode %d is outside valid range (%d - %d).",
-	       keycode, keyboard->keycode_min, keyboard->keycode_max);
-	return 0;
-    }
-
-    keysym_list* symbol_list = (keyboard->map + keycode_index);
-
-    int symbol_match = 0;
-    
-    int symbol_index;
-    for(symbol_index = 0; symbol_index < symbol_list->symbol_count; ++symbol_index)
-    {
-	KeySym compare_symbol = *(symbol_list->symbols + symbol_index);
-	if(compare_symbol == symbol)
-	{
-	    symbol_match = 1;
-	    break;
-	}
-    }
-
-    return symbol_match;
-}
-
-int keyboard_x11_is_down(keyboard_x11* keyboard, virtual_key key)
+static inline bool32
+keyboard_x11_is_down(keyboard_x11* keyboard, virtual_key key)
 {
     int keycode = *(keyboard->vkey_to_keycode + key);
     return (keyboard->state + keycode)->down;
 }
 
-int keyboard_x11_is_pressed(keyboard_x11* keyboard, virtual_key key)
+static inline bool32
+keyboard_x11_is_pressed(keyboard_x11* keyboard, virtual_key key)
 {
     int keycode = *(keyboard->vkey_to_keycode + key);
     return (keyboard->state + keycode)->pressed;
 }
 
-int keyboard_x11_is_released(keyboard_x11* keyboard, virtual_key key)
+static inline bool32
+keyboard_x11_is_released(keyboard_x11* keyboard, virtual_key key)
 {
     int keycode = *(keyboard->vkey_to_keycode + key);
     return (keyboard->state + keycode)->released;

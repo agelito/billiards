@@ -1,17 +1,4 @@
-// platform_posix.c
-
-#define _DEFAULT_SOURCE
-#include <unistd.h>
-#undef _DEFAULT_SOURCE
-
-#include <fcntl.h>
-#include <errno.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-#include "racera.h"
-#include "platform.h"
+// linux_platform.c
 
 long
 platform_executable_directory(char* destination, long destination_size)
@@ -177,3 +164,5 @@ platform_copy_memory(void* destination, void* source, long size)
 {
     memcpy(destination, source, size);
 }
+
+

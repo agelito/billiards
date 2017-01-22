@@ -1,11 +1,22 @@
-// mouse_xi2.c
+// linux_mouse_raw.c
 
-#include <X11/Xlib.h>
-#include <X11/extensions/XInput2.h>
+#define MOUSE_XI2_MAX_AXIS 16
 
-#include <stdio.h>
+typedef struct
+{
+    int major_opcode;
+    int selected_device;
 
-#include "mouse_xi2.h"
+    int axis_count;
+    double axis_raw_data[MOUSE_XI2_MAX_AXIS];
+} xinput2;
+
+typedef struct
+{
+    double x;
+    double y;
+    double wheel;
+} xinput2_mouse;
 
 xinput2
 xinput2_init(Display* display)
