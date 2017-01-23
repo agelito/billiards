@@ -43,9 +43,6 @@ struct game_state
     shader_program simple_shader;
     shader_program uv_shader;
 
-    shader_uniform_group per_scene_uniforms;
-    shader_uniform_group per_object_uniforms;
-
     render_queue render_queue;
 
     loaded_mesh ground;
