@@ -33,10 +33,10 @@ typedef uint32 bool32;
 #define array_count(array) (sizeof(array) / sizeof(array[0]))
 #define invalid_code *(int*)0 = 0
 
-#include "linux_cpu.c"
 #include "platform.h"
 
 #include "linux_platform.c"
+#include "linux_cpu.c"
 #include "linux_mouse.c"
 #include "linux_mouse_raw.c"
 #include "linux_keyboard.c"
