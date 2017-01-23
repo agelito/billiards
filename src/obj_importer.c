@@ -113,27 +113,24 @@ obj_load_from_file(char* path)
     for_range(n, face_count)
     {
 	int* face = (faces + n * 3);
+	
 	int f0 = *(face + 0) - 1;
 	int f1 = *(face + 2) - 1;
 	int f2 = *(face + 1) - 1;
-	
-	vector3* p0 = (vertices + f0);
-	vector3* p1 = (vertices + f1);
-	vector3* p2 = (vertices + f2);
 
 	vertex* v0 = (result.vertices + vertex_index++);
 	vertex* v1 = (result.vertices + vertex_index++);
 	vertex* v2 = (result.vertices + vertex_index++);
 
-	v0->p = *p0;
+	v0->p = *(vertices + f0);
 	v0->c = (color){1.0f, 1.0f, 1.0f};
 	v0->uv = (vector2){{{0.0f, 0.0f}}};
 	
-	v1->p = *p1;
+	v1->p = *(vertices + f1);
 	v1->c = (color){1.0f, 1.0f, 1.0f};
 	v1->uv = (vector2){{{0.0f, 0.0f}}};
 	
-	v2->p = *p2;
+	v2->p = *(vertices + f2);
 	v2->c = (color){1.0f, 1.0f, 1.0f};
 	v2->uv = (vector2){{{0.0f, 0.0f}}};
     }
