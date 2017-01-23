@@ -1,10 +1,7 @@
 // renderer.c
 
-#include "opengl.h"
 #include "renderer.h"
-#include "racera.h"
-
-#include <stdlib.h>
+#include "mesh.c"
 
 #define glUniformScalar(type, u, c, d) gl->type(u->location, c, (void*)d)
 #define glUniformMatrix(type, u, c, d) gl->type(u->location, c, GL_FALSE, (void*)d)
@@ -164,3 +161,6 @@ renderer_queue_process(render_queue* queue, matrix4 projection, matrix4 view)
 	glDrawArrays(GL_TRIANGLES, 0, mesh->data.vertex_count);
     }
 }
+
+#undef glUniformScalar
+#undef glUniformMatrix

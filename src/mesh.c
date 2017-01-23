@@ -7,6 +7,8 @@
 #include <stdlib.h>
 #include <math.h>
 
+#include "obj_importer.c"
+
 #define create_vertex(x, y, z, color, uv_x, uv_y) (vertex){{{{x, y, z}}}, color, {{{uv_x, uv_y}}}}
 
 loaded_mesh
@@ -340,3 +342,5 @@ mesh_data_free(mesh_data* data)
 	data->vertices = 0;
     }
 }
+
+#undef create_vertex

@@ -1,10 +1,14 @@
 // racera_game.c
 
 #include "platform.h"
+
+#include <stdio.h>
+#include <stdlib.h>
+
 #include "opengl.h"
 #include "racera.h"
 
-#include "renderer.h"
+#include "renderer.c"
 
 static matrix4
 camera_rotation_matrix(fps_camera* camera)
@@ -41,7 +45,14 @@ game_update_and_render(game_state* state)
 				       fragment_source.data, fragment_source.size);
 
 	platform_free_file(&fragment_source);
-	platform_free_file(&vertex_source);				       
+	platform_free_file(&vertex_source);
+
+	vertex_source = platform_read_file("colored.vert", 1);
+	fragment_source = platform_read_file("colored.frag", 1);
+	state->colored_shader = load_shader(gl, vertex_source.data, vertex_source.size,
+					    fragment_source.data, fragment_source.size);
+	platform_free_file(&fragment_source);
+	platform_free_file(&vertex_source);
 
 	state->ground =
 	    load_mesh(gl, mesh_create_plane_xz(100.0f, 100, (color){1.0f, 1.0f, 1.0f}));
@@ -52,6 +63,9 @@ game_update_and_render(game_state* state)
 
 	state->pointer = load_mesh(gl, mesh_create_circle(2.0f, 5));
 	mesh_data_free(&state->pointer.data);
+
+	state->cup = load_mesh(gl, obj_load_from_file("cup.obj"));
+	mesh_data_free(&state->cup.data);
 	
 	state->checker = load_texture(gl, texture_create_checker(128, 128, 64));
 	texture_data_free(&state->checker.data);
@@ -129,7 +143,7 @@ game_update_and_render(game_state* state)
 	    vector3 position = *(state->created_cube_positions + i);
 	    matrix4 transform = matrix_translate(position.x, position.y, position.z);
 	
-	    renderer_queue_push(&state->render_queue, &state->cube, &state->simple_shader, transform);
+	    renderer_queue_push(&state->render_queue, &state->cup, &state->colored_shader, transform);
 	}
 
 	float right = (float)state->screen_width * 0.5f;

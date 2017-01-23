@@ -40,6 +40,7 @@ struct game_state
     int loaded_graphics;
     
     gl_functions gl;
+    shader_program colored_shader;
     shader_program simple_shader;
     shader_program uv_shader;
 
@@ -48,6 +49,7 @@ struct game_state
     loaded_mesh ground;
     loaded_mesh cube;
     loaded_mesh pointer;
+    loaded_mesh cup;
 
     loaded_texture checker;
     loaded_texture smiley;
