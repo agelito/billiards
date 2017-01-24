@@ -77,6 +77,16 @@ game_update_and_render(game_state* state)
 
 	state->camera = (fps_camera){0};
 	state->camera.position = (vector3){{{0.0f, 1.0f, -2.0f}}};
+
+	int n;
+	for_range(n, 100)
+	{
+	    vector3 position = (vector3){{{platform_randomf(-50.0f, 50.0f),
+					   0.0f,
+					   platform_randomf(-50.0f, 50.0f)}}};
+	    
+	    *(state->created_cube_positions + state->created_cube_count++) = position;
+	}
 	
 	state->loaded_graphics = 1;
     }
