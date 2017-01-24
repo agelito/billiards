@@ -68,8 +68,8 @@ renderer_apply_uniforms(gl_functions* gl, shader_program* shader, shader_uniform
 static void
 renderer_bind_mesh_buffers(gl_functions* gl, loaded_mesh* mesh)
 {
-    gl->glBindVertexArray(mesh->vao);
-    gl->glBindBuffer(GL_ARRAY_BUFFER, mesh->vbo);
+    gl->glBindVertexArray(mesh->vertex_array);
+    //gl->glBindBuffer(GL_ARRAY_BUFFER, mesh->vbo);
 }
 
 void

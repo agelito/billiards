@@ -36,7 +36,7 @@ obj_load_from_file(char* path)
     char* begin = (char*)file.data;
     char* at = begin;
 
-    int vertex_count = 0;
+    int position_count = 0;
     int normal_count = 0;
     int face_count = 0;
 
@@ -46,7 +46,7 @@ obj_load_from_file(char* path)
 	{ }
 	else if(match_string("v ", at))
 	{
-	    vertex_count++;
+	    position_count++;
 	}
 	else if(match_string("vn ", at))
 	{
@@ -59,15 +59,19 @@ obj_load_from_file(char* path)
 
 	at = advance_line(at);
     }
-    fprintf(stdout, "%s\n vertex: %d\n normal: %d\n face: %d\n", path,
-	    vertex_count, normal_count, face_count);
+    fprintf(stdout, "%s\n position: %d\n normal: %d\n face: %d\n", path,
+	    position_count, normal_count, face_count);
 
     at = begin;
 
-    vector3* vertices = (vector3*)malloc(sizeof(vector3) * vertex_count);
-    int* faces = (int*)malloc(sizeof(int) * face_count * 3);
+    vector3* positions = (vector3*)malloc(sizeof(vector3) * position_count);
+    vector3* normals = (vector3*)malloc(sizeof(vector3) * normal_count);
+    
+    int* positions_index = (int*)malloc(sizeof(int) * face_count * 3);
+    int* normals_index = (int*)malloc(sizeof(int) * face_count * 3);
 
-    int read_vertex_count = 0;
+    int read_position_count = 0;
+    int read_normal_count = 0;
     int read_face_count = 0;
 
     while(*at)
@@ -76,22 +80,28 @@ obj_load_from_file(char* path)
 	{ }
 	else if(match_string("v ", at))
 	{
-	    vector3* vertex = (vertices + read_vertex_count++);
-	    int v = sscanf(at, "v %f %f %f", &vertex->x, &vertex->y, &vertex->z);
+	    vector3* position = (positions + read_position_count++);
+	    int v = sscanf(at, "v %f %f %f", &position->x, &position->y, &position->z);
+	    assert(v == 3);
+	}
+	else if(match_string("vn ", at))
+	{
+	    vector3* normal = (normals + read_normal_count++);
+	    int v = sscanf(at, "vn %f %f %f", &normal->x, &normal->y, &normal->z);
 	    assert(v == 3);
 	}
 	else if(match_string("f ", at))
 	{
-	    int* face = (faces + read_face_count * 3);
+	    int* pi = (positions_index + read_face_count * 3);
+	    int* ni = (normals_index + read_face_count * 3);
 	    
-	    int v0, v1, v2;
+	    int p0, p1, p2;
 	    int n0, n1, n2;
-	    int v = sscanf(at, "f %d//%d %d//%d %d//%d", &v0, &n0, &v1, &n1, &v2, &n2);
+	    int v = sscanf(at, "f %d//%d %d//%d %d//%d", &p0, &n0, &p1, &n1, &p2, &n2);
 	    assert(v == 6);
 	    
-	    *(face + 0) = v0;
-	    *(face + 1) = v1;
-	    *(face + 2) = v2;
+	    *(pi + 0) = p0; *(pi + 1) = p1; *(pi + 2) = p2;
+	    *(ni + 0) = n0; *(ni + 1) = n1; *(ni + 2) = n2;
 
 	    read_face_count++;
 	}
@@ -99,44 +109,54 @@ obj_load_from_file(char* path)
 	at = advance_line(at);
     }
 
-    assert(vertex_count == read_vertex_count);
+    assert(position_count == read_position_count);
+    assert(normal_count == read_normal_count);
     assert(face_count == read_face_count);
     platform_free_file(&file);
 
-    vertex_count = (face_count * 3);
+    int vertex_count = (face_count * 3);
     result.vertex_count = vertex_count;
-    result.vertices = (vertex*)malloc(sizeof(vertex) * vertex_count);
+    result.vertices.positions = (vector3*)malloc(sizeof(vector3) * vertex_count);
+    result.vertices.normals = (vector3*)malloc(sizeof(vector3) * vertex_count);
 
     int vertex_index = 0;
     
     int n;
     for_range(n, face_count)
     {
-	int* face = (faces + n * 3);
+	int* positions_face = (positions_index + n * 3);
 	
-	int f0 = *(face + 0) - 1;
-	int f1 = *(face + 2) - 1;
-	int f2 = *(face + 1) - 1;
+	int pi0 = *(positions_face + 0) - 1;
+	int pi1 = *(positions_face + 2) - 1;
+	int pi2 = *(positions_face + 1) - 1;
 
-	vertex* v0 = (result.vertices + vertex_index++);
-	vertex* v1 = (result.vertices + vertex_index++);
-	vertex* v2 = (result.vertices + vertex_index++);
+	vector3* p0 = (result.vertices.positions + vertex_index + 0);
+	vector3* p1 = (result.vertices.positions + vertex_index + 1);
+	vector3* p2 = (result.vertices.positions + vertex_index + 2);
 
-	v0->p = *(vertices + f0);
-	v0->c = (color){1.0f, 1.0f, 1.0f};
-	v0->uv = (vector2){{{0.0f, 0.0f}}};
+	*p0 = *(positions + pi0); *p1 = *(positions + pi1); *p2 = *(positions + pi2);
 	
-	v1->p = *(vertices + f1);
-	v1->c = (color){1.0f, 1.0f, 1.0f};
-	v1->uv = (vector2){{{0.0f, 0.0f}}};
+
+	int* normals_face = (normals_index + n * 3);
+
+	int ni0 = *(normals_face + 0) - 1;
+	int ni1 = *(normals_face + 2) - 1;
+	int ni2 = *(normals_face + 1) - 1;
+
+	vector3* n0 = (result.vertices.normals + vertex_index + 0);
+	vector3* n1 = (result.vertices.normals + vertex_index + 1);
+	vector3* n2 = (result.vertices.normals + vertex_index + 2);
 	
-	v2->p = *(vertices + f2);
-	v2->c = (color){1.0f, 1.0f, 1.0f};
-	v2->uv = (vector2){{{0.0f, 0.0f}}};
+	*n0 = *(normals + ni0); *n1 = *(normals + ni1); *n2 = *(normals + ni2);
+	
+	vertex_index += 3;
     }
+
+    free(positions);
+    free(normals);
     
-    free(vertices);
-    free(faces);
+    free(positions_index);
+    free(normals_index);
     
     return result;
 }

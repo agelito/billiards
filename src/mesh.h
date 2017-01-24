@@ -3,6 +3,8 @@
 
 #include "math.h"
 
+#define MESH_MAX_VERTEX_BUFFERS 8
+
 typedef struct
 {
     float r;
@@ -12,21 +14,22 @@ typedef struct
 
 typedef struct
 {
-    vector3 p;
-    color c;
-    vector2 uv;
-} vertex;
+    vector3* positions;
+    vector3* normals;
+    vector2* texcoords;
+    color* colors;
+} vertex_data;
 
 typedef struct
 {
     int vertex_count;
-    vertex* vertices;
+    vertex_data vertices;
 } mesh_data;
 
 typedef struct
 {
-    GLuint vao;
-    GLuint vbo;
+    GLuint vertex_array;
+    GLuint vertex_buffer[MESH_MAX_VERTEX_BUFFERS];
     mesh_data data;
 } loaded_mesh;
 
@@ -34,8 +37,8 @@ loaded_mesh load_mesh(gl_functions* gl, mesh_data data);
 
 mesh_data mesh_create_triangle(float side);
 mesh_data mesh_create_circle(float radius, int subdivisions);
-mesh_data mesh_create_cube(float side, color vertex_color);
-mesh_data mesh_create_plane_xz(float side, int subdivisions, color vertex_color);
+mesh_data mesh_create_cube(float side);
+mesh_data mesh_create_plane_xz(float side, int subdivisions);
 void mesh_data_free(mesh_data* data);
 
 #endif // MESH_H_INCLUDED

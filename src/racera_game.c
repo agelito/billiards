@@ -55,10 +55,10 @@ game_update_and_render(game_state* state)
 	platform_free_file(&vertex_source);
 
 	state->ground =
-	    load_mesh(gl, mesh_create_plane_xz(100.0f, 100, (color){1.0f, 1.0f, 1.0f}));
+	    load_mesh(gl, mesh_create_plane_xz(100.0f, 100));
 	mesh_data_free(&state->ground.data);
     
-	state->cube = load_mesh(gl, mesh_create_cube(1.0f, (color){1.0f, 1.0f, 1.0f}));
+	state->cube = load_mesh(gl, mesh_create_cube(1.0f));
 	mesh_data_free(&state->cube.data);
 
 	state->pointer = load_mesh(gl, mesh_create_circle(2.0f, 5));
