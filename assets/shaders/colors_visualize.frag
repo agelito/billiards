@@ -1,4 +1,4 @@
-// colored.frag
+// colors_visualize.frag
 
 varying vec3 color;
 

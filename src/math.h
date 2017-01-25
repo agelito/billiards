@@ -49,6 +49,7 @@ matrix4 matrix_rotation_y(float rotation);
 matrix4 matrix_rotation_z(float rotation);
 matrix4 matrix_rotation_pitch_yaw(float pitch, float yaw);
 matrix4 matrix_translate(float x, float y, float z);
+matrix4 matrix_scale(float x, float y, float z);
 matrix4 matrix_multiply(matrix4 a, matrix4 b);
 matrix4 matrix_perspective(float field_of_view, float aspect_ratio, float near, float far);
 matrix4 matrix_orthographic(float width, float height, float near, float far);

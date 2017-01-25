@@ -83,16 +83,21 @@ mesh_create_triangle(float side)
     mesh_data data = (mesh_data){0};
     data.vertex_count = 3;
 
-    size_t position_data_size = (data.vertex_count * sizeof(vector3));
-
     float half_side = side * 0.5f;
 
+    size_t position_data_size = (data.vertex_count * sizeof(vector3));
     vector3* positions = (vector3*)malloc(position_data_size);
     *(positions + 0) = (vector3){{{0.0f, half_side, 0.0f}}};
     *(positions + 1) = (vector3){{{-half_side, -half_side, 0.0f}}};
     *(positions + 2) = (vector3){{{half_side, -half_side, 0.0f}}};
-    
     data.vertices.positions = positions;
+    
+    size_t texcoord_data_size = (data.vertex_count * sizeof(vector2));
+    vector2* texcoords = (vector2*)malloc(texcoord_data_size);
+    *(texcoords + 0) = (vector2){{{0.5f, 1.0f}}};
+    *(texcoords + 1) = (vector2){{{0.0f, 0.0f}}};
+    *(texcoords + 2) = (vector2){{{1.0f, 0.0f}}};
+    data.vertices.texcoords = texcoords;
 
     return data;
 }

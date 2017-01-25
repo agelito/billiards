@@ -149,6 +149,20 @@ matrix_translate(float x, float y, float z)
 }
 
 matrix4
+matrix_scale(float x, float y, float z)
+{
+    matrix4 matrix = {{
+	       x, 0.0f, 0.0f, 0.0f,
+	    0.0f,    y, 0.0f, 0.0f,
+	    0.0f, 0.0f,    z, 0.0f,
+	    0.0f, 0.0f, 0.0f, 1.0f
+	}};
+
+    return matrix;
+}
+
+
+matrix4
 matrix_multiply(matrix4 a, matrix4 b)
 {
     matrix4 result = (matrix4){0};

@@ -1,4 +1,4 @@
-// uv_visualize.frag
+// texcoords_visualize.frag
 
 varying vec2 uv;
 

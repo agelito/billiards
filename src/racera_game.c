@@ -30,29 +30,32 @@ game_update_and_render(game_state* state)
 	gl_functions* gl = &state->gl;
 
 	state->render_queue = renderer_queue_create(gl, KB(64));
+
+	{ // NOTE: Load shaders
+	    read_file vertex_source = platform_read_file("shaders/simple.vert", 1);
+	    read_file fragment_source = platform_read_file("shaders/simple.frag", 1);
 	
-	read_file vertex_source = platform_read_file("simple.vert", 1);
-	read_file fragment_source = platform_read_file("simple.frag", 1);
+	    state->simple_shader = load_shader(gl, vertex_source.data, vertex_source.size,
+					       fragment_source.data, fragment_source.size);
+	    platform_free_file(&fragment_source);
 
-	state->simple_shader = load_shader(gl, vertex_source.data, vertex_source.size,
-				    fragment_source.data, fragment_source.size);
+	    fragment_source = platform_read_file("shaders/normals_visualize.frag", 1);
+	    state->visualize_normals = load_shader(gl, vertex_source.data, vertex_source.size,
+						   fragment_source.data, fragment_source.size);
+	    platform_free_file(&fragment_source);
+	
+	    fragment_source = platform_read_file("shaders/colors_visualize.frag", 1);
+	    state->visualize_colors = load_shader(gl, vertex_source.data, vertex_source.size,
+						  fragment_source.data, fragment_source.size);
+	    platform_free_file(&fragment_source);
 
+	    fragment_source = platform_read_file("shaders/texcoords_visualize.frag", 1);
+	    state->visualize_texcoords = load_shader(gl, vertex_source.data, vertex_source.size,
+						     fragment_source.data, fragment_source.size);
 
-	platform_free_file(&fragment_source);
-
-	fragment_source = platform_read_file("uv_visualize.frag", 1);
-	state->uv_shader = load_shader(gl, vertex_source.data, vertex_source.size,
-				       fragment_source.data, fragment_source.size);
-
-	platform_free_file(&fragment_source);
-	platform_free_file(&vertex_source);
-
-	vertex_source = platform_read_file("colored.vert", 1);
-	fragment_source = platform_read_file("colored.frag", 1);
-	state->colored_shader = load_shader(gl, vertex_source.data, vertex_source.size,
-					    fragment_source.data, fragment_source.size);
-	platform_free_file(&fragment_source);
-	platform_free_file(&vertex_source);
+	    platform_free_file(&fragment_source);
+	    platform_free_file(&vertex_source);
+	}
 
 	state->ground =
 	    load_mesh(gl, mesh_create_plane_xz(100.0f, 100));
@@ -60,6 +63,9 @@ game_update_and_render(game_state* state)
     
 	state->cube = load_mesh(gl, mesh_create_cube(1.0f));
 	mesh_data_free(&state->cube.data);
+
+	state->triangle = load_mesh(gl, mesh_create_triangle(1.0f));
+	mesh_data_free(&state->triangle.data);
 
 	state->pointer = load_mesh(gl, mesh_create_circle(2.0f, 5));
 	mesh_data_free(&state->pointer.data);
@@ -153,7 +159,8 @@ game_update_and_render(game_state* state)
 	    vector3 position = *(state->created_cube_positions + i);
 	    matrix4 transform = matrix_translate(position.x, position.y, position.z);
 	
-	    renderer_queue_push(&state->render_queue, &state->cup, &state->colored_shader, transform);
+	    renderer_queue_push(&state->render_queue, &state->cup,
+				&state->visualize_normals, transform);
 	}
 
 	float right = (float)state->screen_width * 0.5f;
@@ -171,8 +178,19 @@ game_update_and_render(game_state* state)
 	matrix4 transform = matrix_identity();
 	renderer_queue_push(&state->render_queue, &state->pointer, &state->simple_shader, transform);
 
+	float half_width = (float)state->screen_width * 0.5f;
+	float half_height = (float)state->screen_height * 0.5f;
+	
+	float triangle_size = 128.0f;
+	matrix4 triangle_translate = matrix_translate(-half_width + triangle_size * 0.5f,
+						      half_height - triangle_size * 0.5f, 0.0f);
+	matrix4 triangle_scale = matrix_scale(triangle_size, triangle_size, 1.0f);
+	renderer_queue_push(&state->render_queue, &state->triangle, &state->visualize_texcoords,
+			    matrix_multiply(triangle_translate, triangle_scale));
+
 	matrix4 projection =
-	    matrix_orthographic((float)state->screen_width, (float)state->screen_height, 1.0f, 100.0f);
+	    matrix_orthographic((float)state->screen_width,
+				(float)state->screen_height, 1.0f, 100.0f);
 
 	vector3 eye = (vector3){{{0.0f, 0.0f, -1.0f}}};
 	vector3 at = (vector3){0};
