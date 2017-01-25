@@ -65,18 +65,90 @@ renderer_apply_uniforms(gl_functions* gl, shader_program* shader, shader_uniform
     }
 }
 
-static void
-renderer_bind_mesh_buffers(gl_functions* gl, loaded_mesh* mesh)
+static input_layout*
+mesh_layout_for_shader(gl_functions* gl, loaded_mesh* mesh, shader_program* shader)
 {
-    gl->glBindVertexArray(mesh->vertex_array);
-    //gl->glBindBuffer(GL_ARRAY_BUFFER, mesh->vbo);
+    input_layout* layout = 0;
+
+    int shader_attributes = 0;
+    int position_location = gl->glGetAttribLocation(shader->program, "in_vertex");
+    int color_location = gl->glGetAttribLocation(shader->program, "in_color");
+    int texcoord_location = gl->glGetAttribLocation(shader->program, "in_uv");
+    int normal_location = gl->glGetAttribLocation(shader->program, "in_normal");
+
+    if(position_location != -1) VA_INCLUDE(shader_attributes, VA_POSITIONS_BIT);
+    if(normal_location != -1)   VA_INCLUDE(shader_attributes, VA_NORMALS_BIT);
+    if(texcoord_location != -1) VA_INCLUDE(shader_attributes, VA_TEXCOORDS_BIT);
+    if(color_location != -1)    VA_INCLUDE(shader_attributes, VA_COLORS_BIT);
+
+    int attribute_mask = (shader_attributes & mesh->attribute_mask);
+    
+    int i;
+    for_range(i, mesh->layout_count)
+    {
+	input_layout* check = (mesh->layouts + i);
+	if(check->attribute_mask == attribute_mask)
+	{
+	    layout = check;
+	    break;
+	}
+    }
+
+    if(!layout)
+    {
+	assert(mesh->layout_count < MESH_MAX_INPUT_LAYOUTS);
+	layout = (mesh->layouts + mesh->layout_count++);
+	layout->attribute_mask = attribute_mask;
+
+	gl->glGenVertexArrays(1, &layout->vertex_array);
+	gl->glBindVertexArray(layout->vertex_array);
+
+	if(VA_ISSET(attribute_mask, VA_POSITIONS_BIT))
+	{
+	    gl->glBindBuffer(GL_ARRAY_BUFFER, *(mesh->vertex_buffer + vertex_attributes_positions));
+	    gl->glEnableVertexAttribArray(position_location);
+	    gl->glVertexAttribPointer(position_location, 3, GL_FLOAT, GL_FALSE, sizeof(vector3), 0);
+	}
+
+	if(VA_ISSET(attribute_mask, VA_NORMALS_BIT))
+	{
+	    gl->glBindBuffer(GL_ARRAY_BUFFER, *(mesh->vertex_buffer + vertex_attributes_normals));
+	    gl->glEnableVertexAttribArray(normal_location);
+	    gl->glVertexAttribPointer(normal_location, 3, GL_FLOAT, GL_FALSE, sizeof(vector3), 0);
+	}
+
+	if(VA_ISSET(attribute_mask, VA_TEXCOORDS_BIT))
+	{
+	    gl->glBindBuffer(GL_ARRAY_BUFFER, *(mesh->vertex_buffer + vertex_attributes_texcoords));
+	    gl->glEnableVertexAttribArray(texcoord_location);
+	    gl->glVertexAttribPointer(texcoord_location, 2, GL_FLOAT, GL_FALSE, sizeof(vector2), 0);
+	}
+
+	if(VA_ISSET(attribute_mask, VA_COLORS_BIT))
+	{
+	    gl->glBindBuffer(GL_ARRAY_BUFFER, *(mesh->vertex_buffer + vertex_attributes_colors));
+	    gl->glEnableVertexAttribArray(color_location);
+	    gl->glVertexAttribPointer(color_location, 3, GL_FLOAT, GL_FALSE, sizeof(color), 0);
+	}
+    }
+
+    return layout;
+}
+
+static void
+renderer_bind_mesh_buffers(gl_functions* gl, loaded_mesh* mesh, shader_program* shader)
+{
+    input_layout* layout = mesh_layout_for_shader(gl, mesh, shader);
+    if(layout)
+    {
+	gl->glBindVertexArray(layout->vertex_array);
+    }
 }
 
 void
-renderer_draw_mesh(gl_functions* gl, loaded_mesh* mesh)
+renderer_draw_mesh(gl_functions* gl, loaded_mesh* mesh, shader_program* shader)
 {
-    renderer_bind_mesh_buffers(gl, mesh);
-
+    renderer_bind_mesh_buffers(gl, mesh, shader);
     glDrawArrays(GL_TRIANGLES, 0, mesh->data.vertex_count);
 }
 
@@ -149,7 +221,7 @@ renderer_queue_process(render_queue* queue, matrix4 projection, matrix4 view)
 	loaded_mesh* mesh = item->mesh;
 	if(mesh != bound_mesh)
 	{
-	    renderer_bind_mesh_buffers(gl, mesh);
+	    renderer_bind_mesh_buffers(gl, mesh, shader);
 	    bound_mesh = mesh;
 	}
 

@@ -79,7 +79,7 @@ game_update_and_render(game_state* state)
 	state->camera.position = (vector3){{{0.0f, 1.0f, -2.0f}}};
 
 	int n;
-	for_range(n, 100)
+	for_range(n, 50)
 	{
 	    vector3 position = (vector3){{{platform_randomf(-50.0f, 50.0f),
 					   0.0f,

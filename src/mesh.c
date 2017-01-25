@@ -18,84 +18,61 @@ load_mesh(gl_functions* gl, mesh_data data)
     mesh.data = data;
     
     GLuint* vertex_buffer = 0;
-    int vertex_buffer_index = 0;
     size_t vertex_buffer_size = 0;
-
-    // TODO: Vertex attribute bind point hardcoded.
-    
-    gl->glGenVertexArrays(1, &mesh.vertex_array);
-    gl->glBindVertexArray(mesh.vertex_array);
     
     if(data.vertices.positions)
     {
-	vertex_buffer = (mesh.vertex_buffer + vertex_buffer_index);
+	vertex_buffer = (mesh.vertex_buffer + vertex_attributes_positions);
 	gl->glGenBuffers(1, vertex_buffer);
 	gl->glBindBuffer(GL_ARRAY_BUFFER, *vertex_buffer);
 	
-	gl->glEnableVertexAttribArray(0);
-	gl->glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vector3), NULL);
-
 	vertex_buffer_size = (sizeof(vector3) * data.vertex_count);
-	
 	gl->glBufferData(GL_ARRAY_BUFFER, vertex_buffer_size,
 		      data.vertices.positions, GL_STATIC_DRAW);
 
-	vertex_buffer_index++;
+	VA_INCLUDE(mesh.attribute_mask, VA_POSITIONS_BIT);
     }
 
     if(data.vertices.normals)
     {
-	vertex_buffer = (mesh.vertex_buffer + vertex_buffer_index);
+	vertex_buffer = (mesh.vertex_buffer + vertex_attributes_normals);
 	gl->glGenBuffers(1, vertex_buffer);
 	gl->glBindBuffer(GL_ARRAY_BUFFER, *vertex_buffer);
 
-	gl->glEnableVertexAttribArray(1);
-	gl->glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(vector3), NULL);
-
 	vertex_buffer_size = (sizeof(vector3) * data.vertex_count);
-
 	gl->glBufferData(GL_ARRAY_BUFFER, vertex_buffer_size,
 			  data.vertices.normals, GL_STATIC_DRAW);
 
-	vertex_buffer_index++;
+	VA_INCLUDE(mesh.attribute_mask, VA_NORMALS_BIT);
     }
 
     if(data.vertices.texcoords)
     {
-	vertex_buffer = (mesh.vertex_buffer + vertex_buffer_index);
+	vertex_buffer = (mesh.vertex_buffer + vertex_attributes_texcoords);
 	gl->glGenBuffers(1, vertex_buffer);
 	gl->glBindBuffer(GL_ARRAY_BUFFER, *vertex_buffer);
 
-	gl->glEnableVertexAttribArray(2);
-	gl->glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(vector2), NULL);
-
 	vertex_buffer_size = (sizeof(vector2) * data.vertex_count);
-
 	gl->glBufferData(GL_ARRAY_BUFFER, vertex_buffer_size,
 			  data.vertices.texcoords, GL_STATIC_DRAW);
-
-	vertex_buffer_index++;
+	
+	VA_INCLUDE(mesh.attribute_mask, VA_TEXCOORDS_BIT);
     }
 
     if(data.vertices.colors)
     {
-	vertex_buffer = (mesh.vertex_buffer + vertex_buffer_index);
+	vertex_buffer = (mesh.vertex_buffer + vertex_attributes_colors);
 	gl->glGenBuffers(1, vertex_buffer);
 	gl->glBindBuffer(GL_ARRAY_BUFFER, *vertex_buffer);
 
-	gl->glEnableVertexAttribArray(3);
-	gl->glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(color), NULL);
-
 	vertex_buffer_size = (sizeof(color) * data.vertex_count);
-
 	gl->glBufferData(GL_ARRAY_BUFFER, vertex_buffer_size,
 			  data.vertices.colors, GL_STATIC_DRAW);
 
-	vertex_buffer_index++;
+	VA_INCLUDE(mesh.attribute_mask, VA_COLORS_BIT);
     }
 
     gl->glBindBuffer(GL_ARRAY_BUFFER, 0);
-    gl->glBindVertexArray(0);
 
     return mesh;
 }

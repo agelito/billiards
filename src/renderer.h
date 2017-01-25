@@ -32,7 +32,7 @@ void
 renderer_apply_uniforms(gl_functions* gl, shader_program* shader, shader_uniform_group* group);
 
 void
-renderer_draw_mesh(gl_functions* gl, loaded_mesh* mesh);
+renderer_draw_mesh(gl_functions* gl, loaded_mesh* mesh, shader_program* shader);
 
 render_queue
 renderer_queue_create(gl_functions* gl, int capacity);

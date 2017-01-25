@@ -79,6 +79,7 @@ load_shader(gl_functions* gl, unsigned char* vertex_source, int vertex_source_le
         print_program_error(gl, shader.program);
     }
 
+    shader.source_hash = hash_string((char*)fragment_source);
     shader.info = shader_reflect(gl, &shader);
 
     return shader;

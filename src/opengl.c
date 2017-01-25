@@ -42,6 +42,7 @@ gl_functions load_gl_functions()
     
     gl.glGetUniformLocation = GL_PROC_ADDR(glGetUniformLocation);
     gl.glGetActiveUniform = GL_PROC_ADDR(glGetActiveUniform);
+    gl.glGetAttribLocation = GL_PROC_ADDR(glGetAttribLocation);
 
     gl.glUniformMatrix2fv = GL_PROC_ADDR(glUniformMatrix2fv);
     gl.glUniformMatrix3fv = GL_PROC_ADDR(glUniformMatrix3fv);

@@ -28,6 +28,7 @@ GL_PROC_DEC(glGetProgramInfoLog, GLuint program, GLsizei maxLength, GLsizei* len
 GL_PROC_DEC(glUseProgram, GLuint program);
 GL_PROC_DEC_RET(glGetUniformLocation, GLint, GLuint program, const GLchar* name);
 GL_PROC_DEC(glGetActiveUniform, GLuint program, GLuint index, GLsizei buffSize, GLsizei* length, GLint* size, GLenum* type, GLchar* name);
+GL_PROC_DEC_RET(glGetAttribLocation, GLint, GLuint program, const GLchar* name);
 
 GL_PROC_DEC(glUniformMatrix2fv, GLint location, GLsizei count, GLboolean transpose, const GLfloat* value);
 GL_PROC_DEC(glUniformMatrix3fv, GLint location, GLsizei count, GLboolean transpose, const GLfloat* value);
@@ -66,6 +67,7 @@ typedef struct
     GL_PROC_DEF(glUseProgram);
     GL_PROC_DEF(glGetUniformLocation);
     GL_PROC_DEF(glGetActiveUniform);
+    GL_PROC_DEF(glGetAttribLocation);
 
     GL_PROC_DEF(glUniformMatrix2fv);
     GL_PROC_DEF(glUniformMatrix3fv);

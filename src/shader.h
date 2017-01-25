@@ -44,6 +44,7 @@ struct shader_reflection
 
 typedef struct
 {
+    int source_hash;
     GLuint vertex;
     GLuint fragment;
     GLuint program;
