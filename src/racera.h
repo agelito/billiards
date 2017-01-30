@@ -30,7 +30,7 @@ struct game_state
     int screen_width;
     int screen_height;
     
-    int loaded_graphics;
+    int initialized;
     
     gl_functions gl;
     shader_program simple_shader;
