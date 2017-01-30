@@ -50,8 +50,7 @@ struct game_state
     loaded_texture smiley;
 
     vector3 camera_position;
-    float camera_pitch;
-    float camera_yaw;
+    vector3 camera_pitch_yaw_roll;
     vector3 camera_forward;
     
     int created_cube_count;

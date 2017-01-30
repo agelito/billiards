@@ -73,10 +73,12 @@ game_initialize(game_state* state)
 static void
 camera_controls(game_state* state)
 {
-    state->camera_yaw -= (float)state->mouse.relative_x * 0.5f;
-    state->camera_pitch -= (float)state->mouse.relative_y * 0.5f;
-    if(state->camera_pitch < -90.0f) state->camera_pitch = -90.0f;
-    if(state->camera_pitch > 90.0f) state->camera_pitch = 90.0f;
+    vector3 pitch_yaw_roll = state->camera_pitch_yaw_roll;
+    pitch_yaw_roll.y -= (float)state->mouse.relative_x * 0.5f;
+    pitch_yaw_roll.x -= (float)state->mouse.relative_y * 0.5f;
+    if(pitch_yaw_roll.x < -90.0f) pitch_yaw_roll.x = -90.0f;
+    if(pitch_yaw_roll.x > 90.0f) pitch_yaw_roll.x = 90.0f;
+    state->camera_pitch_yaw_roll = pitch_yaw_roll;
 	
     vector3 camera_movement = (vector3){0};
     if(keyboard_is_down(&state->keyboard, VKEY_W))
@@ -99,7 +101,7 @@ camera_controls(game_state* state)
 	camera_movement.x += 0.1f;
     }
 
-    matrix4 camera_rotation = matrix_rotation_pitch_yaw(state->camera_pitch, state->camera_yaw);
+    matrix4 camera_rotation = matrix_rotation_pitch_yaw(pitch_yaw_roll.x, pitch_yaw_roll.y);
     camera_movement = vector3_matrix_multiply(camera_rotation, camera_movement);
     state->camera_position = vector3_add(state->camera_position, camera_movement);
 
@@ -154,7 +156,8 @@ game_update_and_render(game_state* state)
 	float top = (float)state->screen_height * 0.5f;
 	matrix4 projection = matrix_perspective(80.0f, right / top, 0.01f, 100.0f);
 
-	matrix4 view = matrix_look_fps(state->camera_position, state->camera_pitch, state->camera_yaw);
+	matrix4 view = matrix_look_fps(state->camera_position, state->camera_pitch_yaw_roll.x,
+				       state->camera_pitch_yaw_roll.y);
 
 	renderer_queue_process(&state->render_queue, projection, view);
 	renderer_queue_clear(&state->render_queue);
