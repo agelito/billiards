@@ -1,5 +1,6 @@
 // math.c
 
+#include "racera.h"
 #include "math.h"
 
 #include <math.h>
@@ -303,4 +304,25 @@ hash_string(char* input)
 
     return hash;
     
+}
+
+unsigned int
+hash_string_array(char** input_array, unsigned int count)
+{
+    static unsigned int prime = 16777619;
+    unsigned int hash = 2166136261;
+
+    unsigned int n;
+    for_range(n, count)
+    {
+	char* input = *(input_array + n);
+	char octet;
+	while((octet = *input++))
+	{
+	    hash ^= octet;
+	    hash *= prime;
+	}
+    }
+
+    return hash;
 }

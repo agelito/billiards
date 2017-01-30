@@ -24,29 +24,11 @@ game_update_and_render(game_state* state)
 	state->render_queue = renderer_queue_create(gl, KB(64));
 
 	{ // NOTE: Load shaders
-	    read_file vertex_source = platform_read_file("shaders/simple.vert", 1);
-	    read_file fragment_source = platform_read_file("shaders/simple.frag", 1);
-	
-	    state->simple_shader = load_shader(gl, vertex_source.data, vertex_source.size,
-					       fragment_source.data, fragment_source.size);
-	    platform_free_file(&fragment_source);
-
-	    fragment_source = platform_read_file("shaders/normals_visualize.frag", 1);
-	    state->visualize_normals = load_shader(gl, vertex_source.data, vertex_source.size,
-						   fragment_source.data, fragment_source.size);
-	    platform_free_file(&fragment_source);
-	
-	    fragment_source = platform_read_file("shaders/colors_visualize.frag", 1);
-	    state->visualize_colors = load_shader(gl, vertex_source.data, vertex_source.size,
-						  fragment_source.data, fragment_source.size);
-	    platform_free_file(&fragment_source);
-
-	    fragment_source = platform_read_file("shaders/texcoords_visualize.frag", 1);
-	    state->visualize_texcoords = load_shader(gl, vertex_source.data, vertex_source.size,
-						     fragment_source.data, fragment_source.size);
-
-	    platform_free_file(&fragment_source);
-	    platform_free_file(&vertex_source);
+	    char* vertex_shader = "shaders/simple.vert";
+	    state->simple_shader       = load_shader(gl, vertex_shader, "shaders/simple.frag");
+	    state->visualize_normals   = load_shader(gl, vertex_shader, "shaders/normals_visualize.frag");
+	    state->visualize_colors    = load_shader(gl, vertex_shader, "shaders/colors_visualize.frag");
+	    state->visualize_texcoords = load_shader(gl, vertex_shader, "shaders/texcoords_visualize.frag");
 	}
 
 	state->ground =

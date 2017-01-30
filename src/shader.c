@@ -37,16 +37,26 @@ print_program_error(gl_functions* gl, GLuint program)
 }
 
 shader_program
-load_shader(gl_functions* gl, unsigned char* vertex_source, int vertex_source_length,
-	    unsigned char* fragment_source, int fragment_source_length)
+load_shader(gl_functions* gl, char* vertex_path, char* fragment_path)
 {
     shader_program shader;
+
+    read_file vertex_source = platform_read_file(vertex_path, 1);
+    read_file fragment_source = platform_read_file(fragment_path, 1);
 
     shader.vertex = gl->glCreateShader(GL_VERTEX_SHADER);
     shader.fragment = gl->glCreateShader(GL_FRAGMENT_SHADER);
 
-    gl->glShaderSource(shader.vertex, 1, (const GLchar**)&vertex_source, &vertex_source_length);
-    gl->glShaderSource(shader.fragment, 1, (const GLchar**)&fragment_source, &fragment_source_length);
+    gl->glShaderSource(shader.vertex, 1, (const GLchar**)&vertex_source.data,
+		       (const GLint*)&vertex_source.size);
+    gl->glShaderSource(shader.fragment, 1, (const GLchar**)&fragment_source.data,
+		       (const GLint*)&fragment_source.size);
+
+    char* source_array[] = { (char*)vertex_source.data, (char*)fragment_source.data };
+    shader.source_hash = hash_string_array(source_array, 2);
+    
+    platform_free_file(&fragment_source);
+    platform_free_file(&vertex_source);
 
     int successful_compile = 0;
     
@@ -79,7 +89,6 @@ load_shader(gl_functions* gl, unsigned char* vertex_source, int vertex_source_le
         print_program_error(gl, shader.program);
     }
 
-    shader.source_hash = hash_string((char*)fragment_source);
     shader.info = shader_reflect(gl, &shader);
 
     return shader;
