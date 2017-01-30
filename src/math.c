@@ -141,7 +141,7 @@ matrix_rotation_pitch_yaw(float pitch, float yaw)
 {
     matrix4 axis_x = matrix_rotation_x(pitch);
     matrix4 axis_y = matrix_rotation_y(yaw);
-    return matrix_multiply(axis_x, axis_y);
+    return matrix_multiply(axis_y, axis_x);
 }
 
 matrix4
