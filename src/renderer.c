@@ -1,7 +1,10 @@
 // renderer.c
 
 #include "renderer.h"
+
 #include "mesh.c"
+#include "shader.c"
+#include "texture.c"
 
 #define glUniformScalar(type, u, c, d) gl->type(u->location, c, (void*)d)
 #define glUniformMatrix(type, u, c, d) gl->type(u->location, c, GL_FALSE, (void*)d)

@@ -1,9 +1,6 @@
 // math.c
 
-#include "racera.h"
 #include "math.h"
-
-#include <math.h>
 
 float
 vector3_magnitude(vector3 input)

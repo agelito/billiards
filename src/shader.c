@@ -1,13 +1,6 @@
 // shader.c
 
-#include "platform.h"
-#include "opengl.h"
 #include "shader.h"
-
-#include "math.h"
-
-#include <stdio.h>
-#include <stdlib.h>
 
 #define UNIFORM_BLOCK_CAPACITY 32
 

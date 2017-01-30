@@ -3,7 +3,7 @@
 CFLAGS="-std=c99 -Wall -Wextra -g"
 LDLIBS="-lGL -lm -lX11 -lXi"
 
-SRC_FILES="src/linux_main.c src/opengl.c src/keyboard.c src/mouse.c src/texture.c src/shader.c src/math.c src/racera_game.c"
+SRC_FILES="src/linux_main.c src/racera_game.c src/opengl.c"
 
 OUTPUT_FILE=racera
 

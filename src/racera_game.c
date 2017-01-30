@@ -4,14 +4,16 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
 #include "opengl.h"
 #include "racera.h"
 
+#include "math.c"
 #include "renderer.c"
 
-
-#include <stdio.h>
+#include "keyboard.c"
+#include "mouse.c"
 
 void
 game_update_and_render(game_state* state)

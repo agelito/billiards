@@ -1,11 +1,6 @@
 // texture.c
 
-#include "opengl.h"
 #include "texture.h"				
-#include "racera.h"
-#include "platform.h"
-
-#include <stdlib.h>
 
 #include "tga_loader.c"
 
