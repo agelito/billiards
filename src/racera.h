@@ -52,6 +52,7 @@ struct game_state
     vector3 camera_position;
     float camera_pitch;
     float camera_yaw;
+    vector3 camera_forward;
     
     int created_cube_count;
     vector3 created_cube_positions[MAX_CUBES];

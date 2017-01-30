@@ -70,19 +70,9 @@ game_initialize(game_state* state)
     state->initialized = 1;
 }
 
-void
-game_update_and_render(game_state* state)
+static void
+camera_controls(game_state* state)
 {
-    if(!state->initialized)
-    {
-	game_initialize(state);
-    }
-
-    if(keyboard_is_pressed(&state->keyboard, VKEY_ESCAPE))
-    {
-	state->should_quit = 1;
-    }
-
     state->camera_yaw -= (float)state->mouse.relative_x * 0.5f;
     state->camera_pitch -= (float)state->mouse.relative_y * 0.5f;
     if(state->camera_pitch < -90.0f) state->camera_pitch = -90.0f;
@@ -114,9 +104,25 @@ game_update_and_render(game_state* state)
     state->camera_position = vector3_add(state->camera_position, camera_movement);
 
     vector3 camera_forward = (vector3){{{0.0f, 0.0f, 3.0f}}};
-    camera_forward = vector3_matrix_multiply(camera_rotation, camera_forward);
+    state->camera_forward = vector3_matrix_multiply(camera_rotation, camera_forward);
+}
 
-    vector3 pointer_location = vector3_add(state->camera_position, camera_forward);
+void
+game_update_and_render(game_state* state)
+{
+    if(!state->initialized)
+    {
+	game_initialize(state);
+    }
+
+    if(keyboard_is_pressed(&state->keyboard, VKEY_ESCAPE))
+    {
+	state->should_quit = 1;
+    }
+
+    camera_controls(state);
+
+    vector3 pointer_location = vector3_add(state->camera_position, state->camera_forward);
     if(keyboard_is_pressed(&state->keyboard, VKEY_Q) && state->created_cube_count < MAX_CUBES)
     {
 	*(state->created_cube_positions + state->created_cube_count++) = pointer_location;
