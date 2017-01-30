@@ -18,13 +18,6 @@
 
 #define MAX_CUBES 2048
 
-typedef struct
-{
-    vector3 position;
-    float yaw;
-    float pitch;
-} fps_camera;
-
 typedef struct game_state game_state;
 
 struct game_state
@@ -56,10 +49,15 @@ struct game_state
     loaded_texture checker;
     loaded_texture smiley;
 
-    fps_camera camera;
+    vector3 camera_position;
+    float camera_pitch;
+    float camera_yaw;
     
     int created_cube_count;
     vector3 created_cube_positions[MAX_CUBES];
 };
+
+void
+game_update_and_render(struct game_state* state);
 
 #endif // RACERA_H_INCLUDED

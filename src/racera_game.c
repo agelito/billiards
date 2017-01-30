@@ -10,14 +10,6 @@
 
 #include "renderer.c"
 
-static matrix4
-camera_rotation_matrix(fps_camera* camera)
-{
-    matrix4 rotate_yaw = matrix_rotation_y(camera->yaw);
-    matrix4 rotate_pitch = matrix_rotation_x(camera->pitch);
-    matrix4 camera_rotation = matrix_multiply(rotate_yaw, rotate_pitch);
-    return camera_rotation;
-}
 
 #include <stdio.h>
 
@@ -81,8 +73,7 @@ game_update_and_render(game_state* state)
 
 	glBindTexture(GL_TEXTURE_2D, state->smiley.handle);
 
-	state->camera = (fps_camera){0};
-	state->camera.position = (vector3){{{0.0f, 1.0f, -2.0f}}};
+	state->camera_position = (vector3){{{0.0f, 1.0f, -2.0f}}};
 
 	int n;
 	for_range(n, 50)
@@ -102,10 +93,10 @@ game_update_and_render(game_state* state)
 	state->should_quit = 1;
     }
 
-    state->camera.yaw -= (float)state->mouse.relative_x * 0.5f;
-    state->camera.pitch -= (float)state->mouse.relative_y * 0.5f;
-    if(state->camera.pitch < -90.0f) state->camera.pitch = -90.0f;
-    if(state->camera.pitch > 90.0f) state->camera.pitch = 90.0f;
+    state->camera_yaw -= (float)state->mouse.relative_x * 0.5f;
+    state->camera_pitch -= (float)state->mouse.relative_y * 0.5f;
+    if(state->camera_pitch < -90.0f) state->camera_pitch = -90.0f;
+    if(state->camera_pitch > 90.0f) state->camera_pitch = 90.0f;
 	
     vector3 camera_movement = (vector3){0};
     if(keyboard_is_down(&state->keyboard, VKEY_W))
@@ -128,14 +119,14 @@ game_update_and_render(game_state* state)
 	camera_movement.x += 0.1f;
     }
 
-    matrix4 camera_rotation = camera_rotation_matrix(&state->camera);
+    matrix4 camera_rotation = matrix_rotation_pitch_yaw(state->camera_pitch, state->camera_yaw);
     camera_movement = vector3_matrix_multiply(camera_rotation, camera_movement);
-    state->camera.position = vector3_add(state->camera.position, camera_movement);
+    state->camera_position = vector3_add(state->camera_position, camera_movement);
 
     vector3 camera_forward = (vector3){{{0.0f, 0.0f, 3.0f}}};
     camera_forward = vector3_matrix_multiply(camera_rotation, camera_forward);
 
-    vector3 pointer_location = vector3_add(state->camera.position, camera_forward);
+    vector3 pointer_location = vector3_add(state->camera_position, camera_forward);
     if(keyboard_is_pressed(&state->keyboard, VKEY_Q) && state->created_cube_count < MAX_CUBES)
     {
 	*(state->created_cube_positions + state->created_cube_count++) = pointer_location;
@@ -167,8 +158,7 @@ game_update_and_render(game_state* state)
 	float top = (float)state->screen_height * 0.5f;
 	matrix4 projection = matrix_perspective(80.0f, right / top, 0.01f, 100.0f);
 
-	fps_camera* camera = &state->camera;
-	matrix4 view = matrix_look_fps(camera->position, camera->pitch, camera->yaw);
+	matrix4 view = matrix_look_fps(state->camera_position, state->camera_pitch, state->camera_yaw);
 
 	renderer_queue_process(&state->render_queue, projection, view);
 	renderer_queue_clear(&state->render_queue);

@@ -44,9 +44,6 @@ typedef uint32 bool32;
 
 #include "racera.h"
 
-extern void
-game_update_and_render(struct game_state* state);
-
 int main(int argc, char* argv[])
 {
     unused_arg(argc);

@@ -136,6 +136,14 @@ matrix_rotation_z(float rotation)
 }
 
 matrix4
+matrix_rotation_pitch_yaw(float pitch, float yaw)
+{
+    matrix4 axis_x = matrix_rotation_x(pitch);
+    matrix4 axis_y = matrix_rotation_y(yaw);
+    return matrix_multiply(axis_x, axis_y);
+}
+
+matrix4
 matrix_translate(float x, float y, float z)
 {
     matrix4 matrix = {{
