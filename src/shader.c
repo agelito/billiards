@@ -47,10 +47,8 @@ load_shader(gl_functions* gl, char* vertex_path, char* fragment_path)
     shader.vertex = gl->glCreateShader(GL_VERTEX_SHADER);
     shader.fragment = gl->glCreateShader(GL_FRAGMENT_SHADER);
 
-    gl->glShaderSource(shader.vertex, 1, (const GLchar**)&vertex_source.data,
-		       (const GLint*)&vertex_source.size);
-    gl->glShaderSource(shader.fragment, 1, (const GLchar**)&fragment_source.data,
-		       (const GLint*)&fragment_source.size);
+    gl->glShaderSource(shader.vertex, 1, (const GLchar**)&vertex_source.data, 0);
+    gl->glShaderSource(shader.fragment, 1, (const GLchar**)&fragment_source.data, 0);
 
     char* source_array[] = { (char*)vertex_source.data, (char*)fragment_source.data };
     shader.source_hash = hash_string_array(source_array, 2);
