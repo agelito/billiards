@@ -42,7 +42,7 @@ game_initialize(game_state* state)
     state->triangle = load_mesh(gl, mesh_create_triangle(1.0f));
     mesh_data_free(&state->triangle.data);
 
-    state->pointer = load_mesh(gl, mesh_create_circle(2.0f, 5));
+    state->pointer = load_mesh(gl, mesh_create_circle(1.0f, 5));
     mesh_data_free(&state->pointer.data);
 
     state->cup = load_mesh(gl, obj_load_from_file("cup.obj"));
@@ -165,8 +165,8 @@ game_update_and_render(game_state* state)
     }
 
     { // NOTE: Draw UI
-	matrix4 transform = matrix_identity();
-	renderer_queue_push(&state->render_queue, &state->pointer, 0,
+	matrix4 transform = matrix_scale(4.0f, 4.0f, 1.0f);
+	renderer_queue_push(&state->render_queue, &state->pointer, &state->checker,
 			    &state->textured, transform);
 
 	float half_width = (float)state->screen_width * 0.5f;

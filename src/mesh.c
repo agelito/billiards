@@ -114,6 +114,10 @@ mesh_create_circle(float radius, int subdivisions)
     vector3* positions = (vector3*)malloc(position_data_size);
     data.vertices.positions = positions;
 
+    size_t texcoord_data_size = (sizeof(vector2) * data.vertex_count);
+    vector2* texcoords = (vector2*)malloc(texcoord_data_size);
+    data.vertices.texcoords = texcoords;
+
     vector3 center = (vector3){{{0.0f, 0.0f, 0.0f}}};
 
     float segment_step = MATH_PIOVER2 / subdivisions;
@@ -128,36 +132,64 @@ mesh_create_circle(float radius, int subdivisions)
 	float circle_y2 = sin((segment + 1) * segment_step) * radius;
 
 	// side 0
-	vector3 segment0_0 = (vector3){{{circle_x1, circle_y1, 0.0f}}};
-	vector3 segment1_0 = (vector3){{{circle_x2, circle_y2, 0.0f}}};
+	vector3 segment0_0 = vector3_create(circle_x1, circle_y1, 0.0f);
+	vector3 segment1_0 = vector3_create(circle_x2, circle_y2, 0.0f);
 
-	*(positions + vertex_index++) = center;
-	*(positions + vertex_index++) = segment0_0;
-	*(positions + vertex_index++) = segment1_0;
+	*(positions + vertex_index+0) = center;
+	*(positions + vertex_index+1) = segment0_0;
+	*(positions + vertex_index+2) = segment1_0;
+
+	*(texcoords + vertex_index+0) = vector2_create(0.5f, 0.5f);
+	*(texcoords + vertex_index+1) =
+	    vector2_scale(vector2_create(1.0f + circle_x1, 1.0f + circle_y1), 0.5f);
+	*(texcoords + vertex_index+2) =
+	    vector2_scale(vector2_create(1.0f + circle_x2, 1.0f + circle_y2), 0.5f);
+	vertex_index += 3;
 
 	// side 1
-	vector3 segment0_1 = (vector3){{{circle_x1, -circle_y1, 0.0f}}};
-	vector3 segment1_1 = (vector3){{{circle_x2, -circle_y2, 0.0f}}};
+	vector3 segment0_1 = vector3_create(circle_x1, -circle_y1, 0.0f);
+	vector3 segment1_1 = vector3_create(circle_x2, -circle_y2, 0.0f);
 	
-	*(positions + vertex_index++) = center;
-	*(positions + vertex_index++) = segment1_1;
-	*(positions + vertex_index++) = segment0_1;
+	*(positions + vertex_index+0) = center;
+	*(positions + vertex_index+1) = segment1_1;
+	*(positions + vertex_index+2) = segment0_1;
+
+	*(texcoords + vertex_index+0) = vector2_create(0.5f, 0.5f);
+	*(texcoords + vertex_index+2) =
+	    vector2_scale(vector2_create(1.0f + circle_x1, 1.0f + -circle_y1), 0.5f);
+	*(texcoords + vertex_index+1) =
+	    vector2_scale(vector2_create(1.0f + circle_x2, 1.0f + -circle_y2), 0.5f);
+	vertex_index += 3;
 
 	// side 2
-	vector3 segment0_2 = (vector3){{{-circle_x1, circle_y1, 0.0f}}};
-	vector3 segment1_2 = (vector3){{{-circle_x2, circle_y2, 0.0f}}};
+	vector3 segment0_2 = vector3_create(-circle_x1, circle_y1, 0.0f);
+	vector3 segment1_2 = vector3_create(-circle_x2, circle_y2, 0.0f);
 
-	*(positions + vertex_index++) = center;
-	*(positions + vertex_index++) = segment1_2;
-	*(positions + vertex_index++) = segment0_2;
+	*(positions + vertex_index+0) = center;
+	*(positions + vertex_index+1) = segment1_2;
+	*(positions + vertex_index+2) = segment0_2;
+
+	*(texcoords + vertex_index+0) = vector2_create(0.5f, 0.5f);
+	*(texcoords + vertex_index+2) =
+	    vector2_scale(vector2_create(1.0f + -circle_x1, 1.0f + circle_y1), 0.5f);
+	*(texcoords + vertex_index+1) =
+	    vector2_scale(vector2_create(1.0f + -circle_x2, 1.0f + circle_y2), 0.5f);
+	vertex_index += 3;
 
 	// side 3
-	vector3 segment0_3 = (vector3){{{-circle_x1, -circle_y1, 0.0f}}};
-	vector3 segment1_3 = (vector3){{{-circle_x2, -circle_y2, 0.0f}}};
+	vector3 segment0_3 = vector3_create(-circle_x1, -circle_y1, 0.0f);
+	vector3 segment1_3 = vector3_create(-circle_x2, -circle_y2, 0.0f);
 
-	*(positions + vertex_index++) = center;
-	*(positions + vertex_index++) = segment0_3;
-	*(positions + vertex_index++) = segment1_3;
+	*(positions + vertex_index+0) = center;
+	*(positions + vertex_index+1) = segment0_3;
+	*(positions + vertex_index+2) = segment1_3;
+
+	*(texcoords + vertex_index+0) = vector2_create(0.5f, 0.5f);
+	*(texcoords + vertex_index+1) =
+	    vector2_scale(vector2_create(1.0f + -circle_x1, 1.0f + -circle_y1), 0.5f);
+	*(texcoords + vertex_index+2) =
+	    vector2_scale(vector2_create(1.0f + -circle_x2, 1.0f + -circle_y2), 0.5f);
+	vertex_index += 3;
     }
 
     return data;

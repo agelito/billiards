@@ -2,12 +2,40 @@
 
 #include "math.h"
 
+vector2
+vector2_create(float x, float y)
+{
+    vector2 result;
+    result.x = x;
+    result.y = y;
+    return result;
+}
+
+vector2
+vector2_scale(vector2 a, float s)
+{
+    vector2 result;
+    result.x = a.x * s;
+    result.y = a.y * s;
+    return result;
+}
+
 float
 vector3_magnitude(vector3 input)
 {
     return sqrt(input.x * input.x +
 		input.y * input.y +
 		input.z * input.z);
+}
+
+vector3
+vector3_create(float x, float y, float z)
+{
+    vector3 result;
+    result.x = x;
+    result.y = y;
+    result.z = z;
+    return result;
 }
 
 vector3
@@ -52,6 +80,16 @@ vector3_cross(vector3 a, vector3 b)
     result.x = a.y * b.z - a.z * b.y;
     result.y = a.z * b.x - a.x * b.z;
     result.z = a.y * b.x - a.x * b.y;
+    return result;
+}
+
+vector3
+vector3_scale(vector3 a, float s)
+{
+    vector3 result;
+    result.x = a.x * s;
+    result.y = a.y * s;
+    result.z = a.z * s;
     return result;
 }
 
