@@ -206,13 +206,24 @@ mesh_create_cube(float side)
     size_t position_data_size = (sizeof(vector3) * data.vertex_count);
     vector3* positions = (vector3*)malloc(position_data_size);
     data.vertices.positions = positions;
+
+    size_t texcoord_data_size = (sizeof(vector2) * data.vertex_count);
+    vector2* texcoords = (vector2*)malloc(texcoord_data_size);
+    data.vertices.texcoords = texcoords;
     
     memset(positions, 0, position_data_size);
 
     int vertex_index = 0;
     float half_side = side * 0.5f;
-    
-    vector3 side_right[4] = {
+
+    vector2 uv_quad[4] = {
+	{{{0.0f, 0.0f}}}, // BOTTOM LEFT
+	{{{0.0f, 1.0}}},  // TOP LEFT
+	{{{1.0f, 1.0f}}}, // TOP RIGHT
+	{{{1.0f, 0.0f}}}  // BOTTOM RIGHT
+    };
+
+    vector3 sides[8] = {
 	// [0]TOP RIGHT FRONT
 	{{{half_side, half_side, half_side}}},
 	// [1]TOP RIGHT BACK
@@ -220,111 +231,118 @@ mesh_create_cube(float side)
 	// [2]BOTTOM RIGHT FRONT
 	{{{half_side, -half_side, half_side}}},
 	// [3]BOTTOM RIGHT BACK
-	{{{half_side, -half_side, -half_side}}}
-    };
-
-    vector3 side_left[4] = {
+	{{{half_side, -half_side, -half_side}}},
 	// [4]TOP LEFT FRONT
 	{{{-half_side, half_side, half_side}}},
 	// [5]TOP LEFT BACK
 	{{{-half_side, half_side, -half_side}}},
 	// [6]BOTTOM LEFT FRONT
 	{{{-half_side, -half_side, half_side}}},
-	// [7]BOTTOM LEFT BACK
-	{{{-half_side, -half_side, -half_side}}}
-    };
-
-    vector3 side_top[4] = {
-	// [0]TOP RIGHT FRONT
-	{{{half_side, half_side, half_side}}},
-	// [1]TOP RIGHT BACK
-	{{{half_side, half_side, -half_side}}},
-	// [4]TOP LEFT FRONT
-	{{{-half_side, half_side, half_side}}},
-	// [5]TOP LEFT BACK
-	{{{-half_side, half_side, -half_side}}}
-    };
-
-    vector3 side_bottom[4] = {
-	// [2]BOTTOM RIGHT FRONT
-	{{{half_side, -half_side, half_side}}},
-	// [3]BOTTOM RIGHT BACK
-	{{{half_side, -half_side, -half_side}}},
-	// [6]BOTTOM LEFT FRONT
-	{{{-half_side, -half_side, half_side}}},
-	// [7]BOTTOM LEFT BACK
-	{{{-half_side, -half_side, -half_side}}}
-    };
-
-    vector3 side_front[4] = {
-	// [0]TOP RIGHT FRONT
-	{{{half_side, half_side, half_side}}},
-	// [2]BOTTOM RIGHT FRONT
-	{{{half_side, -half_side, half_side}}},
-	// [4]TOP LEFT FRONT
-	{{{-half_side, half_side, half_side}}},
-	// [6]BOTTOM LEFT FRONT
-	{{{-half_side, -half_side, half_side}}}
-    };
-
-    vector3 side_back[4] = {
-	// [1]TOP RIGHT BACK
-	{{{half_side, half_side, -half_side}}},
-	// [3]BOTTOM RIGHT BACK
-	{{{half_side, -half_side, -half_side}}},
-	// [5]TOP LEFT BACK
-	{{{-half_side, half_side, -half_side}}},
 	// [7]BOTTOM LEFT BACK
 	{{{-half_side, -half_side, -half_side}}}
     };
 
     // Right Side
-    *(positions + vertex_index++) = *(side_right + 0);
-    *(positions + vertex_index++) = *(side_right + 1);
-    *(positions + vertex_index++) = *(side_right + 2);
-    *(positions + vertex_index++) = *(side_right + 2);
-    *(positions + vertex_index++) = *(side_right + 1);
-    *(positions + vertex_index++) = *(side_right + 3);
+    *(positions + vertex_index+0) = *(sides + 0);
+    *(positions + vertex_index+1) = *(sides + 1);
+    *(positions + vertex_index+2) = *(sides + 2);
+    *(positions + vertex_index+3) = *(sides + 2);
+    *(positions + vertex_index+4) = *(sides + 1);
+    *(positions + vertex_index+5) = *(sides + 3);
+
+    *(texcoords + vertex_index+0) = *(uv_quad + 1);
+    *(texcoords + vertex_index+1) = *(uv_quad + 2);
+    *(texcoords + vertex_index+2) = *(uv_quad + 0);
+    *(texcoords + vertex_index+3) = *(uv_quad + 0);
+    *(texcoords + vertex_index+4) = *(uv_quad + 2);
+    *(texcoords + vertex_index+5) = *(uv_quad + 3);
+
+    vertex_index += 6;
 
     // Left Side
-    *(positions + vertex_index++) = *(side_left + 1);
-    *(positions + vertex_index++) = *(side_left + 0);
-    *(positions + vertex_index++) = *(side_left + 2);
-    *(positions + vertex_index++) = *(side_left + 2);
-    *(positions + vertex_index++) = *(side_left + 3);
-    *(positions + vertex_index++) = *(side_left + 1);
+    *(positions + vertex_index+0) = *(sides + 5);
+    *(positions + vertex_index+1) = *(sides + 4);
+    *(positions + vertex_index+2) = *(sides + 6);
+    *(positions + vertex_index+3) = *(sides + 6);
+    *(positions + vertex_index+4) = *(sides + 7);
+    *(positions + vertex_index+5) = *(sides + 5);
+    
+    *(texcoords + vertex_index+0) = *(uv_quad + 1);
+    *(texcoords + vertex_index+1) = *(uv_quad + 2);
+    *(texcoords + vertex_index+2) = *(uv_quad + 3);
+    *(texcoords + vertex_index+3) = *(uv_quad + 3);
+    *(texcoords + vertex_index+4) = *(uv_quad + 0);
+    *(texcoords + vertex_index+5) = *(uv_quad + 1);
+
+    vertex_index += 6;
     
     // Top Side
-    *(positions + vertex_index++) = *(side_top + 2);
-    *(positions + vertex_index++) = *(side_top + 3);
-    *(positions + vertex_index++) = *(side_top + 1);
-    *(positions + vertex_index++) = *(side_top + 1);
-    *(positions + vertex_index++) = *(side_top + 0);
-    *(positions + vertex_index++) = *(side_top + 2);
+    *(positions + vertex_index+0) = *(sides + 4);
+    *(positions + vertex_index+1) = *(sides + 5);
+    *(positions + vertex_index+2) = *(sides + 1);
+    *(positions + vertex_index+3) = *(sides + 1);
+    *(positions + vertex_index+4) = *(sides + 0);
+    *(positions + vertex_index+5) = *(sides + 4);
+
+    *(texcoords + vertex_index+0) = *(uv_quad + 1);
+    *(texcoords + vertex_index+1) = *(uv_quad + 0);
+    *(texcoords + vertex_index+2) = *(uv_quad + 3);
+    *(texcoords + vertex_index+3) = *(uv_quad + 3);
+    *(texcoords + vertex_index+4) = *(uv_quad + 2);
+    *(texcoords + vertex_index+5) = *(uv_quad + 1);
+
+    vertex_index += 6;
     
     // Bottom Side
-    *(positions + vertex_index++) = *(side_bottom + 2);
-    *(positions + vertex_index++) = *(side_bottom + 1);
-    *(positions + vertex_index++) = *(side_bottom + 3);
-    *(positions + vertex_index++) = *(side_bottom + 1);
-    *(positions + vertex_index++) = *(side_bottom + 2);
-    *(positions + vertex_index++) = *(side_bottom + 0);
+    *(positions + vertex_index+0) = *(sides + 6);
+    *(positions + vertex_index+1) = *(sides + 3);
+    *(positions + vertex_index+2) = *(sides + 7);
+    *(positions + vertex_index+3) = *(sides + 3);
+    *(positions + vertex_index+4) = *(sides + 6);
+    *(positions + vertex_index+5) = *(sides + 2);
+
+    *(texcoords + vertex_index+0) = *(uv_quad + 0);
+    *(texcoords + vertex_index+1) = *(uv_quad + 2);
+    *(texcoords + vertex_index+2) = *(uv_quad + 1);
+    *(texcoords + vertex_index+3) = *(uv_quad + 2);
+    *(texcoords + vertex_index+4) = *(uv_quad + 0);
+    *(texcoords + vertex_index+5) = *(uv_quad + 3);
+
+    vertex_index += 6;
 
     // Front Side
-    *(positions + vertex_index++) = *(side_front + 3);
-    *(positions + vertex_index++) = *(side_front + 2);
-    *(positions + vertex_index++) = *(side_front + 1);
-    *(positions + vertex_index++) = *(side_front + 2);
-    *(positions + vertex_index++) = *(side_front + 0);
-    *(positions + vertex_index++) = *(side_front + 1);
+    *(positions + vertex_index+0) = *(sides + 6);
+    *(positions + vertex_index+1) = *(sides + 4);
+    *(positions + vertex_index+2) = *(sides + 2);
+    *(positions + vertex_index+3) = *(sides + 4);
+    *(positions + vertex_index+4) = *(sides + 0);
+    *(positions + vertex_index+5) = *(sides + 2);
+
+    *(texcoords + vertex_index+0) = *(uv_quad + 3);
+    *(texcoords + vertex_index+1) = *(uv_quad + 2);
+    *(texcoords + vertex_index+2) = *(uv_quad + 0);
+    *(texcoords + vertex_index+3) = *(uv_quad + 2);
+    *(texcoords + vertex_index+4) = *(uv_quad + 1);
+    *(texcoords + vertex_index+5) = *(uv_quad + 0);
+
+    vertex_index += 6;
     
     // Back Side
-    *(positions + vertex_index++) = *(side_back + 3);
-    *(positions + vertex_index++) = *(side_back + 0);
-    *(positions + vertex_index++) = *(side_back + 2);
-    *(positions + vertex_index++) = *(side_back + 0);
-    *(positions + vertex_index++) = *(side_back + 3);
-    *(positions + vertex_index++) = *(side_back + 1);
+    *(positions + vertex_index+0) = *(sides + 7);
+    *(positions + vertex_index+1) = *(sides + 1);
+    *(positions + vertex_index+2) = *(sides + 5);
+    *(positions + vertex_index+3) = *(sides + 1);
+    *(positions + vertex_index+4) = *(sides + 7);
+    *(positions + vertex_index+5) = *(sides + 3);
+
+    *(texcoords + vertex_index+0) = *(uv_quad + 0);
+    *(texcoords + vertex_index+1) = *(uv_quad + 2);
+    *(texcoords + vertex_index+2) = *(uv_quad + 1);
+    *(texcoords + vertex_index+3) = *(uv_quad + 2);
+    *(texcoords + vertex_index+4) = *(uv_quad + 0);
+    *(texcoords + vertex_index+5) = *(uv_quad + 3);
+
+    vertex_index += 6;
 
     return data;
 }
@@ -338,8 +356,10 @@ mesh_create_plane_xz(float side, int subdivisions)
     size_t position_data_size = (sizeof(vector3) * data.vertex_count);
     vector3* positions = (vector3*)malloc(position_data_size);
     data.vertices.positions = positions;
-    
-    memset(positions, 0, position_data_size);
+
+    size_t texcoord_data_size = (sizeof(vector2) * data.vertex_count);
+    vector2* texcoords = (vector2*)malloc(texcoord_data_size);
+    data.vertices.texcoords = texcoords;
 
     float half_side = side * 0.5f;
     float quad_side = side / subdivisions;
@@ -374,13 +394,21 @@ mesh_create_plane_xz(float side, int subdivisions)
 	    corners[2].x = x0;
 	    corners[3].x = x1;
 	    
-	    *(positions + vertex_index++) = *(corners + 2);
-	    *(positions + vertex_index++) = *(corners + 3);
-	    *(positions + vertex_index++) = *(corners + 0);
+	    *(positions + vertex_index+0) = *(corners + 2);
+	    *(positions + vertex_index+1) = *(corners + 3);
+	    *(positions + vertex_index+2) = *(corners + 0);
+	    *(positions + vertex_index+3) = *(corners + 0);
+	    *(positions + vertex_index+4) = *(corners + 3);
+	    *(positions + vertex_index+5) = *(corners + 1);
 
-	    *(positions + vertex_index++) = *(corners + 0);
-	    *(positions + vertex_index++) = *(corners + 3);
-	    *(positions + vertex_index++) = *(corners + 1);
+	    *(texcoords + vertex_index+0) = vector2_create(x0, z0);
+	    *(texcoords + vertex_index+1) = vector2_create(x1, z0);
+	    *(texcoords + vertex_index+2) = vector2_create(x0, z1);
+	    *(texcoords + vertex_index+3) = vector2_create(x0, z1);
+	    *(texcoords + vertex_index+4) = vector2_create(x1, z0);
+	    *(texcoords + vertex_index+5) = vector2_create(x1, z1);
+
+	    vertex_index += 6;
 	}
     }
 

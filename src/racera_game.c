@@ -149,7 +149,7 @@ game_update_and_render(game_state* state)
 	    vector3 position = *(state->created_cube_positions + i);
 	    matrix4 transform = matrix_translate(position.x, position.y, position.z);
 	
-	    renderer_queue_push(&state->render_queue, &state->cube, &state->smiley,
+	    renderer_queue_push(&state->render_queue, &state->cup, 0,
 				&state->visualize_normals, transform);
 	}
 
