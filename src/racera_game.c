@@ -25,7 +25,8 @@ game_initialize(game_state* state)
 
     { // NOTE: Load shaders
 	char* vertex_shader = "shaders/simple.vert";
-	state->simple_shader       = load_shader(gl, vertex_shader, "shaders/simple.frag");
+	state->textured            = load_shader(gl, vertex_shader, "shaders/textured.frag");
+	state->color_blend         = load_shader(gl, vertex_shader, "shaders/color_blend.frag");
 	state->visualize_normals   = load_shader(gl, vertex_shader, "shaders/normals_visualize.frag");
 	state->visualize_colors    = load_shader(gl, vertex_shader, "shaders/colors_visualize.frag");
 	state->visualize_texcoords = load_shader(gl, vertex_shader, "shaders/texcoords_visualize.frag");
@@ -139,8 +140,8 @@ game_update_and_render(game_state* state)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     { // NOTE: Draw scene
-	renderer_queue_push(&state->render_queue, &state->ground,
-			    &state->simple_shader, matrix_identity());
+	renderer_queue_push(&state->render_queue, &state->ground, &state->checker,
+			    &state->textured, matrix_identity());
 	
 	int i;
 	for(i = 0; i < state->created_cube_count; i++)
@@ -148,7 +149,7 @@ game_update_and_render(game_state* state)
 	    vector3 position = *(state->created_cube_positions + i);
 	    matrix4 transform = matrix_translate(position.x, position.y, position.z);
 	
-	    renderer_queue_push(&state->render_queue, &state->cup,
+	    renderer_queue_push(&state->render_queue, &state->cube, &state->smiley,
 				&state->visualize_normals, transform);
 	}
 
@@ -165,7 +166,8 @@ game_update_and_render(game_state* state)
 
     { // NOTE: Draw UI
 	matrix4 transform = matrix_identity();
-	renderer_queue_push(&state->render_queue, &state->pointer, &state->simple_shader, transform);
+	renderer_queue_push(&state->render_queue, &state->pointer, 0,
+			    &state->textured, transform);
 
 	float half_width = (float)state->screen_width * 0.5f;
 	float half_height = (float)state->screen_height * 0.5f;
@@ -173,9 +175,11 @@ game_update_and_render(game_state* state)
 	float triangle_size = 128.0f;
 	matrix4 triangle_translate = matrix_translate(-half_width + triangle_size * 0.5f,
 						      half_height - triangle_size * 0.5f, 0.0f);
+	
 	matrix4 triangle_scale = matrix_scale(triangle_size, triangle_size, 1.0f);
-	renderer_queue_push(&state->render_queue, &state->triangle, &state->visualize_texcoords,
-			    matrix_multiply(triangle_translate, triangle_scale));
+	matrix4 triangle_transform = matrix_multiply(triangle_translate, triangle_scale);
+	renderer_queue_push(&state->render_queue, &state->triangle, &state->smiley,
+			    &state->textured, triangle_transform);
 
 	matrix4 projection =
 	    matrix_orthographic((float)state->screen_width,

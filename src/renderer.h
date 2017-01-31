@@ -12,6 +12,7 @@ typedef struct render_queue_item render_queue_item;
 struct render_queue_item
 {
     loaded_mesh* mesh;
+    loaded_texture* texture;
     shader_program* shader;
     matrix4 transform;
 };
@@ -38,7 +39,7 @@ render_queue
 renderer_queue_create(gl_functions* gl, int capacity);
 
 void
-renderer_queue_push(render_queue* queue, loaded_mesh* mesh,
+renderer_queue_push(render_queue* queue, loaded_mesh* mesh, loaded_texture* texture,
 		    shader_program* shader, matrix4 transform);
 
 void

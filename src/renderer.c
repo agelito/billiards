@@ -47,6 +47,9 @@ renderer_upload_uniform(gl_functions* gl, shader_uniform* uniform, int count, un
     case shader_data_matrix4:
 	glUniformMatrix(glUniformMatrix4fv, uniform, count, data);
 	break;
+    case shader_data_sampler2d:
+	glUniformScalar(glUniform1iv, uniform, count, data);
+	break;
     default: break;
     }
 }
@@ -173,11 +176,12 @@ renderer_queue_create(gl_functions* gl, int capacity)
 }
 
 void
-renderer_queue_push(render_queue* queue, loaded_mesh* mesh,
+renderer_queue_push(render_queue* queue, loaded_mesh* mesh, loaded_texture* texture,
 		    shader_program* shader, matrix4 transform)
 {
     render_queue_item item;
     item.mesh = mesh;
+    item.texture = texture;
     item.shader = shader;
     item.transform = transform;
     
@@ -196,6 +200,7 @@ renderer_queue_process(render_queue* queue, matrix4 projection, matrix4 view)
     gl_functions* gl = queue->gl;
     
     loaded_mesh* bound_mesh = 0;
+    loaded_texture* bound_texture = 0;
     shader_program* bound_shader = 0;
 
     shader_uniform_set_data(&queue->uniforms, hash_string("projection"),
@@ -230,6 +235,27 @@ renderer_queue_process(render_queue* queue, matrix4 projection, matrix4 view)
 
 	shader_uniform_set_data(&queue->uniforms_per_object, hash_string("world"),
 				item->transform.data, sizeof(matrix4));
+
+
+	if(item->texture != bound_texture)
+	{
+	    int main_texture_slot = 0;
+	    shader_uniform_set_data(&queue->uniforms_per_object, hash_string("main_texture"),
+				    &main_texture_slot, sizeof(int));
+
+	    glActiveTexture(GL_TEXTURE0);
+	    
+	    if(item->texture)
+	    {
+		glBindTexture(GL_TEXTURE_2D, item->texture->handle);
+	    }
+	    else
+	    {
+		glBindTexture(GL_TEXTURE_2D, 0);
+	    }
+
+	    bound_texture = item->texture;
+	}
 
 	renderer_apply_uniforms(gl, shader, &queue->uniforms_per_object);
 	

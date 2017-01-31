@@ -102,6 +102,7 @@ shader_type_from_gl(GLenum type)
     case GL_FLOAT_MAT2:	result = shader_data_matrix2; break;
     case GL_FLOAT_MAT3:	result = shader_data_matrix3; break;
     case GL_FLOAT_MAT4:	result = shader_data_matrix4; break;
+    case GL_SAMPLER_2D: result = shader_data_sampler2d; break;
     }
     return result;
 }
@@ -123,6 +124,7 @@ shader_data_type_size(shader_data_type type, int count)
     case shader_data_matrix2: base_size = sizeof(float) * 4; break;
     case shader_data_matrix3: base_size = sizeof(float) * 9; break;
     case shader_data_matrix4: base_size = sizeof(float) * 16; break;
+    case shader_data_sampler2d: base_size = sizeof(int) * 1; break;
     default: base_size = 0; break;
     }
 

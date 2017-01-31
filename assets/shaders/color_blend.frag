@@ -1,4 +1,4 @@
-// simple.frag
+// color_blend.frag
 
 uniform sampler2D main_texture;
 

@@ -33,7 +33,9 @@ struct game_state
     int initialized;
     
     gl_functions gl;
-    shader_program simple_shader;
+
+    shader_program textured;
+    shader_program color_blend;
     shader_program visualize_colors;
     shader_program visualize_normals;
     shader_program visualize_texcoords;

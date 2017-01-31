@@ -18,6 +18,7 @@ typedef enum
     shader_data_matrix2,
     shader_data_matrix3,
     shader_data_matrix4,
+    shader_data_sampler2d,
     shader_data_unknown,
 } shader_data_type;
 
