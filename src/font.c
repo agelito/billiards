@@ -16,7 +16,7 @@
 #define BM_FONT_FIXED_HEIGHT_BIT      0x10
 
 font_data
-font_load(char* path)
+font_create_from_file(char* path)
 {
     platform_log("loading font definition %s\n", path);
 
@@ -175,26 +175,6 @@ font_load(char* path)
     return font;
 }
 
-void
-font_unload(font_data* font)
-{
-    if(font->page_names)
-    {
-        int page_index;
-	for_range(page_index, font->page_count)
-	{
-	    char* page_name = *(font->page_names + page_index);
-	    if(page_name) free(page_name);
-	}
-
-        free(font->page_names);
-    }
-
-    if(font->characters) free(font->characters);
-
-    *font = (font_data){0};
-}
-
 font_character*
 font_get_character(font_data* font, uint32 character)
 {
@@ -288,4 +268,24 @@ font_measure_text(font_data* font, real32 size, char* text, bool32 kerning_enabl
     result.y = (max_height * size * one_over_font_size);
 
     return result;
+}
+
+void
+font_data_free(font_data* font)
+{
+    if(font->page_names)
+    {
+        int page_index;
+	for_range(page_index, font->page_count)
+	{
+	    char* page_name = *(font->page_names + page_index);
+	    if(page_name) free(page_name);
+	}
+
+        free(font->page_names);
+    }
+
+    if(font->characters) free(font->characters);
+
+    *font = (font_data){0};
 }

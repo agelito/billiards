@@ -1,10 +1,15 @@
 #ifndef FONT_H_INCLUDED
 #define FONT_H_INCLUDED
 
+#include "opengl.h"
+#include "texture.h"
+
 typedef struct font_character font_character;
 typedef struct font_kerning font_kerning;
 
 typedef struct font_data font_data;
+
+typedef struct loaded_font loaded_font;
 
 struct font_character
 {
@@ -46,11 +51,18 @@ struct font_data
     font_kerning* kerning;
 };
 
-font_data
-font_load(char* path);
+struct loaded_font
+{
+    font_data data;
 
-void
-font_unload(font_data* font);
+    loaded_texture* textures;
+};
+
+loaded_font
+load_font(gl_functions* gl, font_data data);
+
+font_data
+font_create_from_file(char* path);
 
 font_character*
 font_get_character(font_data* font, uint32 character);
@@ -60,5 +72,8 @@ font_get_kerning(font_data* font, uint32 first, uint32 second);
 
 vector2
 font_measure_text(font_data* font, real32 size, char* text, bool32 kerning_enabled);
+
+void
+font_data_free(font_data* font);
 
 #endif // FONT_H_INCLUDED
