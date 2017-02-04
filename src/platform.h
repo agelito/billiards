@@ -49,4 +49,7 @@ platform_randomf(float min, float max);
 void
 platform_copy_memory(void* destination, void* source, long size);
 
+void
+platform_log(char* format, ...);
+
 #endif // PLATFORM_H_INCLUDED

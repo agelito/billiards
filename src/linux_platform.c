@@ -10,7 +10,7 @@ platform_executable_directory(char* destination, long destination_size)
     int result = readlink(proc_exe, path_store, array_count(path_store));
     if(result == -1)
     {
-        fprintf(stderr, "error %d when trying to read %s", result, proc_exe);
+        platform_log("error %d when trying to read %s", result, proc_exe);
         invalid_code;
     }
 
@@ -46,7 +46,7 @@ platform_set_working_directory(char* directory)
     int chdir_result = chdir(directory);
     if(chdir_result != 0)
     {
-        fprintf(stderr, "couldn't set working directory to '%s'.", directory);
+        platform_log("couldn't set working directory to '%s'.", directory);
     }
 }
 
@@ -64,14 +64,14 @@ platform_read_file(char* path, int append_null)
     int file = open(path, O_RDONLY);
     if(file == -1)
     {
-        printf("can't open file %s (%s)\n", path, strerror(errno));
+        platform_log("can't open file %s (%s)\n", path, strerror(errno));
         return result;
     }
 
     off_t file_size = lseek(file, 0, SEEK_END);
     if(file_size == -1)
     {
-        printf("error retrieving file size %s (%s)\n", path, strerror(errno));
+        platform_log("error retrieving file size %s (%s)\n", path, strerror(errno));
         close(file);
         return result;
     }
@@ -97,7 +97,7 @@ platform_read_file(char* path, int append_null)
         ssize_t bytes_read = read(file, read_to, read_size);
         if(bytes_read == -1)
         {
-            printf("error reading file %s (%s)\n", path, strerror(errno));
+            platform_log("error reading file %s (%s)\n", path, strerror(errno));
 	    free(destination);
             close(file);
 
@@ -165,4 +165,11 @@ platform_copy_memory(void* destination, void* source, long size)
     memcpy(destination, source, size);
 }
 
-
+void
+platform_log(char* format, ...)
+{
+    va_list args;
+    va_start(args, format);
+    vfprintf(stdout, format, args);
+    va_end(args);
+}
