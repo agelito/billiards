@@ -15,6 +15,30 @@
 #define BM_FONT_BOLD_BIT              0x08
 #define BM_FONT_FIXED_HEIGHT_BIT      0x10
 
+loaded_font
+load_font(gl_functions* gl, font_data data)
+{
+    loaded_font font = (loaded_font){0};
+
+    font.data = data;
+
+    uint32 textures_size = (data.page_count * sizeof(loaded_texture));
+    font.textures = (loaded_texture*)malloc(textures_size);
+
+    uint32 page_index;
+    for_range(page_index, data.page_count)
+    {
+	char* page_texture_path = *(data.page_names + page_index);
+	loaded_texture page_texture =
+	    load_texture(gl, texture_create_from_tga(page_texture_path));
+	texture_data_free(&page_texture.data);
+	
+	*(font.textures + page_index) = page_texture;
+    }
+    
+    return font;
+}
+
 font_data
 font_create_from_file(char* path)
 {

@@ -55,7 +55,7 @@ game_initialize(game_state* state)
     texture_data_free(&state->smiley.data);
 
     { // NOTE: Load Fonts
-	state->deja_vu = font_create_from_file("fonts/DejaVu.fnt");
+	state->deja_vu = load_font(gl, font_create_from_file("fonts/DejaVu.fnt"));
     }
 
     state->camera_position = (vector3){{{0.0f, 1.0f, -2.0f}}};
