@@ -3,17 +3,17 @@
 #include "platform.h"
 #include "font.h"
 
-#define BM_FONT_BLOCK_INFO 1
-#define BM_FONT_BLOCK_COMMON 2
-#define BM_FONT_BLOCK_PAGES 3
-#define BM_FONT_BLOCK_CHARS 4
-#define BM_FONT_BLOCK_KERNING_PAIRS 5
+#define BM_FONT_BLOCK_INFO            1
+#define BM_FONT_BLOCK_COMMON          2
+#define BM_FONT_BLOCK_PAGES           3
+#define BM_FONT_BLOCK_CHARS           4
+#define BM_FONT_BLOCK_KERNING_PAIRS   5
 
-#define BM_FONT_SMOOTH_BIT 0x01
-#define BM_FONT_UNICODE_BIT 0x02
-#define BM_FONT_ITALIC_BIT 0x04
-#define BM_FONT_BOLD_BIT 0x08
-#define BM_FONT_FIXED_HEIGHT_BIT 0x10
+#define BM_FONT_SMOOTH_BIT            0x01
+#define BM_FONT_UNICODE_BIT           0x02
+#define BM_FONT_ITALIC_BIT            0x04
+#define BM_FONT_BOLD_BIT              0x08
+#define BM_FONT_FIXED_HEIGHT_BIT      0x10
 
 loaded_font
 font_load(char* path)
