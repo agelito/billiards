@@ -4,6 +4,13 @@
 
 * Engine
 
+** Platform Abstraction
+**** TODO Window Management
+**** TODO Pointer Hide/Show
+**** TODO File I/O
+**** TODO Memory Management
+**** TODO Game Controllers
+
 ** Rendering
 **** TODO Draw Text
 Support for drawing text. This involves loading the necessary font specification 
