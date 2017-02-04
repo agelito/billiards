@@ -151,13 +151,6 @@ renderer_bind_mesh_buffers(gl_functions* gl, loaded_mesh* mesh, shader_program* 
     }
 }
 
-void
-renderer_draw_mesh(gl_functions* gl, loaded_mesh* mesh, shader_program* shader)
-{
-    renderer_bind_mesh_buffers(gl, mesh, shader);
-    glDrawArrays(GL_TRIANGLES, 0, mesh->data.vertex_count);
-}
-
 render_queue
 renderer_queue_create(gl_functions* gl, int capacity)
 {
