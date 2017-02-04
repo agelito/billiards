@@ -15,12 +15,12 @@
 #define BM_FONT_BOLD_BIT              0x08
 #define BM_FONT_FIXED_HEIGHT_BIT      0x10
 
-loaded_font
+font_data
 font_load(char* path)
 {
     platform_log("loading font definition %s\n", path);
 
-    loaded_font font = (loaded_font){0};
+    font_data font = (font_data){0};
 
     read_file definition_file = platform_read_file(path, 1);
     if(definition_file.size == 0)
@@ -176,7 +176,7 @@ font_load(char* path)
 }
 
 void
-font_unload(loaded_font* font)
+font_unload(font_data* font)
 {
     if(font->page_names)
     {
@@ -192,11 +192,11 @@ font_unload(loaded_font* font)
 
     if(font->characters) free(font->characters);
 
-    *font = (loaded_font){0};
+    *font = (font_data){0};
 }
 
 font_character*
-font_get_character(loaded_font* font, uint32 character)
+font_get_character(font_data* font, uint32 character)
 {
     font_character* result = 0;
     
@@ -215,7 +215,7 @@ font_get_character(loaded_font* font, uint32 character)
 }
 
 font_kerning*
-font_get_kerning(loaded_font* font, unsigned int first, unsigned int second)
+font_get_kerning(font_data* font, unsigned int first, unsigned int second)
 {
     font_kerning* result = 0;
 
@@ -234,7 +234,7 @@ font_get_kerning(loaded_font* font, unsigned int first, unsigned int second)
 }
 
 vector2
-font_measure_text(loaded_font* font, real32 size, char* text, bool32 kerning_enabled)
+font_measure_text(font_data* font, real32 size, char* text, bool32 kerning_enabled)
 {
     int32 cursor_x = 0;
     int32 cursor_y = 0;

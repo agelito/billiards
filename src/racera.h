@@ -55,7 +55,7 @@ struct game_state
     loaded_texture checker;
     loaded_texture smiley;
 
-    loaded_font deja_vu;
+    font_data deja_vu;
 
     vector3 camera_position;
     vector3 camera_pitch_yaw_roll;

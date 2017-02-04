@@ -4,7 +4,7 @@
 typedef struct font_character font_character;
 typedef struct font_kerning font_kerning;
 
-typedef struct loaded_font loaded_font;
+typedef struct font_data font_data;
 
 struct font_character
 {
@@ -29,7 +29,7 @@ struct font_kerning
     int16 amount;
 };
 
-struct loaded_font
+struct font_data
 {
     uint16 size;
 
@@ -46,19 +46,19 @@ struct loaded_font
     font_kerning* kerning;
 };
 
-loaded_font
+font_data
 font_load(char* path);
 
 void
-font_unload(loaded_font* font);
+font_unload(font_data* font);
 
 font_character*
-font_get_character(loaded_font* font, uint32 character);
+font_get_character(font_data* font, uint32 character);
 
 font_kerning*
-font_get_kerning(loaded_font* font, uint32 first, uint32 second);
+font_get_kerning(font_data* font, uint32 first, uint32 second);
 
 vector2
-font_measure_text(loaded_font* font, real32 size, char* text, bool32 kerning_enabled);
+font_measure_text(font_data* font, real32 size, char* text, bool32 kerning_enabled);
 
 #endif // FONT_H_INCLUDED
