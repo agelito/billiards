@@ -23,6 +23,9 @@ typedef struct game_state game_state;
 struct game_state
 {
     int should_quit;
+
+    real32 time_wall;
+    real32 time_frame;
     
     mouse_state mouse;
     keyboard_state keyboard;

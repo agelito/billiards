@@ -14,6 +14,9 @@ typedef uint64_t uint64;
 
 typedef uint32 bool32;
 
+typedef float real32;
+typedef double real64;
+
 typedef struct read_file read_file;
 
 struct read_file

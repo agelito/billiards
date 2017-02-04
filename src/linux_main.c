@@ -9,6 +9,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <stdarg.h>
+#include <time.h>
 #undef _XOPEN_SOURCE
 
 #include <GL/gl.h>
@@ -32,6 +33,16 @@
 #include "linux_window.c"
 
 #include "racera.h"
+
+static uint64
+get_precise_time()
+{
+    struct timespec time;
+    int result = clock_gettime(CLOCK_MONOTONIC_RAW, &time);
+    if(result == -1) return 0;
+
+    return (time.tv_sec * 1000000) + (time.tv_nsec / 1000);
+}
 
 int main(int argc, char* argv[])
 {
@@ -57,8 +68,19 @@ int main(int argc, char* argv[])
 
     game_state racera_state = (game_state){0};
 
+    uint64 elapsed_time = 0;
+    uint64 previous_time = get_precise_time();
+
     while(handle_window_events(&window_context, &keyboard, &mouse_raw))
     {
+	uint64 current_time = get_precise_time();
+	uint64 delta_time = (current_time - previous_time);
+	previous_time = current_time;
+	elapsed_time += delta_time;
+
+	racera_state.time_wall = (real32)(elapsed_time * 0.000001f);
+	racera_state.time_frame = (real32)(delta_time * 0.000001f);
+	
 	racera_state.screen_width = window_context.width;
 	racera_state.screen_height = window_context.height;
 
