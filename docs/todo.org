@@ -1,0 +1,62 @@
+#+TITLE: Racera TODO
+#+AUTHOR: Axel Wettervik
+#+options: {}:^
+
+* Engine
+
+** Rendering
+**** TODO Draw Text
+Support for drawing text. This involves loading the necessary font specification 
+file and texture and then providing functions for drawing. 
+
+**** TODO Draw Transparent
+Support for drawing transparent meshes. The transparent meshes should be rendered
+in the correct order so no artifacts occurr. 
+
+**** TODO Models (mesh hierarchy)
+**** TODO Particle Effects
+**** TODO Multitexturing
+**** TODO Lightning
+**** TODO Multiple Render Targets
+**** TODO Post Process Effects
+
+** TODO Animation
+
+** Physics
+*** Collision Detection
+**** TODO Box
+**** TODO Box <-> Plane
+**** TODO Box <-> Sphere
+**** TODO Sphere
+**** TODO Sphere <-> Plane
+**** TODO Sphere <-> Box
+
+*** TODO Springs
+*** TODO Integrators
+
+** Audio
+**** TODO Sample Playback
+**** TODO WAV Loading
+**** TODO MP3 Loading
+**** TODO Mixer
+**** TODO Recording
+
+** Profiling
+**** TODO Function Timing
+**** TODO Block Timing
+**** TODO Per thread visualization
+
+** Threading
+**** TODO Thread pool
+**** TODO Synchronization
+**** TODO Job System
+
+** TODO Entity Management
+** TODO World Gen / Editor
+
+* TODO Gameplay
+
+
+
+
+
