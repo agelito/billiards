@@ -1,14 +1,10 @@
 // tga_loader.c
 
-#include <string.h>
-#include <stdio.h>
-
 #define TGA_DATA_BITMASK 0x7
 #define TGA_RLE_BITMASK  0x8
 
 #define TGA_RLE_PACKET_BITMASK 0x80
 #define TGA_RLE_PACKET_SHIFT 7
-
 
 typedef enum tga_data_type
 {

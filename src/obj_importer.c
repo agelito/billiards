@@ -1,5 +1,7 @@
 // obj_importer.c
 
+#include <stdio.h>
+
 static inline int
 match_string(char* a, char* b)
 {
