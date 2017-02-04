@@ -10,6 +10,7 @@
 
 #include "math.c"
 #include "renderer.c"
+#include "font.c"
 
 #include "keyboard.c"
 #include "mouse.c"
