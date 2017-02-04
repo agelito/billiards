@@ -63,7 +63,7 @@ font_load(char* path)
         case BM_FONT_BLOCK_INFO: {
             font.size = *((int16*)(block_data + 0));
             font_name = (block_data + 14);
-            platform_log("%s %d\n", font_name, font.size);
+            platform_log(" %s %d\n", font_name, font.size);
 	} break;
         case BM_FONT_BLOCK_COMMON: {
             font.line_height  = *((int16*)(block_data + 0));
@@ -112,7 +112,7 @@ font_load(char* path)
         } break;
         case BM_FONT_BLOCK_CHARS: {
             font.character_count = (length / 20);
-            platform_log("character count: %d\n", font.character_count);
+            platform_log(" character count: %d\n", font.character_count);
 
 	    uint32 characters_size = (font.character_count * sizeof(font_character));
             font.characters = (font_character*)malloc(characters_size);
@@ -144,7 +144,7 @@ font_load(char* path)
         } break;
         case BM_FONT_BLOCK_KERNING_PAIRS:
             font.kerning_count = (length / 10);
-            platform_log("kerning count: %d\n", font.kerning_count);
+            platform_log(" kerning count: %d\n", font.kerning_count);
 
 	    uint32 kerning_size = (font.kerning_count * sizeof(font_kerning));
             font.kerning = (font_kerning*)malloc(kerning_size);
@@ -178,8 +178,6 @@ font_load(char* path)
 void
 font_unload(loaded_font* font)
 {
-    if(font->name) free(font->name);
-
     if(font->page_names)
     {
         int page_index;

@@ -31,7 +31,6 @@ struct font_kerning
 
 struct loaded_font
 {
-    char* name;
     uint16 size;
 
     int16 line_height;

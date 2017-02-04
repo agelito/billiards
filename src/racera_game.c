@@ -54,7 +54,9 @@ game_initialize(game_state* state)
     state->smiley = load_texture(gl, texture_create_from_tga("smiley_rle.tga"));
     texture_data_free(&state->smiley.data);
 
-    glBindTexture(GL_TEXTURE_2D, state->smiley.handle);
+    { // NOTE: Load Fonts
+	state->deja_vu = font_load("fonts/DejaVu.fnt");
+    }
 
     state->camera_position = (vector3){{{0.0f, 1.0f, -2.0f}}};
 

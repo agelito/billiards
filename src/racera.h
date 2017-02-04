@@ -11,6 +11,7 @@
 #define GB(giga_bytes) (MB(giga_bytes) * 1024)
 
 #include "math.h"
+#include "font.h"
 #include "renderer.h"
 
 #include "mouse.h"
@@ -53,6 +54,8 @@ struct game_state
 
     loaded_texture checker;
     loaded_texture smiley;
+
+    loaded_font deja_vu;
 
     vector3 camera_position;
     vector3 camera_pitch_yaw_roll;
