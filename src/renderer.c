@@ -177,6 +177,9 @@ renderer_queue_push(render_queue* queue, loaded_mesh* mesh, loaded_texture* text
     item.texture = texture;
     item.shader = shader;
     item.transform = transform;
+
+    item.draw_element_offset = 0;
+    item.draw_element_count = mesh->data.vertex_count;
     
     *(queue->items + queue->count++) = item;
 }
@@ -252,7 +255,7 @@ renderer_queue_process(render_queue* queue, matrix4 projection, matrix4 view)
 
 	renderer_apply_uniforms(gl, shader, &queue->uniforms_per_object);
 	
-	glDrawArrays(GL_TRIANGLES, 0, mesh->data.vertex_count);
+	glDrawArrays(GL_TRIANGLES, item->draw_element_offset, item->draw_element_count);
     }
 }
 
