@@ -11,7 +11,7 @@ file and texture and then providing functions for drawing.
 
 **** TODO Draw Transparent
 Support for drawing transparent meshes. The transparent meshes should be rendered
-in the correct order so no artifacts occurr. 
+in the correct order so no artifacts occur. 
 
 **** TODO Models (mesh hierarchy)
 **** TODO Particle Effects
