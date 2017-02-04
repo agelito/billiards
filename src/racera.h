@@ -1,7 +1,7 @@
 #ifndef RACERA_H_INCLUDED
 #define RACERA_H_INCLUDED
 
-#define assert(expr) if(!(expr)) { fprintf(stderr, "assertion! %s:%d\n", __FILE__, __LINE__); *(int*)0 = 0; }
+#define assert(expr) if(!(expr)) { platform_log("assertion! %s:%d\n", __FILE__, __LINE__); *(int*)0 = 0; }
 
 #define array_count(array) (sizeof(array) / sizeof(array[0]))
 #define for_range(n, count) for(n = 0; n < count; ++n)

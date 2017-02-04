@@ -2,7 +2,7 @@
 
 #include "opengl.h"
 
-#include <stdio.h>
+#include "platform.h"
 
 static void
 print_gl_info()
@@ -12,7 +12,7 @@ print_gl_info()
     const GLubyte* version = glGetString(GL_VERSION);
     const GLubyte* glsl_version = glGetString(GL_SHADING_LANGUAGE_VERSION);
 
-    printf("%s (glsl %s)\n%s (%s)\n", version, glsl_version, renderer, vendor);
+    platform_log("%s (glsl %s)\n%s (%s)\n", version, glsl_version, renderer, vendor);
 }
 
 gl_functions load_gl_functions()

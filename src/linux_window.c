@@ -19,7 +19,7 @@ create_window(int width, int height, char* title)
 
     if(display == NULL)
     {
-        printf("couldn't connect to X server.\n");
+        platform_log("couldn't connect to X server.\n");
         exit(0);
     }
 
@@ -30,7 +30,7 @@ create_window(int width, int height, char* title)
     XVisualInfo* visual_info = glXChooseVisual(display, 0, attributes);
     if(visual_info == NULL)
     {
-        printf("no appropriate visual available.\n");
+        platform_log("no appropriate visual available.\n");
         exit(0);
     }
 

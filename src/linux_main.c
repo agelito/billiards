@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
+#include <stdarg.h>
 #undef _XOPEN_SOURCE
 
 #include <GL/gl.h>

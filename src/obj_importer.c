@@ -59,7 +59,7 @@ obj_load_from_file(char* path)
 
 	at = advance_line(at);
     }
-    fprintf(stdout, "%s\n position: %d\n normal: %d\n face: %d\n", path,
+    platform_log("%s\n position: %d\n normal: %d\n face: %d\n", path,
 	    position_count, normal_count, face_count);
 
     at = begin;

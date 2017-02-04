@@ -39,7 +39,7 @@ create_keycode_map(Display* display, keyboard_x11* keyboard)
     int keycode_count = (keycode_max - keycode_min);
     if(keycode_count > MAX_KEYCODE_COUNT)
     {
-	printf("warning: keycode_count(%d) > MAX_KEYCODE_COUNT(%d)\n", keycode_count, MAX_KEYCODE_COUNT);
+	platform_log("warning: keycode_count(%d) > MAX_KEYCODE_COUNT(%d)\n", keycode_count, MAX_KEYCODE_COUNT);
 	keycode_count = MAX_KEYCODE_COUNT;
 	keycode_max = (keycode_min + keycode_count);
     }
@@ -54,7 +54,7 @@ create_keycode_map(Display* display, keyboard_x11* keyboard)
     {
 	if(keysym_per_keycode > MAX_KEYSYM_PER_KEYCODE)
 	{
-	    printf("warning: keysym_per_keycode(%d) > MAX_KEYSYM_PER_KEYCODE(%d)\n",
+	    platform_log("warning: keysym_per_keycode(%d) > MAX_KEYSYM_PER_KEYCODE(%d)\n",
 		   keysym_per_keycode, MAX_KEYSYM_PER_KEYCODE);
 	    keysym_per_keycode = MAX_KEYSYM_PER_KEYCODE;
 	}

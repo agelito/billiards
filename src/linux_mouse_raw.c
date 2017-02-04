@@ -26,7 +26,7 @@ xinput2_init(Display* display)
     int major_opcode, first_event, first_error;
     if(!XQueryExtension(display, "XInputExtension", &major_opcode, &first_event, &first_error))
     {
-	fprintf(stderr, "XInputExtension is not available\n");
+	platform_log("XInputExtension is not available\n");
 	return input;
     }
 
@@ -36,15 +36,15 @@ xinput2_init(Display* display)
 
     if(version_status == Success)
     {
-	fprintf(stdout, "XInput %d.%d supported\n", major_version, minor_version);
+	platform_log("XInput %d.%d supported\n", major_version, minor_version);
     }
     else if(version_status == BadRequest)
     {
-	fprintf(stderr, "XInput 2.1 not supported (%d.%d supported)\n", major_version, minor_version);
+	platform_log("XInput 2.1 not supported (%d.%d supported)\n", major_version, minor_version);
     }
     else
     {
-	fprintf(stderr, "XIQueryVersion unknown error\n");
+	platform_log("XIQueryVersion unknown error\n");
     }
 
     input.major_opcode = major_opcode;
@@ -74,7 +74,7 @@ xinput2_init(Display* display)
 	{
 	    selected_device = device->deviceid;
 	    selected_axis_count = valuator_axis_count;
-	    fprintf(stdout, "%s (%d)\n", device->name, device->deviceid); 
+	    platform_log("%s (%d)\n", device->name, device->deviceid); 
 	    break;
 	}
     }
@@ -95,7 +95,7 @@ xinput2_init(Display* display)
     int select_events_status = XISelectEvents(display, root_window, &event_mask, 1);
     if(select_events_status != Success)
     {
-	fprintf(stderr, "couldn't select event mask %d for device %d\n", mask, selected_device);
+	platform_log("couldn't select event mask %d for device %d\n", mask, selected_device);
     }
 
     return input;

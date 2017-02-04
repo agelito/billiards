@@ -18,7 +18,7 @@ print_shader_error(gl_functions* gl, GLuint shader)
 {
     GLchar info_log[1024];
     gl->glGetShaderInfoLog(shader, 1024, NULL, info_log);
-    printf("%s\n\n", info_log);
+    platform_log("%s\n\n", info_log);
 }
 
 static void
@@ -26,7 +26,7 @@ print_program_error(gl_functions* gl, GLuint program)
 {
     char info_log[1024];
     gl->glGetProgramInfoLog(program, 1024, NULL, (GLchar*)info_log);
-    printf("%s\n\n", info_log);
+    platform_log("%s\n\n", info_log);
 }
 
 shader_program
@@ -55,7 +55,7 @@ load_shader(gl_functions* gl, char* vertex_path, char* fragment_path)
     gl->glGetShaderiv(shader.vertex, GL_COMPILE_STATUS, &successful_compile);
     if(!successful_compile)
     {
-        printf("failed to compile vertex shader:\n");
+        platform_log("failed to compile vertex shader:\n");
         print_shader_error(gl, shader.vertex);
     }
 
@@ -63,7 +63,7 @@ load_shader(gl_functions* gl, char* vertex_path, char* fragment_path)
     gl->glGetShaderiv(shader.fragment, GL_COMPILE_STATUS, &successful_compile);
     if(!successful_compile)
     {
-        printf("failed to compile fragment shader:\n");
+        platform_log("failed to compile fragment shader:\n");
         print_shader_error(gl, shader.fragment);
     }
 
@@ -76,7 +76,7 @@ load_shader(gl_functions* gl, char* vertex_path, char* fragment_path)
     gl->glGetProgramiv(shader.program, GL_LINK_STATUS, &successful_link);
     if(!successful_link)
     {
-        printf("failed to link shader program:\n");
+        platform_log("failed to link shader program:\n");
         print_program_error(gl, shader.program);
     }
 
@@ -170,8 +170,8 @@ shader_reflect(gl_functions* gl, shader_program* shader)
         shader_data_type data_type = shader_type_from_gl(type);
         if(data_type == shader_data_unknown)
         {
-            fprintf(stderr, "unrecognized uniform %s (0x%08x) index %d, type: %d\n",
-                    uniform_name, name_hash, uniform_index, type);
+            platform_log("unrecognized uniform %s (0x%08x) index %d, type: %d\n",
+			 uniform_name, name_hash, uniform_index, type);
             continue;
         }
 
