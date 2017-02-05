@@ -5,6 +5,7 @@
 #include "shader.h"
 #include "texture.h"
 #include "mesh.h"
+#include "material.h"
 
 typedef struct render_queue render_queue;
 typedef struct render_queue_item render_queue_item;
@@ -12,8 +13,7 @@ typedef struct render_queue_item render_queue_item;
 struct render_queue_item
 {
     loaded_mesh* mesh;
-    loaded_texture* texture;
-    shader_program* shader;
+    material* material;
     matrix4 transform;
 
     uint32 draw_element_offset;
@@ -43,8 +43,7 @@ render_queue
 renderer_queue_create(gl_functions* gl, int capacity, int text_capacity);
 
 void
-renderer_queue_push(render_queue* queue, loaded_mesh* mesh, loaded_texture* texture,
-		    shader_program* shader, matrix4 transform);
+renderer_queue_push(render_queue* queue, loaded_mesh* mesh, material* material, matrix4 transform);
 
 void
 renderer_queue_push_text(render_queue* queue, char* text, loaded_font* font,

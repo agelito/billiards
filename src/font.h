@@ -3,6 +3,7 @@
 
 #include "opengl.h"
 #include "texture.h"
+#include "material.h"
 
 typedef struct font_character font_character;
 typedef struct font_kerning font_kerning;
@@ -56,6 +57,7 @@ struct loaded_font
     font_data data;
 
     loaded_texture* textures;
+    material* materials;
 };
 
 loaded_font

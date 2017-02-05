@@ -5,6 +5,7 @@
 #include "mesh.c"
 #include "shader.c"
 #include "texture.c"
+#include "material.c"
 
 #define glUniformScalar(type, u, c, d) gl->type(u->location, c, (void*)d)
 #define glUniformMatrix(type, u, c, d) gl->type(u->location, c, GL_FALSE, (void*)d)
@@ -187,13 +188,11 @@ renderer_queue_create(gl_functions* gl, int capacity, int text_capacity)
 }
 
 void
-renderer_queue_push(render_queue* queue, loaded_mesh* mesh, loaded_texture* texture,
-		    shader_program* shader, matrix4 transform)
+renderer_queue_push(render_queue* queue, loaded_mesh* mesh, material* material, matrix4 transform)
 {
     render_queue_item item;
     item.mesh = mesh;
-    item.texture = texture;
-    item.shader = shader;
+    item.material = material;
     item.transform = transform;
 
     item.draw_element_offset = 0;
@@ -207,9 +206,8 @@ renderer_queue_push_text(render_queue* queue, char* text, loaded_font* font,
 			 real32 font_size, shader_program* shader, matrix4 transform)
 {
     render_queue_item item;
-    item.mesh                = &queue->text_buffer;
-    item.shader              = shader;
-    item.transform           = transform;
+    item.mesh      = &queue->text_buffer;
+    item.transform = transform;
     
     int32 cursor_x = 0;
     int32 cursor_y = 0;
@@ -224,6 +222,8 @@ renderer_queue_push_text(render_queue* queue, char* text, loaded_font* font,
     real32 one_over_page_width = 0.0f;
     real32 one_over_page_height = 0.0f;
     real32 one_over_size = (1.0f / font->data.size);
+
+    material* configured_material = 0;
     
     char character, previous = 0;
     while((character = *text++) != 0)
@@ -234,9 +234,11 @@ renderer_queue_push_text(render_queue* queue, char* text, loaded_font* font,
 	font_character* fc = font_get_character(&font->data, (uint32)character);
 	if(fc != 0)
 	{
-	    loaded_texture* page_texture = (font->textures + fc->page);
-	    if(page_texture != item.texture)
+	    material* page_material = (font->materials + fc->page);
+	    if(page_material != configured_material)
 	    {
+		loaded_texture* page_texture = (font->textures + fc->page);
+	    
 		if(submit_vertex_count)
 		{
 		    item.draw_element_offset = queue->text_buffer_count;
@@ -252,7 +254,10 @@ renderer_queue_push_text(render_queue* queue, char* text, loaded_font* font,
 		one_over_page_width = (1.0f / page_texture->data.width);
 		one_over_page_height = (1.0f / page_texture->data.height);
 		
-		item.texture = page_texture;
+		configured_material = page_material;
+		configured_material->shader = shader;
+		
+		item.material = page_material;
 	    }
 
 	    int32 base_x = cursor_x;
@@ -332,53 +337,56 @@ renderer_queue_clear(render_queue* queue)
     queue->text_buffer_count = 0;
 }
 
+static void
+configure_for_transparency(bool32 transparency_enabled)
+{
+    if(transparency_enabled)
+    {
+	glDisable(GL_DEPTH_TEST);
+		
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    }
+    else
+    {
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LEQUAL);
+		
+	glDisable(GL_BLEND);
+    }
+}
+
 void
 renderer_queue_process(render_queue* queue)
 {
     gl_functions* gl = queue->gl;
     
     loaded_mesh* bound_mesh = 0;
-    loaded_texture* bound_texture = 0;
-    shader_program* bound_shader = 0;
+    material* bound_material = 0;
 
     if(queue->text_buffer_count)
     {
 	update_mesh(queue->gl, &queue->text_buffer, 0, queue->text_buffer_count);
     }
-
-    
-
-    vector3 tint_color = (vector3){{{1.0f, 1.0f, 1.0f}}};
-    shader_uniform_set_data(&queue->uniforms, hash_string("tint_color"),
-			    &tint_color, sizeof(vector3));
     
     int i;
     for_range(i, queue->count)
     {
 	render_queue_item* item = (queue->items + i);
 
-	shader_program* shader = item->shader;
-	if(shader != bound_shader)
+	material* material = item->material;
+	shader_program* shader = material->shader;
+	if(material != bound_material)
 	{
 	    gl->glUseProgram(shader->program);
+	    
+	    configure_for_transparency(shader->transparent);
+	 
 	    renderer_apply_uniforms(gl, shader, &queue->uniforms);
 
-	    if(shader->transparent)
-	    {
-		glDisable(GL_DEPTH_TEST);
-		
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	    }
-	    else
-	    {
-		glEnable(GL_DEPTH_TEST);
-		glDepthFunc(GL_LEQUAL);
-		
-		glDisable(GL_BLEND);
-	    }
+	    material_apply(material, &queue->uniforms_per_object);
 	    
-	    bound_shader = shader;
+	    bound_material = material;
 	}
 	
 	loaded_mesh* mesh = item->mesh;
@@ -390,27 +398,6 @@ renderer_queue_process(render_queue* queue)
 
 	shader_uniform_set_data(&queue->uniforms_per_object, hash_string("world"),
 				item->transform.data, sizeof(matrix4));
-
-
-	if(item->texture != bound_texture)
-	{
-	    int main_texture_slot = 0;
-	    shader_uniform_set_data(&queue->uniforms_per_object, hash_string("main_texture"),
-				    &main_texture_slot, sizeof(int));
-
-	    glActiveTexture(GL_TEXTURE0);
-	    
-	    if(item->texture)
-	    {
-		glBindTexture(GL_TEXTURE_2D, item->texture->handle);
-	    }
-	    else
-	    {
-		glBindTexture(GL_TEXTURE_2D, 0);
-	    }
-
-	    bound_texture = item->texture;
-	}
 
 	renderer_apply_uniforms(gl, shader, &queue->uniforms_per_object);
 

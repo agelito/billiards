@@ -58,6 +58,10 @@ struct game_state
 
     loaded_font deja_vu;
 
+    material ground_material;
+    material cup_material;
+    material pointer_material;
+
     vector3 camera_position;
     vector3 camera_pitch_yaw_roll;
     vector3 camera_forward;

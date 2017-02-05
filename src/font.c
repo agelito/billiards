@@ -22,6 +22,9 @@ load_font(gl_functions* gl, font_data data)
 
     font.data = data;
 
+    uint32 materials_size = (data.page_count * sizeof(material));
+    font.materials = (material*)malloc(materials_size);
+
     uint32 textures_size = (data.page_count * sizeof(loaded_texture));
     font.textures = (loaded_texture*)malloc(textures_size);
 
@@ -32,8 +35,12 @@ load_font(gl_functions* gl, font_data data)
 	loaded_texture page_texture =
 	    load_texture(gl, texture_create_from_tga(page_texture_path));
 	texture_data_free(&page_texture.data);
-	
 	*(font.textures + page_index) = page_texture;
+
+	material page_material = material_create(0, 76);
+	material_set_texture(&page_material, "main_texture", (font.textures + page_index));
+	material_set_color(&page_material, "tint_color", vector3_create(1.0f, 1.0f, 1.0f));
+	*(font.materials + page_index) = page_material;
     }
     
     return font;

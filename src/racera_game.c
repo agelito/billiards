@@ -77,13 +77,25 @@ game_initialize(game_state* state)
     }
 
     { // NOTE: Load Fonts
-	platform_log("load_fonts\n");
+	platform_log("load fonts\n");
 	
 	state->deja_vu = load_font(gl, font_create_from_file("fonts/DejaVu.fnt"));
 
 	renderer_check_error();
     }
 
+    { // NOTE: Load Materials
+	platform_log("load materials\n");
+
+	state->ground_material = material_create(&state->textured, KB(1));
+	material_set_texture(&state->ground_material, "main_texture", &state->checker);
+	
+	state->cup_material = material_create(&state->visualize_normals, KB(1));
+		
+	state->pointer_material = material_create(&state->textured, KB(1));
+	material_set_texture(&state->pointer_material, "main_texture", &state->smiley);
+    }
+    
     state->camera_position = (vector3){{{0.0f, 1.0f, -2.0f}}};
 
     int n;
@@ -168,8 +180,8 @@ game_update_and_render(game_state* state)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     { // NOTE: Draw scene
-	renderer_queue_push(&state->render_queue, &state->ground, &state->checker,
-			    &state->textured, matrix_identity());
+	renderer_queue_push(&state->render_queue, &state->ground,
+			    &state->ground_material, matrix_identity());
 	
 	int i;
 	for(i = 0; i < state->created_cube_count; i++)
@@ -177,8 +189,7 @@ game_update_and_render(game_state* state)
 	    vector3 position = *(state->created_cube_positions + i);
 	    matrix4 transform = matrix_translate(position.x, position.y, position.z);
 	
-	    renderer_queue_push(&state->render_queue, &state->cup, 0,
-				&state->visualize_normals, transform);
+	    renderer_queue_push(&state->render_queue, &state->cup, &state->cup_material, transform);
 	}
 
 	float right = (float)state->screen_width * 0.5f;
@@ -196,8 +207,8 @@ game_update_and_render(game_state* state)
 
     { // NOTE: Draw UI
 	matrix4 transform = matrix_scale(4.0f, 4.0f, 1.0f);
-	renderer_queue_push(&state->render_queue, &state->pointer, &state->checker,
-			    &state->textured, transform);
+	renderer_queue_push(&state->render_queue, &state->pointer,
+			    &state->pointer_material, transform);
 
 	char* sample_text = "This is just a sample text.";
 	vector2 text_size = font_measure_text(&state->deja_vu.data, 32.0f, sample_text, 1);
