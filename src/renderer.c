@@ -365,6 +365,21 @@ renderer_queue_process(render_queue* queue, matrix4 projection, matrix4 view)
 	{
 	    gl->glUseProgram(shader->program);
 	    renderer_apply_uniforms(gl, shader, &queue->uniforms);
+
+	    if(shader->transparent)
+	    {
+		glDisable(GL_DEPTH_TEST);
+		
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	    }
+	    else
+	    {
+		glEnable(GL_DEPTH_TEST);
+		glDepthFunc(GL_LEQUAL);
+		
+		glDisable(GL_BLEND);
+	    }
 	    
 	    bound_shader = shader;
 	}

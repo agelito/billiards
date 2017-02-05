@@ -63,8 +63,7 @@ int main(int argc, char* argv[])
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
     
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LEQUAL);
+    
 
     renderer_check_error();
 

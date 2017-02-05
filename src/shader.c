@@ -30,10 +30,12 @@ print_program_error(gl_functions* gl, GLuint program)
 }
 
 shader_program
-load_shader(gl_functions* gl, char* vertex_path, char* fragment_path)
+load_shader(gl_functions* gl, char* vertex_path, char* fragment_path, bool32 transparent)
 {
     shader_program shader;
 
+    shader.transparent = transparent;
+    
     read_file vertex_source = platform_read_file(vertex_path, 1);
     read_file fragment_source = platform_read_file(fragment_path, 1);
 

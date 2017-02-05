@@ -4,6 +4,7 @@
 typedef struct shader_uniform shader_uniform;
 typedef struct shader_reflection shader_reflection;
 typedef struct shader_uniform_data shader_uniform_data;
+typedef struct shader_program shader_program;
 
 typedef enum
 {
@@ -43,14 +44,15 @@ struct shader_reflection
     shader_uniform* uniforms;
 };
 
-typedef struct
+struct shader_program
 {
     int source_hash;
     GLuint vertex;
     GLuint fragment;
     GLuint program;
     shader_reflection info;
-} shader_program;
+    bool32 transparent;
+};
 
 typedef struct uniform_data_location_list
 {
@@ -69,7 +71,7 @@ typedef struct
 } shader_uniform_group;
 
 shader_program
-load_shader(gl_functions* gl, char* vertex_path, char* fragment_path);
+load_shader(gl_functions* gl, char* vertex_path, char* fragment_path, bool32 transparent);
 
 size_t
 shader_data_type_size(shader_data_type type, int count);

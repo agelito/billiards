@@ -27,12 +27,18 @@ game_initialize(game_state* state)
 	platform_log("load shaders\n");
 	
 	char* vertex_shader = "shaders/simple.vert";
-	state->textured            = load_shader(gl, vertex_shader, "shaders/textured.frag");
-	state->color_blend         = load_shader(gl, vertex_shader, "shaders/color_blend.frag");
-	state->text                = load_shader(gl, vertex_shader, "shaders/text.frag");
-	state->visualize_normals   = load_shader(gl, vertex_shader, "shaders/normals_visualize.frag");
-	state->visualize_colors    = load_shader(gl, vertex_shader, "shaders/colors_visualize.frag");
-	state->visualize_texcoords = load_shader(gl, vertex_shader, "shaders/texcoords_visualize.frag");
+	state->textured =
+	    load_shader(gl, vertex_shader, "shaders/textured.frag", 0);
+	state->color_blend =
+	    load_shader(gl, vertex_shader, "shaders/color_blend.frag", 0);
+	state->text =
+	    load_shader(gl, vertex_shader, "shaders/text.frag", 1);
+	state->visualize_normals =
+	    load_shader(gl, vertex_shader, "shaders/normals_visualize.frag", 0);
+	state->visualize_colors =
+	    load_shader(gl, vertex_shader, "shaders/colors_visualize.frag", 0);
+	state->visualize_texcoords =
+	    load_shader(gl, vertex_shader, "shaders/texcoords_visualize.frag", 0);
 	renderer_check_error();
     }
 
