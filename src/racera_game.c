@@ -21,31 +21,32 @@ game_initialize(game_state* state)
     state->gl = load_gl_functions();
     gl_functions* gl = &state->gl;
 
-    state->render_queue = renderer_queue_create(gl, KB(64));
+    state->render_queue = renderer_queue_create(gl, KB(64), KB(16));
 
     { // NOTE: Load shaders
 	char* vertex_shader = "shaders/simple.vert";
 	state->textured            = load_shader(gl, vertex_shader, "shaders/textured.frag");
 	state->color_blend         = load_shader(gl, vertex_shader, "shaders/color_blend.frag");
+	state->text                = load_shader(gl, vertex_shader, "shaders/text.frag");
 	state->visualize_normals   = load_shader(gl, vertex_shader, "shaders/normals_visualize.frag");
 	state->visualize_colors    = load_shader(gl, vertex_shader, "shaders/colors_visualize.frag");
 	state->visualize_texcoords = load_shader(gl, vertex_shader, "shaders/texcoords_visualize.frag");
     }
 
     state->ground =
-	load_mesh(gl, mesh_create_plane_xz(100.0f, 100));
+	load_mesh(gl, mesh_create_plane_xz(100.0f, 100), 0);
     mesh_data_free(&state->ground.data);
     
-    state->cube = load_mesh(gl, mesh_create_cube(1.0f));
+    state->cube = load_mesh(gl, mesh_create_cube(1.0f), 0);
     mesh_data_free(&state->cube.data);
 
-    state->triangle = load_mesh(gl, mesh_create_triangle(1.0f));
+    state->triangle = load_mesh(gl, mesh_create_triangle(1.0f), 0);
     mesh_data_free(&state->triangle.data);
 
-    state->pointer = load_mesh(gl, mesh_create_circle(1.0f, 5));
+    state->pointer = load_mesh(gl, mesh_create_circle(1.0f, 5), 0);
     mesh_data_free(&state->pointer.data);
 
-    state->cup = load_mesh(gl, obj_load_from_file("cup.obj"));
+    state->cup = load_mesh(gl, obj_load_from_file("cup.obj"), 0);
     mesh_data_free(&state->cup.data);
 	
     state->checker = load_texture(gl, texture_create_checker(128, 128, 64));
@@ -171,21 +172,16 @@ game_update_and_render(game_state* state)
 	renderer_queue_push(&state->render_queue, &state->pointer, &state->checker,
 			    &state->textured, transform);
 
-	float half_width = (float)state->screen_width * 0.5f;
-	float half_height = (float)state->screen_height * 0.5f;
+	char* sample_text = "This is just a sample text.";
+	vector2 text_size = font_measure_text(&state->deja_vu.data, 32.0f, sample_text, 1);
 	
-	float triangle_size = 128.0f;
-	matrix4 triangle_translate = matrix_translate(-half_width + triangle_size * 0.5f,
-						      half_height - triangle_size * 0.5f, 0.0f);
-	
-	matrix4 triangle_scale = matrix_scale(triangle_size, triangle_size, 1.0f);
-	matrix4 triangle_transform = matrix_multiply(triangle_translate, triangle_scale);
-	renderer_queue_push(&state->render_queue, &state->triangle, &state->smiley,
-			    &state->textured, triangle_transform);
+	matrix4 text_transform =
+	    matrix_translate(-text_size.x * 0.5f, (real32)state->screen_height * 0.40f, 0.0f);
+	renderer_queue_push_text(&state->render_queue, sample_text, &state->deja_vu,
+				 32.0f, &state->text, text_transform);
 
-	matrix4 projection =
-	    matrix_orthographic((float)state->screen_width,
-				(float)state->screen_height, 1.0f, 100.0f);
+	matrix4 projection = matrix_orthographic((float)state->screen_width,
+						 (float)state->screen_height, 1.0f, 100.0f);
 
 	vector3 eye = (vector3){{{0.0f, 0.0f, -1.0f}}};
 	vector3 at = (vector3){0};

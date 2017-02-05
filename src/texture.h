@@ -5,7 +5,8 @@ typedef struct
 {
     int width;
     int height;
-    unsigned char* colors;
+    uint8 components;
+    uint8* colors;
 } texture_data;
 
 typedef struct

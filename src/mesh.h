@@ -68,7 +68,8 @@ struct loaded_mesh
     mesh_data data;
 };
 
-loaded_mesh load_mesh(gl_functions* gl, mesh_data data);
+loaded_mesh load_mesh(gl_functions* gl, mesh_data data, bool32 dynamic);
+void update_mesh(gl_functions* gl, loaded_mesh* mesh, uint32 offset, uint32 count);
 
 mesh_data mesh_create_triangle(float side);
 mesh_data mesh_create_circle(float radius, int subdivisions);

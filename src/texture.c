@@ -19,8 +19,14 @@ load_texture(gl_functions* gl, texture_data data)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, data.width, data.height,
-		 0, GL_RGBA, GL_UNSIGNED_BYTE, data.colors);
+    GLenum texture_format = GL_RGB;
+    if(data.components == 4)
+    {
+	texture_format = GL_RGBA;
+    }
+
+    glTexImage2D(GL_TEXTURE_2D, 0, texture_format, data.width, data.height,
+		 0, texture_format, GL_UNSIGNED_BYTE, data.colors);
     gl->glGenerateMipmap(GL_TEXTURE_2D);
 
     glBindTexture(GL_TEXTURE_2D, 0);
@@ -41,6 +47,7 @@ texture_create_checker(int width, int height, int checker_size)
 
     data.width = width;
     data.height = height;
+    data.components = components_per_pixel;
     data.colors = malloc(pixel_size * width * height);
 
     int i, pixels = width * height;
@@ -102,6 +109,8 @@ texture_create_from_tga(char* path)
 	components_per_pixel = 4;
 	break;
     }
+
+    texture.components = components_per_pixel;
 
     assert(components_per_pixel != 0);
 

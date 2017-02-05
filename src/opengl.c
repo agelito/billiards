@@ -25,6 +25,7 @@ gl_functions load_gl_functions()
     gl.glGenBuffers = GL_PROC_ADDR(glGenBuffers);
     gl.glBindBuffer = GL_PROC_ADDR(glBindBuffer);
     gl.glBufferData = GL_PROC_ADDR(glBufferData);
+    gl.glBufferSubData = GL_PROC_ADDR(glBufferSubData);
     gl.glEnableVertexAttribArray = GL_PROC_ADDR(glEnableVertexAttribArray);
     gl.glVertexAttribPointer = GL_PROC_ADDR(glVertexAttribPointer);
 

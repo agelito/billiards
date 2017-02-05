@@ -10,6 +10,42 @@
 #define glUniformMatrix(type, u, c, d) gl->type(u->location, c, GL_FALSE, (void*)d)
 
 static void
+renderer_check_gl_error()
+{
+    GLenum error;
+    while((error = glGetError()) != GL_NO_ERROR)
+    {
+	char* error_name = "";
+	switch(error)
+	{
+	case GL_INVALID_ENUM:
+	    error_name = "GL_INVALID_ENUM";
+	    break;
+	case GL_INVALID_VALUE:
+	    error_name = "GL_INVALID_VALUE";
+	    break;
+	case GL_INVALID_OPERATION:
+	    error_name = "GL_INVALID_OPERATION";
+	    break;
+	case GL_INVALID_FRAMEBUFFER_OPERATION:
+	    error_name = "GL_INVALID_FRAMEBUFFER_OPERATION";
+	    break;
+	case GL_OUT_OF_MEMORY:
+	    error_name = "GL_OUT_OF_MEMORY";
+	    break;
+	case GL_STACK_UNDERFLOW:
+	    error_name = "GL_STACK_UNDERFLOW";
+	    break;
+	case GL_STACK_OVERFLOW:
+	    error_name = "GL_STACK_OVERFLOW";
+	    break;
+	}
+
+	platform_log("OpenGL Error: %s (%d)\n", error_name, error);
+    }
+}
+
+static void
 renderer_upload_uniform(gl_functions* gl, shader_uniform* uniform, int count, unsigned char* data)
 {
     switch(uniform->type)
@@ -152,7 +188,7 @@ renderer_bind_mesh_buffers(gl_functions* gl, loaded_mesh* mesh, shader_program* 
 }
 
 render_queue
-renderer_queue_create(gl_functions* gl, int capacity)
+renderer_queue_create(gl_functions* gl, int capacity, int text_capacity)
 {
     render_queue queue = (render_queue){0};
     
@@ -164,6 +200,24 @@ renderer_queue_create(gl_functions* gl, int capacity)
 
     queue.uniforms = shader_uniform_group_create(KB(1));
     queue.uniforms_per_object = shader_uniform_group_create(KB(1));
+
+    mesh_data text_mesh_data = (mesh_data){0};
+    text_mesh_data.vertex_count = (text_capacity * 6);
+
+    size_t position_data_size = (text_mesh_data.vertex_count * sizeof(vector3));
+    text_mesh_data.vertices.positions = (vector3*)malloc(position_data_size);
+
+    size_t texcoord_data_size = (text_mesh_data.vertex_count * sizeof(vector2));
+    text_mesh_data.vertices.texcoords = (vector2*)malloc(texcoord_data_size);
+
+    memset(text_mesh_data.vertices.positions, 0, position_data_size);
+    memset(text_mesh_data.vertices.texcoords, 0, texcoord_data_size);
+
+    queue.text_buffer             = load_mesh(gl, text_mesh_data, 1);
+    queue.text_buffer_capacity    = text_mesh_data.vertex_count;
+    queue.text_buffer_count       = 0;
+
+    renderer_check_gl_error();
 
     return queue;
 }
@@ -185,9 +239,133 @@ renderer_queue_push(render_queue* queue, loaded_mesh* mesh, loaded_texture* text
 }
 
 void
+renderer_queue_push_text(render_queue* queue, char* text, loaded_font* font,
+			 real32 font_size, shader_program* shader, matrix4 transform)
+{
+    render_queue_item item;
+    item.mesh                = &queue->text_buffer;
+    item.shader              = shader;
+    item.transform           = transform;
+    
+    int32 cursor_x = 0;
+    int32 cursor_y = 0;
+
+    vector3* vertex_positions =
+	(queue->text_buffer.data.vertices.positions + queue->text_buffer_count);
+    vector2* vertex_texcoords =
+	(queue->text_buffer.data.vertices.texcoords + queue->text_buffer_count);
+
+    uint32 submit_vertex_count = 0;
+
+    real32 one_over_page_width = 0.0f;
+    real32 one_over_page_height = 0.0f;
+    real32 one_over_size = (1.0f / font->data.size);
+    
+    char character, previous = 0;
+    while((character = *text++) != 0)
+    {
+	// TODO: Make sure the text vertex buffer isn't overflowed.
+	
+	font_kerning* kern = font_get_kerning(&font->data, (uint32)previous, (uint32)character);
+	font_character* fc = font_get_character(&font->data, (uint32)character);
+	if(fc != 0)
+	{
+	    loaded_texture* page_texture = (font->textures + fc->page);
+	    if(page_texture != item.texture)
+	    {
+		if(submit_vertex_count)
+		{
+		    item.draw_element_offset = queue->text_buffer_count;
+		    item.draw_element_count  = submit_vertex_count;
+		    
+		    *(queue->items + queue->count++) = item;
+
+		    queue->text_buffer_count += submit_vertex_count;
+
+		    submit_vertex_count = 0;
+		}
+
+		one_over_page_width = (1.0f / page_texture->data.width);
+		one_over_page_height = (1.0f / page_texture->data.height);
+		
+		item.texture = page_texture;
+	    }
+
+	    int32 base_x = cursor_x;
+	    int32 base_y = cursor_y + font->data.baseline;
+
+	    int32 x_min = base_x + fc->offset_x;
+	    int32 x_max = x_min + fc->source_w;
+	    int32 y_max = base_y - fc->offset_y;
+	    int32 y_min = y_max - fc->source_h;
+
+	    if(kern != 0)
+	    {
+		x_min += kern->amount;
+		x_max += kern->amount;
+	    }
+
+	    real32 left   = (real32)x_min * one_over_size * font_size;
+	    real32 right  = (real32)x_max * one_over_size * font_size;
+	    
+	    real32 bottom = (real32)y_min * one_over_size * font_size;
+	    real32 top    = (real32)y_max * one_over_size * font_size;
+
+	    *(vertex_positions + 0) = vector3_create(left, bottom, 0.0f);
+	    *(vertex_positions + 1) = vector3_create(right, bottom, 0.0f);
+	    *(vertex_positions + 2) = vector3_create(left, top, 0.0f);
+	    *(vertex_positions + 3) = vector3_create(right, bottom, 0.0f);
+	    *(vertex_positions + 4) = vector3_create(right, top, 0.0f);
+	    *(vertex_positions + 5) = vector3_create(left, top, 0.0f);
+	    vertex_positions += 6;
+
+	    real32 uv_x0 = one_over_page_width * fc->source_x;
+	    real32 uv_x1 = one_over_page_width * (fc->source_x + fc->source_w);
+
+	    real32 uv_y1 = (one_over_page_height * fc->source_y);
+	    real32 uv_y0 = (one_over_page_height * (fc->source_y + fc->source_h));
+
+	    *(vertex_texcoords + 0) = vector2_create(uv_x0, uv_y0);
+	    *(vertex_texcoords + 1) = vector2_create(uv_x1, uv_y0);
+	    *(vertex_texcoords + 2) = vector2_create(uv_x0, uv_y1);
+	    *(vertex_texcoords + 3) = vector2_create(uv_x1, uv_y0);
+	    *(vertex_texcoords + 4) = vector2_create(uv_x1, uv_y1);
+	    *(vertex_texcoords + 5) = vector2_create(uv_x0, uv_y1);
+	    vertex_texcoords += 6;
+
+	    submit_vertex_count += 6;
+
+	    cursor_x += fc->advance;
+	}
+	else
+	{
+	    if(character == '\n')
+	    {
+		cursor_x = 0;
+		cursor_y -= font->data.line_height;
+	    }
+	}
+
+	previous = character;
+    }
+
+    if(submit_vertex_count)
+    {
+	item.draw_element_offset = queue->text_buffer_count;
+	item.draw_element_count  = submit_vertex_count;	
+	
+	*(queue->items + queue->count++) = item;
+
+	queue->text_buffer_count += submit_vertex_count;
+	submit_vertex_count = 0;
+    }
+}
+
+void
 renderer_queue_clear(render_queue* queue)
 {
     queue->count = 0;
+    queue->text_buffer_count = 0;
 }
 
 void
@@ -198,6 +376,11 @@ renderer_queue_process(render_queue* queue, matrix4 projection, matrix4 view)
     loaded_mesh* bound_mesh = 0;
     loaded_texture* bound_texture = 0;
     shader_program* bound_shader = 0;
+
+    if(queue->text_buffer_count)
+    {
+	update_mesh(queue->gl, &queue->text_buffer, 0, queue->text_buffer_count);
+    }
 
     shader_uniform_set_data(&queue->uniforms, hash_string("projection"),
 			    projection.data, sizeof(matrix4));
@@ -254,9 +437,11 @@ renderer_queue_process(render_queue* queue, matrix4 projection, matrix4 view)
 	}
 
 	renderer_apply_uniforms(gl, shader, &queue->uniforms_per_object);
-	
+
 	glDrawArrays(GL_TRIANGLES, item->draw_element_offset, item->draw_element_count);
     }
+
+    renderer_check_gl_error();
 }
 
 #undef glUniformScalar

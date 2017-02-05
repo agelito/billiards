@@ -12,13 +12,20 @@
 #define create_vertex(x, y, z, color, uv_x, uv_y) (vertex){{{{x, y, z}}}, color, {{{uv_x, uv_y}}}}
 
 loaded_mesh
-load_mesh(gl_functions* gl, mesh_data data)
+load_mesh(gl_functions* gl, mesh_data data, bool32 dynamic)
 {
     loaded_mesh mesh = (loaded_mesh){0};
     mesh.data = data;
     
     GLuint* vertex_buffer = 0;
     size_t vertex_buffer_size = 0;
+
+    GLenum usage = GL_STATIC_DRAW;
+
+    if(dynamic)
+    {
+	usage = GL_DYNAMIC_DRAW;
+    }
     
     if(data.vertices.positions)
     {
@@ -28,7 +35,7 @@ load_mesh(gl_functions* gl, mesh_data data)
 	
 	vertex_buffer_size = (sizeof(vector3) * data.vertex_count);
 	gl->glBufferData(GL_ARRAY_BUFFER, vertex_buffer_size,
-		      data.vertices.positions, GL_STATIC_DRAW);
+		      data.vertices.positions, usage);
 
 	VA_INCLUDE(mesh.attribute_mask, VA_POSITIONS_BIT);
     }
@@ -41,7 +48,7 @@ load_mesh(gl_functions* gl, mesh_data data)
 
 	vertex_buffer_size = (sizeof(vector3) * data.vertex_count);
 	gl->glBufferData(GL_ARRAY_BUFFER, vertex_buffer_size,
-			  data.vertices.normals, GL_STATIC_DRAW);
+			  data.vertices.normals, usage);
 
 	VA_INCLUDE(mesh.attribute_mask, VA_NORMALS_BIT);
     }
@@ -54,7 +61,7 @@ load_mesh(gl_functions* gl, mesh_data data)
 
 	vertex_buffer_size = (sizeof(vector2) * data.vertex_count);
 	gl->glBufferData(GL_ARRAY_BUFFER, vertex_buffer_size,
-			  data.vertices.texcoords, GL_STATIC_DRAW);
+			  data.vertices.texcoords, usage);
 	
 	VA_INCLUDE(mesh.attribute_mask, VA_TEXCOORDS_BIT);
     }
@@ -67,7 +74,7 @@ load_mesh(gl_functions* gl, mesh_data data)
 
 	vertex_buffer_size = (sizeof(color) * data.vertex_count);
 	gl->glBufferData(GL_ARRAY_BUFFER, vertex_buffer_size,
-			  data.vertices.colors, GL_STATIC_DRAW);
+			  data.vertices.colors, usage);
 
 	VA_INCLUDE(mesh.attribute_mask, VA_COLORS_BIT);
     }
@@ -75,6 +82,60 @@ load_mesh(gl_functions* gl, mesh_data data)
     gl->glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     return mesh;
+}
+
+void
+update_mesh(gl_functions* gl, loaded_mesh* mesh, uint32 offset, uint32 count)
+{
+    GLuint* vertex_buffer = 0;
+    size_t vertex_buffer_offset = 0;;
+    size_t vertex_buffer_size = 0;
+    
+    if(VA_ISSET(mesh->attribute_mask, VA_POSITIONS_BIT))
+    {
+	vertex_buffer = (mesh->vertex_buffer + vertex_attributes_positions);
+	gl->glBindBuffer(GL_ARRAY_BUFFER, *vertex_buffer);
+
+	vertex_buffer_offset = (offset * sizeof(vector3));
+	vertex_buffer_size = (count * sizeof(vector3));
+	gl->glBufferSubData(GL_ARRAY_BUFFER, vertex_buffer_offset, vertex_buffer_size,
+			    mesh->data.vertices.positions);
+    }
+
+    if(VA_ISSET(mesh->attribute_mask, VA_NORMALS_BIT))
+    {
+	vertex_buffer = (mesh->vertex_buffer + vertex_attributes_normals);
+	gl->glBindBuffer(GL_ARRAY_BUFFER, *vertex_buffer);
+
+	vertex_buffer_offset = (offset * sizeof(vector3));
+	vertex_buffer_size = (count * sizeof(vector3));
+	gl->glBufferSubData(GL_ARRAY_BUFFER, vertex_buffer_offset, vertex_buffer_size,
+			    mesh->data.vertices.normals);
+    }
+
+    if(VA_ISSET(mesh->attribute_mask, VA_TEXCOORDS_BIT))
+    {
+	vertex_buffer = (mesh->vertex_buffer + vertex_attributes_texcoords);
+	gl->glBindBuffer(GL_ARRAY_BUFFER, *vertex_buffer);
+
+	vertex_buffer_offset = (offset * sizeof(vector2));
+	vertex_buffer_size = (count * sizeof(vector2));
+	gl->glBufferSubData(GL_ARRAY_BUFFER, vertex_buffer_offset, vertex_buffer_size,
+			    mesh->data.vertices.texcoords);
+    }
+
+    if(VA_ISSET(mesh->attribute_mask, VA_COLORS_BIT))
+    {
+	vertex_buffer = (mesh->vertex_buffer + vertex_attributes_colors);
+	gl->glBindBuffer(GL_ARRAY_BUFFER, *vertex_buffer);
+
+	vertex_buffer_offset = (offset * sizeof(vector3));
+	vertex_buffer_size = (count * sizeof(vector3));
+	gl->glBufferSubData(GL_ARRAY_BUFFER, vertex_buffer_offset, vertex_buffer_size,
+			    mesh->data.vertices.colors);
+    }
+
+    gl->glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 mesh_data

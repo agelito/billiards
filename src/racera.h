@@ -40,6 +40,7 @@ struct game_state
 
     shader_program textured;
     shader_program color_blend;
+    shader_program text;
     shader_program visualize_colors;
     shader_program visualize_normals;
     shader_program visualize_texcoords;
