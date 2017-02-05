@@ -184,11 +184,13 @@ game_update_and_render(game_state* state)
 	float right = (float)state->screen_width * 0.5f;
 	float top = (float)state->screen_height * 0.5f;
 	matrix4 projection = matrix_perspective(80.0f, right / top, 0.01f, 100.0f);
+	renderer_queue_set_projection(&state->render_queue, projection);
 
 	matrix4 view = matrix_look_fps(state->camera_position, state->camera_pitch_yaw_roll.x,
 				       state->camera_pitch_yaw_roll.y);
+	renderer_queue_set_view(&state->render_queue, view);
 
-	renderer_queue_process(&state->render_queue, projection, view);
+	renderer_queue_process(&state->render_queue);
 	renderer_queue_clear(&state->render_queue);
     }
 
@@ -207,14 +209,16 @@ game_update_and_render(game_state* state)
 
 	matrix4 projection = matrix_orthographic((float)state->screen_width,
 						 (float)state->screen_height, 1.0f, 100.0f);
+	renderer_queue_set_projection(&state->render_queue, projection);
 
 	vector3 eye = (vector3){{{0.0f, 0.0f, -1.0f}}};
 	vector3 at = (vector3){0};
 	vector3 up = (vector3){{{0.0f, 1.0f, 0.0f}}};
 	
 	matrix4 view = matrix_look_at(eye, at, up);
+	renderer_queue_set_view(&state->render_queue, view);
     
-	renderer_queue_process(&state->render_queue, projection, view);
+	renderer_queue_process(&state->render_queue);
 	renderer_queue_clear(&state->render_queue);
     }
 }

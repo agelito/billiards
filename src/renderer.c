@@ -333,7 +333,7 @@ renderer_queue_clear(render_queue* queue)
 }
 
 void
-renderer_queue_process(render_queue* queue, matrix4 projection, matrix4 view)
+renderer_queue_process(render_queue* queue)
 {
     gl_functions* gl = queue->gl;
     
@@ -346,10 +346,7 @@ renderer_queue_process(render_queue* queue, matrix4 projection, matrix4 view)
 	update_mesh(queue->gl, &queue->text_buffer, 0, queue->text_buffer_count);
     }
 
-    shader_uniform_set_data(&queue->uniforms, hash_string("projection"),
-			    projection.data, sizeof(matrix4));
-    shader_uniform_set_data(&queue->uniforms, hash_string("view"),
-			    view.data, sizeof(matrix4));
+    
 
     vector3 tint_color = (vector3){{{1.0f, 1.0f, 1.0f}}};
     shader_uniform_set_data(&queue->uniforms, hash_string("tint_color"),
@@ -421,6 +418,20 @@ renderer_queue_process(render_queue* queue, matrix4 projection, matrix4 view)
     }
 
     renderer_check_error();
+}
+
+void
+renderer_queue_set_projection(render_queue* queue, matrix4 projection)
+{
+    shader_uniform_set_data(&queue->uniforms, hash_string("projection"),
+			    projection.data, sizeof(matrix4));
+}
+
+void
+renderer_queue_set_view(render_queue* queue, matrix4 view)
+{
+    shader_uniform_set_data(&queue->uniforms, hash_string("view"),
+			    view.data, sizeof(matrix4));
 }
 
 void
