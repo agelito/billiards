@@ -10,42 +10,6 @@
 #define glUniformMatrix(type, u, c, d) gl->type(u->location, c, GL_FALSE, (void*)d)
 
 static void
-renderer_check_gl_error()
-{
-    GLenum error;
-    while((error = glGetError()) != GL_NO_ERROR)
-    {
-	char* error_name = "";
-	switch(error)
-	{
-	case GL_INVALID_ENUM:
-	    error_name = "GL_INVALID_ENUM";
-	    break;
-	case GL_INVALID_VALUE:
-	    error_name = "GL_INVALID_VALUE";
-	    break;
-	case GL_INVALID_OPERATION:
-	    error_name = "GL_INVALID_OPERATION";
-	    break;
-	case GL_INVALID_FRAMEBUFFER_OPERATION:
-	    error_name = "GL_INVALID_FRAMEBUFFER_OPERATION";
-	    break;
-	case GL_OUT_OF_MEMORY:
-	    error_name = "GL_OUT_OF_MEMORY";
-	    break;
-	case GL_STACK_UNDERFLOW:
-	    error_name = "GL_STACK_UNDERFLOW";
-	    break;
-	case GL_STACK_OVERFLOW:
-	    error_name = "GL_STACK_OVERFLOW";
-	    break;
-	}
-
-	platform_log("OpenGL Error: %s (%d)\n", error_name, error);
-    }
-}
-
-static void
 renderer_upload_uniform(gl_functions* gl, shader_uniform* uniform, int count, unsigned char* data)
 {
     switch(uniform->type)
@@ -217,7 +181,7 @@ renderer_queue_create(gl_functions* gl, int capacity, int text_capacity)
     queue.text_buffer_capacity    = text_mesh_data.vertex_count;
     queue.text_buffer_count       = 0;
 
-    renderer_check_gl_error();
+    renderer_check_error();
 
     return queue;
 }
@@ -441,7 +405,43 @@ renderer_queue_process(render_queue* queue, matrix4 projection, matrix4 view)
 	glDrawArrays(GL_TRIANGLES, item->draw_element_offset, item->draw_element_count);
     }
 
-    renderer_check_gl_error();
+    renderer_check_error();
+}
+
+void
+renderer_check_error()
+{
+    GLenum error;
+    while((error = glGetError()) != GL_NO_ERROR)
+    {
+	char* error_name = "";
+	switch(error)
+	{
+	case GL_INVALID_ENUM:
+	    error_name = "GL_INVALID_ENUM";
+	    break;
+	case GL_INVALID_VALUE:
+	    error_name = "GL_INVALID_VALUE";
+	    break;
+	case GL_INVALID_OPERATION:
+	    error_name = "GL_INVALID_OPERATION";
+	    break;
+	case GL_INVALID_FRAMEBUFFER_OPERATION:
+	    error_name = "GL_INVALID_FRAMEBUFFER_OPERATION";
+	    break;
+	case GL_OUT_OF_MEMORY:
+	    error_name = "GL_OUT_OF_MEMORY";
+	    break;
+	case GL_STACK_UNDERFLOW:
+	    error_name = "GL_STACK_UNDERFLOW";
+	    break;
+	case GL_STACK_OVERFLOW:
+	    error_name = "GL_STACK_OVERFLOW";
+	    break;
+	}
+
+	platform_log("OpenGL Error: %s (%d)\n", error_name, error);
+    }
 }
 
 #undef glUniformScalar

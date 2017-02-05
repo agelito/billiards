@@ -24,6 +24,8 @@ game_initialize(game_state* state)
     state->render_queue = renderer_queue_create(gl, KB(64), KB(16));
 
     { // NOTE: Load shaders
+	platform_log("load shaders\n");
+	
 	char* vertex_shader = "shaders/simple.vert";
 	state->textured            = load_shader(gl, vertex_shader, "shaders/textured.frag");
 	state->color_blend         = load_shader(gl, vertex_shader, "shaders/color_blend.frag");
@@ -31,32 +33,49 @@ game_initialize(game_state* state)
 	state->visualize_normals   = load_shader(gl, vertex_shader, "shaders/normals_visualize.frag");
 	state->visualize_colors    = load_shader(gl, vertex_shader, "shaders/colors_visualize.frag");
 	state->visualize_texcoords = load_shader(gl, vertex_shader, "shaders/texcoords_visualize.frag");
+	renderer_check_error();
     }
 
-    state->ground =
-	load_mesh(gl, mesh_create_plane_xz(100.0f, 100), 0);
-    mesh_data_free(&state->ground.data);
+    { // NOTE: Load Meshes
+	platform_log("load meshes\n");
+	
+	state->ground =
+	    load_mesh(gl, mesh_create_plane_xz(100.0f, 100), 0);
+	mesh_data_free(&state->ground.data);
     
-    state->cube = load_mesh(gl, mesh_create_cube(1.0f), 0);
-    mesh_data_free(&state->cube.data);
+	state->cube = load_mesh(gl, mesh_create_cube(1.0f), 0);
+	mesh_data_free(&state->cube.data);
 
-    state->triangle = load_mesh(gl, mesh_create_triangle(1.0f), 0);
-    mesh_data_free(&state->triangle.data);
+	state->triangle = load_mesh(gl, mesh_create_triangle(1.0f), 0);
+	mesh_data_free(&state->triangle.data);
 
-    state->pointer = load_mesh(gl, mesh_create_circle(1.0f, 5), 0);
-    mesh_data_free(&state->pointer.data);
+	state->pointer = load_mesh(gl, mesh_create_circle(1.0f, 5), 0);
+	mesh_data_free(&state->pointer.data);
 
-    state->cup = load_mesh(gl, obj_load_from_file("cup.obj"), 0);
-    mesh_data_free(&state->cup.data);
+	state->cup = load_mesh(gl, obj_load_from_file("cup.obj"), 0);
+	mesh_data_free(&state->cup.data);
+
+	renderer_check_error();
+    }
+
+    { // NOTE: Load Textures
+	platform_log("load textures\n");
 	
-    state->checker = load_texture(gl, texture_create_checker(128, 128, 64));
-    texture_data_free(&state->checker.data);
+	state->checker = load_texture(gl, texture_create_checker(128, 128, 64));
+	texture_data_free(&state->checker.data);
 	
-    state->smiley = load_texture(gl, texture_create_from_tga("smiley_rle.tga"));
-    texture_data_free(&state->smiley.data);
+	state->smiley = load_texture(gl, texture_create_from_tga("smiley_rle.tga"));
+	texture_data_free(&state->smiley.data);
+
+	renderer_check_error();
+    }
 
     { // NOTE: Load Fonts
+	platform_log("load_fonts\n");
+	
 	state->deja_vu = load_font(gl, font_create_from_file("fonts/DejaVu.fnt"));
+
+	renderer_check_error();
     }
 
     state->camera_position = (vector3){{{0.0f, 1.0f, -2.0f}}};

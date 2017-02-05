@@ -56,4 +56,7 @@ renderer_queue_clear(render_queue* queue);
 void
 renderer_queue_process(render_queue* queue, matrix4 projection, matrix4 view);
 
+void
+renderer_check_error();
+
 #endif // RENDERER_H_INCLUDED

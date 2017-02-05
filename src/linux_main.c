@@ -66,6 +66,8 @@ int main(int argc, char* argv[])
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
 
+    renderer_check_error();
+
     game_state racera_state = (game_state){0};
 
     uint64 elapsed_time = 0;
