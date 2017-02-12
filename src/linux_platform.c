@@ -173,3 +173,14 @@ platform_log(char* format, ...)
     vfprintf(stdout, format, args);
     va_end(args);
 }
+
+long
+platform_format(char* destination, long size, char* format, ...)
+{
+    va_list args;
+    va_start(args, format);
+    int result = vsnprintf(destination, size, format, args);
+    va_end(args);
+
+    return (long)result;
+}

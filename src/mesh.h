@@ -71,6 +71,7 @@ struct loaded_mesh
 loaded_mesh load_mesh(gl_functions* gl, mesh_data data, bool32 dynamic);
 void update_mesh(gl_functions* gl, loaded_mesh* mesh, uint32 offset, uint32 count);
 
+mesh_data mesh_create_quad();
 mesh_data mesh_create_triangle(float side);
 mesh_data mesh_create_circle(float radius, int subdivisions);
 mesh_data mesh_create_cube(float side);

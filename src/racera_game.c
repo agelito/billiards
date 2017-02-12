@@ -29,8 +29,8 @@ game_initialize(game_state* state)
 	char* vertex_shader = "shaders/simple.vert";
 	state->textured =
 	    load_shader(gl, vertex_shader, "shaders/textured.frag", 0);
-	state->color_blend =
-	    load_shader(gl, vertex_shader, "shaders/color_blend.frag", 0);
+	state->colored =
+	    load_shader(gl, vertex_shader, "shaders/colored.frag", 1);
 	state->text =
 	    load_shader(gl, vertex_shader, "shaders/text.frag", 1);
 	state->visualize_normals =
@@ -60,6 +60,9 @@ game_initialize(game_state* state)
 
 	state->cup = load_mesh(gl, obj_load_from_file("cup.obj"), 0);
 	mesh_data_free(&state->cup.data);
+
+	state->quad = load_mesh(gl, mesh_create_quad(), 0);
+	mesh_data_free(&state->quad.data);
 
 	renderer_check_error();
     }
@@ -94,6 +97,10 @@ game_initialize(game_state* state)
 		
 	state->pointer_material = material_create(&state->textured, KB(1));
 	material_set_texture(&state->pointer_material, "main_texture", &state->smiley);
+
+	state->text_background = material_create(&state->colored, KB(1));
+	material_set_color(&state->text_background, "color",
+			   vector4_create(0.0f, 0.0f, 0.0f, 0.75f));
     }
     
     state->camera_position = (vector3){{{0.0f, 1.0f, -2.0f}}};
@@ -210,12 +217,26 @@ game_update_and_render(game_state* state)
 	renderer_queue_push(&state->render_queue, &state->pointer,
 			    &state->pointer_material, transform);
 
-	char* sample_text = "This is just a sample text.";
-	vector2 text_size = font_measure_text(&state->deja_vu.data, 32.0f, sample_text, 1);
+	char timings_text[256];
+	platform_format(timings_text, 256, "frame time: %f", state->time_frame);
+
+	real32 text_left = (real32)state->screen_width * -0.48f;
+	real32 text_top = (real32)state->screen_height * 0.45f;
+	vector2 text_size = font_measure_text(&state->deja_vu.data, 32.0f, timings_text, 1);
 	
-	matrix4 text_transform =
-	    matrix_translate(-text_size.x * 0.5f, (real32)state->screen_height * 0.40f, 0.0f);
-	renderer_queue_push_text(&state->render_queue, sample_text, &state->deja_vu,
+	
+	matrix4 text_transform = matrix_translate(text_left, text_top, 0.0f);
+
+	matrix4 text_background_translate =
+	    matrix_translate(text_left + text_size.x * 0.5f, text_top, 0.0f);
+	matrix4 text_background_scale =
+	    matrix_scale(text_size.x, text_size.y, 1.0f);
+	matrix4 text_background_transform =
+	    matrix_multiply(text_background_translate, text_background_scale);
+
+	renderer_queue_push(&state->render_queue, &state->quad,
+			    &state->text_background, text_background_transform);
+	renderer_queue_push_text(&state->render_queue, timings_text, &state->deja_vu,
 				 32.0f, &state->text, text_transform);
 
 	matrix4 projection = matrix_orthographic((float)state->screen_width,

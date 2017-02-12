@@ -55,4 +55,7 @@ platform_copy_memory(void* destination, void* source, long size);
 void
 platform_log(char* format, ...);
 
+long
+platform_format(char* destination, long size, char* format, ...);
+
 #endif // PLATFORM_H_INCLUDED

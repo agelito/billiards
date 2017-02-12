@@ -115,10 +115,10 @@ material_set_texture(material* material, char* name, loaded_texture* texture)
 }
 
 void
-material_set_color(material* material, char* name, vector3 color)
+material_set_color(material* material, char* name, vector4 color)
 {
-    material_set_named_value(material, name, &color, material_data_type_vector3,
-			     sizeof(vector3));
+    material_set_named_value(material, name, &color, material_data_type_vector4,
+			     sizeof(vector4));
 }
 
 void

@@ -31,6 +31,19 @@ typedef struct
 
 typedef struct
 {
+    union {
+	struct {
+	    float x;
+	    float y;
+	    float z;
+	    float w;
+	};
+	float data[4];
+    };
+} vector4;
+
+typedef struct
+{
     float data[16];
 } matrix4;
 
@@ -47,6 +60,8 @@ vector3 vector3_scale(vector3 a, float s);
 float vector3_dot(vector3 a, vector3 b);
 
 vector3 vector3_matrix_multiply(matrix4 matrix, vector3 input);
+
+vector4 vector4_create(float x, float y, float z, float w);
 
 matrix4 matrix_identity();
 matrix4 matrix_rotation_x(float rotation);

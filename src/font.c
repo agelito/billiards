@@ -37,9 +37,9 @@ load_font(gl_functions* gl, font_data data)
 	texture_data_free(&page_texture.data);
 	*(font.textures + page_index) = page_texture;
 
-	material page_material = material_create(0, 76);
+	material page_material = material_create(0, 80);
 	material_set_texture(&page_material, "main_texture", (font.textures + page_index));
-	material_set_color(&page_material, "tint_color", vector3_create(1.0f, 1.0f, 1.0f));
+	material_set_color(&page_material, "tint_color", vector4_create(1.0f, 1.0f, 1.0f, 1.0f));
 	*(font.materials + page_index) = page_material;
     }
     

@@ -110,6 +110,16 @@ vector3_matrix_multiply(matrix4 matrix, vector3 input)
     return result;
 }
 
+vector4 vector4_create(float x, float y, float z, float w)
+{
+    vector4 result;
+    result.x = x;
+    result.y = y;
+    result.z = z;
+    result.w = w;
+    return result;
+}
+
 matrix4
 matrix_identity()
 {

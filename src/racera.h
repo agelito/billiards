@@ -39,7 +39,7 @@ struct game_state
     gl_functions gl;
 
     shader_program textured;
-    shader_program color_blend;
+    shader_program colored;
     shader_program text;
     shader_program visualize_colors;
     shader_program visualize_normals;
@@ -51,6 +51,7 @@ struct game_state
     loaded_mesh cube;
     loaded_mesh triangle;
     loaded_mesh pointer;
+    loaded_mesh quad;
     loaded_mesh cup;
 
     loaded_texture checker;
@@ -61,6 +62,7 @@ struct game_state
     material ground_material;
     material cup_material;
     material pointer_material;
+    material text_background;
 
     vector3 camera_position;
     vector3 camera_pitch_yaw_roll;
