@@ -53,7 +53,7 @@ xinput2_init(Display* display)
     int selected_axis_count = 0;
 
     int device_count;
-    XIDeviceInfo* devices = XIQueryDevice(display, XIAllDevices, &device_count);
+    XIDeviceInfo* devices = XIQueryDevice(display, XIMasterPointer, &device_count);
     while(device_count--)
     {
 	XIDeviceInfo* device = (devices + device_count);
