@@ -3,6 +3,8 @@
 #include "platform.h"
 #include "font.h"
 
+#include <float.h>
+
 #define BM_FONT_BLOCK_INFO            1
 #define BM_FONT_BLOCK_COMMON          2
 #define BM_FONT_BLOCK_PAGES           3
@@ -245,58 +247,68 @@ font_get_kerning(font_data* font, unsigned int first, unsigned int second)
 }
 
 vector2
-font_measure_text(font_data* font, real32 size, char* text, bool32 kerning_enabled)
+font_measure_text(font_data* font, real32 font_size, char* text)
 {
     int32 cursor_x = 0;
     int32 cursor_y = 0;
 
-    float max_width = 0.0f;
-    float max_height = font->line_height;
-    float one_over_font_size = 1.0f / font->size;
+    real32 one_over_size = (1.0f / font->size);
 
-    char current, previous = 0;
-    while((current = *text++) != 0)
+    real32 measured_max_x = FLT_MIN;
+    real32 measured_min_x = FLT_MAX;
+    real32 measured_max_y = FLT_MIN;
+    real32 measured_min_y = FLT_MAX;
+
+    char character, previous = 0;
+    while((character = *text++) != 0)
     {
-        if(current == '\n')
-        {
-            if(cursor_x > max_width) max_width = (real32)cursor_x;
+	font_kerning* kern = font_get_kerning(font, (uint32)previous, (uint32)character);
+	font_character* fc = font_get_character(font, (uint32)character);
+	if(fc != 0)
+	{
+	    int32 base_x = cursor_x;
+	    int32 base_y = cursor_y + font->baseline;
 
-            max_height += font->line_height;
+	    int32 x_min = base_x + fc->offset_x;
+	    int32 x_max = x_min + fc->source_w;
+	    int32 y_max = base_y - fc->offset_y;
+	    int32 y_min = y_max - fc->source_h;
+
+	    if(kern != 0)
+	    {
+		x_min += kern->amount;
+		x_max += kern->amount;
+	    }
+
+	    real32 left   = (real32)x_min * one_over_size;
+	    real32 right  = (real32)x_max * one_over_size;
 	    
-            cursor_x = 0;
-            cursor_y -= font->line_height;
-            continue;
-        }
-	    
-        font_character* character = font_get_character(font, (unsigned int)current);
-        if(character == 0) continue;
+	    real32 bottom = (real32)y_min * one_over_size;
+	    real32 top    = (real32)y_max * one_over_size;
 
-        // TODO: Calculate bounds using top/bottom variables
+	    if(left < measured_min_x) measured_min_x = left;
+	    if(right > measured_max_x) measured_max_x = right;
+	    if(top > measured_max_y) measured_max_y = top;
+	    if(bottom < measured_min_y) measured_min_y = bottom;
 
-        real32 left   = (real32)cursor_x + character->offset_x;
-        real32 right  = left + character->source_w;
+	    cursor_x += fc->advance;
+	}
+	else
+	{
+	    if(character == '\n')
+	    {
+		cursor_x = 0;
+		cursor_y -= font->line_height;
+	    }
+	}
 
-        int kerning_offset = 0;
-	    
-        if(kerning_enabled)
-        {
-            font_kerning* kerning = font_get_kerning(font, (uint32)previous, (uint32)current);
-            if(kerning != 0) kerning_offset = kerning->amount;
-        }
-
-        left += kerning_offset;
-        right += kerning_offset;
-
-        cursor_x += (character->advance + kerning_offset);
-
-        previous = current;
+	previous = character;
     }
 
-    if(cursor_x > max_width) max_width = (float)cursor_x;
-
     vector2 result;
-    result.x = (max_width * size * one_over_font_size);
-    result.y = (max_height * size * one_over_font_size);
+    result.x = (measured_max_x - measured_min_x);
+    result.y = (measured_max_y - measured_min_y);
+    result = vector2_scale(result, font_size);
 
     return result;
 }

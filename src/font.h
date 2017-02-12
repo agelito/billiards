@@ -73,7 +73,7 @@ font_kerning*
 font_get_kerning(font_data* font, uint32 first, uint32 second);
 
 vector2
-font_measure_text(font_data* font, real32 size, char* text, bool32 kerning_enabled);
+font_measure_text(font_data* font, real32 size, char* text);
 
 void
 font_data_free(font_data* font);

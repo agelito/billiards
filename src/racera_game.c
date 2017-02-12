@@ -222,15 +222,16 @@ game_update_and_render(game_state* state)
 
 	real32 text_left = (real32)state->screen_width * -0.48f;
 	real32 text_top = (real32)state->screen_height * 0.45f;
-	vector2 text_size = font_measure_text(&state->deja_vu.data, 32.0f, timings_text, 1);
+	vector2 text_size = font_measure_text(&state->deja_vu.data, 32.0f, timings_text);
+	platform_log("text size: %f, %f\n", text_size.x, text_size.y);
 	
 	
 	matrix4 text_transform = matrix_translate(text_left, text_top, 0.0f);
 
 	matrix4 text_background_translate =
-	    matrix_translate(text_left + text_size.x * 0.5f, text_top, 0.0f);
+	    matrix_translate(text_left + text_size.x * 0.5f, text_top + text_size.y * 0.5f, 0.0f);
 	matrix4 text_background_scale =
-	    matrix_scale(text_size.x, text_size.y, 1.0f);
+	    matrix_scale(text_size.x + 10.0f, text_size.y + 10.0f, 1.0f);
 	matrix4 text_background_transform =
 	    matrix_multiply(text_background_translate, text_background_scale);
 
