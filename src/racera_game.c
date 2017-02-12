@@ -223,8 +223,6 @@ game_update_and_render(game_state* state)
 	real32 text_left = (real32)state->screen_width * -0.48f;
 	real32 text_top = (real32)state->screen_height * 0.45f;
 	vector2 text_size = font_measure_text(&state->deja_vu.data, 32.0f, timings_text);
-	platform_log("text size: %f, %f\n", text_size.x, text_size.y);
-	
 	
 	matrix4 text_transform = matrix_translate(text_left, text_top, 0.0f);
 
