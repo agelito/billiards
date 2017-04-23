@@ -2,7 +2,7 @@
 
 #include "opengl.h"
 
-#include "platform.h"
+#include "../platform.h"
 
 static void
 print_gl_info()

@@ -5,11 +5,11 @@
 #include <stdlib.h>
 #include <math.h>
 
-#include "opengl.h"
+#include "rendering/opengl.h"
 #include "racera.h"
 
 #include "math.c"
-#include "renderer.c"
+#include "rendering/renderer.c"
 #include "font.c"
 #include "ui.c"
 

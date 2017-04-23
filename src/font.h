@@ -1,9 +1,9 @@
 #ifndef FONT_H_INCLUDED
 #define FONT_H_INCLUDED
 
-#include "opengl.h"
-#include "texture.h"
-#include "material.h"
+#include "rendering/opengl.h"
+#include "rendering/texture.h"
+#include "rendering/material.h"
 
 typedef struct font_character font_character;
 typedef struct font_kerning font_kerning;

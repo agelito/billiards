@@ -12,7 +12,7 @@
 
 #include "math.h"
 #include "font.h"
-#include "renderer.h"
+#include "rendering/renderer.h"
 
 #include "mouse.h"
 #include "keyboard.h"

@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include <math.h>
 
-#include "obj_importer.c"
+#include "../obj_importer.c"
 
 #define create_vertex(x, y, z, color, uv_x, uv_y) (vertex){{{{x, y, z}}}, color, {{{uv_x, uv_y}}}}
 
