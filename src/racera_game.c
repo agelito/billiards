@@ -120,7 +120,7 @@ game_initialize(game_state* state)
 }
 
 static void
-camera_controls(game_state* state)
+control_camera(game_state* state)
 {
     vector3 pitch_yaw_roll = state->camera_pitch_yaw_roll;
     pitch_yaw_roll.y -= (float)state->mouse.relative_x * 0.5f;
@@ -171,7 +171,7 @@ game_update_and_render(game_state* state)
 	state->should_quit = 1;
     }
 
-    camera_controls(state);
+    control_camera(state);
 
     vector3 pointer_location = vector3_add(state->camera_position, state->camera_forward);
     if(keyboard_is_pressed(&state->keyboard, VKEY_Q) && state->created_cube_count < MAX_CUBES)
