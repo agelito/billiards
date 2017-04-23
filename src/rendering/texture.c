@@ -2,7 +2,7 @@
 
 #include "texture.h"				
 
-#include "../asset_import/tga_loader.c"
+#include "../asset_import/tga_importer.c"
 
 loaded_texture
 load_texture(gl_functions* gl, texture_data data)

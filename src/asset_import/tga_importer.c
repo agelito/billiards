@@ -1,4 +1,4 @@
-// tga_loader.c
+// tga_importer.c
 
 #define TGA_DATA_BITMASK 0x7
 #define TGA_RLE_BITMASK  0x8
