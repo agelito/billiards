@@ -23,7 +23,7 @@
 #define array_count(array) (sizeof(array) / sizeof(array[0]))
 #define invalid_code *(int*)0 = 0
 
-#include "platform.h"
+#include "../../platform.h"
 
 #include "linux_platform.c"
 #include "linux_cpu.c"
@@ -32,7 +32,7 @@
 #include "linux_keyboard.c"
 #include "linux_window.c"
 
-#include "racera.h"
+#include "../../racera.h"
 
 static uint64
 get_precise_time()
