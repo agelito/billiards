@@ -14,8 +14,8 @@
 #include "font.h"
 #include "rendering/renderer.h"
 
-#include "mouse.h"
-#include "keyboard.h"
+#include "input/mouse.h"
+#include "input/keyboard.h"
 
 #define MAX_CUBES 2048
 

@@ -1,6 +1,6 @@
 // linux_keyboard.c
 
-#include "../../keyboard.h"
+#include "../../input/keyboard.h"
 
 #define MAX_KEYCODE_COUNT 256
 #define MAX_KEYSYM_PER_KEYCODE 16

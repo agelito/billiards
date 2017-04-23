@@ -13,8 +13,8 @@
 #include "font.c"
 #include "ui.c"
 
-#include "keyboard.c"
-#include "mouse.c"
+#include "input/keyboard.c"
+#include "input/mouse.c"
 
 static void
 game_initialize(game_state* state)
