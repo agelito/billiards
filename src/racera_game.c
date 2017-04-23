@@ -214,10 +214,6 @@ game_update_and_render(game_state* state)
     }
 
     { // NOTE: Draw UI
-	matrix4 transform = matrix_scale(4.0f, 4.0f, 1.0f);
-	renderer_queue_push(&state->render_queue, &state->pointer,
-			    &state->pointer_material, transform);
-
 	char timings_text[256];
 	platform_format(timings_text, 256, "frame time: %f", state->time_frame);
 
