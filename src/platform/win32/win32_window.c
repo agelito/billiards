@@ -1,18 +1,18 @@
-// window_win32.c
+// win32_window.c
 
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 
 #include <stdlib.h>
 
-#include "window_win32.h"
+#include "win32_window.h"
 
 static char* WINDOW_WIN32_CLASS = "window_win32-windowclass";
 
 static LRESULT CALLBACK 
-window_win32_message_callback(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+win32_window_message_callback(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-    window_win32* window = (window_win32*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
+    win32_window* window = (win32_window*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
     if(window == 0 || window->handle != hWnd) 
     {
         return DefWindowProc(hWnd, uMsg, wParam, lParam);
@@ -33,8 +33,8 @@ window_win32_message_callback(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam
     return 0;
 }
 
-window_win32*
-window_win32_create(int width, int height, char* title)
+win32_window*
+win32_window_create(int width, int height, char* title)
 {
     char* window_title = title;
     char* window_class_name = WINDOW_WIN32_CLASS;
@@ -43,7 +43,7 @@ window_win32_create(int width, int height, char* title)
 
     WNDCLASSEX window_class;
     window_class.cbSize = sizeof(WNDCLASSEX);
-    window_class.lpfnWndProc = window_win32_message_callback;
+    window_class.lpfnWndProc = win32_window_message_callback;
     window_class.cbClsExtra = 0;
     window_class.cbWndExtra = 8;
     window_class.style = CS_OWNDC;
@@ -107,7 +107,7 @@ window_win32_create(int width, int height, char* title)
     HGLRC gl_context = wglCreateContext(device_context);
     wglMakeCurrent(device_context, gl_context);
 
-    window_win32* window = (window_win32*)malloc(sizeof(window_win32));
+    win32_window* window = (win32_window*)malloc(sizeof(win32_window));
 
     window->handle = window_handle;
     window->gl_context = gl_context;
@@ -125,7 +125,7 @@ window_win32_create(int width, int height, char* title)
 }
 
 void
-window_win32_destroy(window_win32* window)
+win32_window_destroy(win32_window* window)
 {
     if(window->gl_context)
     {
@@ -143,7 +143,7 @@ window_win32_destroy(window_win32* window)
 }
 
 void
-window_win32_process_messages(window_win32* window)
+win32_window_process_messages(win32_window* window)
 {
     MSG message;
     while(PeekMessage(&message, window->handle, 0, 0, PM_REMOVE))
