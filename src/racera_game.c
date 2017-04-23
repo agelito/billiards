@@ -11,6 +11,7 @@
 #include "math.c"
 #include "renderer.c"
 #include "font.c"
+#include "ui.c"
 
 #include "keyboard.c"
 #include "mouse.c"
@@ -220,23 +221,9 @@ game_update_and_render(game_state* state)
 	char timings_text[256];
 	platform_format(timings_text, 256, "frame time: %f", state->time_frame);
 
-	real32 text_left = (real32)state->screen_width * -0.48f;
-	real32 text_top = (real32)state->screen_height * 0.45f;
-	vector2 text_size = font_measure_text(&state->deja_vu.data, 32.0f, timings_text);
-	
-	matrix4 text_transform = matrix_translate(text_left, text_top, 0.0f);
-
-	matrix4 text_background_translate =
-	    matrix_translate(text_left + text_size.x * 0.5f, text_top + text_size.y * 0.5f, 0.0f);
-	matrix4 text_background_scale =
-	    matrix_scale(text_size.x + 10.0f, text_size.y + 10.0f, 1.0f);
-	matrix4 text_background_transform =
-	    matrix_multiply(text_background_translate, text_background_scale);
-
-	renderer_queue_push(&state->render_queue, &state->quad,
-			    &state->text_background, text_background_transform);
-	renderer_queue_push_text(&state->render_queue, timings_text, &state->deja_vu,
-				 32.0f, &state->text, text_transform);
+	vector2 text_position = vector2_create((real32)state->screen_width * -0.48f,
+						(real32)state->screen_height * 0.45f);
+	ui_draw_label(state, text_position, timings_text, 32.0f, &state->deja_vu);
 
 	matrix4 projection = matrix_orthographic((float)state->screen_width,
 						 (float)state->screen_height, 1.0f, 100.0f);
