@@ -4,6 +4,9 @@
 
 #include "../asset_import/tga_importer.c"
 
+#define TEXTURE_COLOR_POINTER(texture, x, y)			\
+    texture.colors + (x + y * texture.width) * texture.components
+
 loaded_texture
 load_texture(gl_functions* gl, texture_data data)
 {
@@ -125,6 +128,66 @@ texture_create_from_tga(char* path)
     platform_free_file(&file);
 
     return texture;
+}
+
+vector4
+texture_unpack_bw(uint8* color)
+{
+    vector4 result = (vector4){0};
+    result.x = *(color + 0) / 255.0f;
+    return result;
+}
+
+vector4
+texture_unpack_rgb(uint8* color)
+{
+    vector4 result = (vector4){0};
+    result.x = *(color + 0) / 255.0f;
+    result.y = *(color + 1) / 255.0f;
+    result.z = *(color + 2) / 255.0f;
+    return result;
+}
+
+vector4
+texture_unpack_rgba(uint8* color)
+{
+    vector4 result = (vector4){0};
+    result.x = *(color + 0) / 255.0f;
+    result.y = *(color + 1) / 255.0f;
+    result.z = *(color + 2) / 255.0f;
+    result.w = *(color + 3) / 255.0f;
+    return result;
+}
+
+vector4
+texture_bilinear_sample(float tx, float ty, texture_data texture)
+{
+    tx = (tx * (texture.width - 1));
+    ty = (ty * (texture.height - 1));
+    
+    float fraction_x = tx - (int)tx;
+    float fraction_y = ty - (int)ty;
+
+    float one_minus_fx = 1.0f - fraction_x;
+    float one_minus_fy = 1.0f - fraction_y;
+
+    int x0 = (int)tx;
+    int y0 = (int)ty;
+    int x1 = x0 + 1;
+    int y1 = y0 + 1;
+
+    // TODO: Unpack depending on pixel type.
+    vector4 colorx0y0 = texture_unpack_bw(TEXTURE_COLOR_POINTER(texture, x0, y0));
+    vector4 colorx1y0 = texture_unpack_bw(TEXTURE_COLOR_POINTER(texture, x1, y0));
+    vector4 colorx0y1 = texture_unpack_bw(TEXTURE_COLOR_POINTER(texture, x0, y1));
+    vector4 colorx1y1 = texture_unpack_bw(TEXTURE_COLOR_POINTER(texture, x1, y1));
+
+    vector4 a =
+	vector4_add(vector4_scale(colorx0y0, one_minus_fx), vector4_scale(colorx1y0, fraction_x));
+    vector4 b =
+	vector4_add(vector4_scale(colorx0y1, one_minus_fx), vector4_scale(colorx1y1, fraction_x));
+
+    return vector4_add(vector4_scale(a, one_minus_fy), vector4_scale(b, fraction_y));
 }
 
 void

@@ -110,13 +110,35 @@ vector3_matrix_multiply(matrix4 matrix, vector3 input)
     return result;
 }
 
-vector4 vector4_create(float x, float y, float z, float w)
+vector4
+vector4_create(float x, float y, float z, float w)
 {
     vector4 result;
     result.x = x;
     result.y = y;
     result.z = z;
     result.w = w;
+    return result;
+}
+
+vector4 vector4_add(vector4 a, vector4 b)
+{
+    vector4 result;
+    result.x = a.x + b.x;
+    result.y = a.y + b.y;
+    result.z = a.z + b.z;
+    result.w = a.w + b.w;
+    return result;
+}
+
+vector4
+vector4_scale(vector4 a, float s)
+{
+    vector4 result;
+    result.x = a.x * s;
+    result.y = a.y * s;
+    result.z = a.z * s;
+    result.w = a.w * s;
     return result;
 }
 

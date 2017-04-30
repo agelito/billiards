@@ -55,13 +55,11 @@ struct game_state
     loaded_mesh cup;
 
     loaded_texture checker;
-    loaded_texture smiley;
 
     loaded_font deja_vu;
 
     material ground_material;
     material cup_material;
-    material pointer_material;
     material text_background;
 
     vector3 camera_position;

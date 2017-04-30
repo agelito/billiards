@@ -45,10 +45,14 @@ game_initialize(game_state* state)
 
     { // NOTE: Load Meshes
 	platform_log("load meshes\n");
+
+	texture_data heightmap = texture_create_checker(128, 128, 64);
+	state->checker = load_texture(gl, heightmap);
 	
 	state->ground =
-	    load_mesh(gl, mesh_create_plane_xz(100.0f, 100), 0);
+	    load_mesh(gl, mesh_create_from_heightmap(heightmap, 256), 0);
 	mesh_data_free(&state->ground.data);
+	texture_data_free(&heightmap);
     
 	state->cube = load_mesh(gl, mesh_create_cube(1.0f), 0);
 	mesh_data_free(&state->cube.data);
@@ -68,18 +72,6 @@ game_initialize(game_state* state)
 	renderer_check_error();
     }
 
-    { // NOTE: Load Textures
-	platform_log("load textures\n");
-	
-	state->checker = load_texture(gl, texture_create_checker(128, 128, 64));
-	texture_data_free(&state->checker.data);
-	
-	state->smiley = load_texture(gl, texture_create_from_tga("smiley_rle.tga"));
-	texture_data_free(&state->smiley.data);
-
-	renderer_check_error();
-    }
-
     { // NOTE: Load Fonts
 	platform_log("load fonts\n");
 	
@@ -95,9 +87,6 @@ game_initialize(game_state* state)
 	material_set_texture(&state->ground_material, "main_texture", &state->checker);
 	
 	state->cup_material = material_create(&state->visualize_normals, KB(1));
-		
-	state->pointer_material = material_create(&state->textured, KB(1));
-	material_set_texture(&state->pointer_material, "main_texture", &state->smiley);
 
 	state->text_background = material_create(&state->colored, KB(1));
 	material_set_color(&state->text_background, "color",

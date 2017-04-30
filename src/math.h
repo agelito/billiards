@@ -62,6 +62,8 @@ float vector3_dot(vector3 a, vector3 b);
 vector3 vector3_matrix_multiply(matrix4 matrix, vector3 input);
 
 vector4 vector4_create(float x, float y, float z, float w);
+vector4 vector4_add(vector4 a, vector4 b);
+vector4 vector4_scale(vector4 a, float s);
 
 matrix4 matrix_identity();
 matrix4 matrix_rotation_x(float rotation);
