@@ -508,9 +508,9 @@ mesh_create_plane_xz(float side, int subdivisions)
 }
 
 mesh_data
-mesh_create_from_heightmap(texture_data heightmap, int resolution)
+mesh_create_from_heightmap(texture_data heightmap, float size, int resolution, float height_resolution)
 {
-    mesh_data data = mesh_create_plane_xz((float)resolution, resolution);
+    mesh_data data = mesh_create_plane_xz(size, resolution);
 
     size_t height_data_size = (sizeof(float) * (resolution * resolution));
     float* height_data = (float*)malloc(height_data_size);
@@ -524,7 +524,7 @@ mesh_create_from_heightmap(texture_data heightmap, int resolution)
 	    float ty = (float)y / resolution;
 
 	    vector4 heightmap_color = texture_bilinear_sample(tx, ty, heightmap);
-	    *(height_data + (x + y * resolution)) = (heightmap_color.x * 1.0f);
+	    *(height_data + (x + y * resolution)) = (heightmap_color.x * height_resolution);
 	}
     }
     

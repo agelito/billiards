@@ -46,11 +46,10 @@ game_initialize(game_state* state)
     { // NOTE: Load Meshes
 	platform_log("load meshes\n");
 
-	texture_data heightmap = texture_create_checker(128, 128, 64);
-	state->checker = load_texture(gl, heightmap);
+	texture_data heightmap = texture_create_from_tga("heightmaps/heightmap.tga");
 	
 	state->ground =
-	    load_mesh(gl, mesh_create_from_heightmap(heightmap, 256), 0);
+	    load_mesh(gl, mesh_create_from_heightmap(heightmap, 800.0f, 1024, 40.0f), 0);
 	mesh_data_free(&state->ground.data);
 	texture_data_free(&heightmap);
     
@@ -70,6 +69,11 @@ game_initialize(game_state* state)
 	mesh_data_free(&state->quad.data);
 
 	renderer_check_error();
+    }
+
+    { // NOTE: Load Textures
+	state->checker = load_texture(gl, texture_create_checker(256, 256, 64));
+	texture_data_free(&state->checker.data);
     }
 
     { // NOTE: Load Fonts
