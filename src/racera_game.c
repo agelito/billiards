@@ -49,7 +49,7 @@ game_initialize(game_state* state)
 	texture_data heightmap = texture_create_from_tga("heightmaps/heightmap.tga");
 	
 	state->ground =
-	    load_mesh(gl, mesh_create_from_heightmap(heightmap, 800.0f, 1024, 40.0f), 0);
+	    load_mesh(gl, mesh_create_from_heightmap(heightmap, 10000.0f, 1024, 1000.0f), 0);
 	mesh_data_free(&state->ground.data);
 	texture_data_free(&heightmap);
     
@@ -125,22 +125,22 @@ control_camera(game_state* state)
     vector3 camera_movement = (vector3){0};
     if(keyboard_is_down(&state->keyboard, VKEY_W))
     {
-	camera_movement.z += 0.1f;
+	camera_movement.z += 1.0f;
     }
 
     if(keyboard_is_down(&state->keyboard, VKEY_S))
     {
-	camera_movement.z -= 0.1f;
+	camera_movement.z -= 1.0f;
     }
 
     if(keyboard_is_down(&state->keyboard, VKEY_A))
     {
-	camera_movement.x -= 0.1f;
+	camera_movement.x -= 1.0f;
     }
 
     if(keyboard_is_down(&state->keyboard, VKEY_D))
     {
-	camera_movement.x += 0.1f;
+	camera_movement.x += 1.0f;
     }
 
     matrix4 camera_rotation = matrix_rotation_pitch_yaw(pitch_yaw_roll.x, pitch_yaw_roll.y);
@@ -195,7 +195,7 @@ game_update_and_render(game_state* state)
 
 	float right = (float)state->screen_width * 0.5f;
 	float top = (float)state->screen_height * 0.5f;
-	matrix4 projection = matrix_perspective(80.0f, right / top, 0.01f, 100.0f);
+	matrix4 projection = matrix_perspective(80.0f, right / top, 0.1f, 2000.0f);
 	renderer_queue_set_projection(&state->render_queue, projection);
 
 	matrix4 view = matrix_look_fps(state->camera_position, state->camera_pitch_yaw_roll.x,
