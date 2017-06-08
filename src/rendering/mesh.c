@@ -507,56 +507,6 @@ mesh_create_plane_xz(float side, int subdivisions)
     return data;
 }
 
-mesh_data
-mesh_create_from_heightmap(texture_data heightmap, float size, int resolution, float height_resolution)
-{
-    mesh_data data = mesh_create_plane_xz(size, resolution);
-
-    size_t height_data_size = (sizeof(float) * (resolution * resolution));
-    float* height_data = (float*)malloc(height_data_size);
-
-    int x, y;
-    for(y = 0; y < resolution; ++y)
-    {
-	for(x = 0; x < resolution; ++x)
-	{
-	    float tx = (float)x / resolution;
-	    float ty = (float)y / resolution;
-
-	    vector4 heightmap_color = texture_bilinear_sample(tx, ty, heightmap);
-	    *(height_data + (x + y * resolution)) = (heightmap_color.x * height_resolution);
-	}
-    }
-    
-    int vertex_index = 0;
-
-    vector3* positions = data.vertices.positions;
-
-    for(y = 0; y < resolution; ++y)
-    {
-	for(x = 0; x < resolution; ++x)
-	{
-	    float height0 = height_data[x + (y + 1) * resolution];
-	    float height1 = height_data[(x + 1) + (y + 1) * resolution];
-	    float height2 = height_data[x + y * resolution];
-	    float height3 = height_data[(x + 1) + y * resolution];
-	    
-	    positions[vertex_index+0].y = height2;
-	    positions[vertex_index+1].y = height3;
-	    positions[vertex_index+2].y = height0;
-	    positions[vertex_index+3].y = height0;
-	    positions[vertex_index+4].y = height3;
-	    positions[vertex_index+5].y = height1;
-
-	    vertex_index += 6;
-	}
-    }
-
-    free(height_data);
-
-    return data;
-}
-
 void
 mesh_data_free(mesh_data* data)
 {

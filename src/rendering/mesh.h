@@ -76,7 +76,6 @@ mesh_data mesh_create_triangle(float side);
 mesh_data mesh_create_circle(float radius, int subdivisions);
 mesh_data mesh_create_cube(float side);
 mesh_data mesh_create_plane_xz(float side, int subdivisions);
-mesh_data mesh_create_from_heightmap(texture_data heightmap, float size, int resolution, float height_resolution);
 void mesh_data_free(mesh_data* data);
 
 #endif // MESH_H_INCLUDED

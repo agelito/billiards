@@ -32,7 +32,7 @@
 #include "linux_keyboard.c"
 #include "linux_window.c"
 
-#include "../../racera.h"
+#include "../../game.h"
 
 static uint64
 get_precise_time()

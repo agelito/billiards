@@ -1,4 +1,4 @@
-// racera_game.c
+// game.c
 
 #include "platform.h"
 
@@ -6,7 +6,7 @@
 #include <math.h>
 
 #include "rendering/opengl.h"
-#include "racera.h"
+#include "game.h"
 
 #include "math.c"
 #include "rendering/renderer.c"
@@ -45,13 +45,9 @@ game_initialize(game_state* state)
 
     { // NOTE: Load Meshes
 	platform_log("load meshes\n");
-
-	texture_data heightmap = texture_create_from_tga("heightmaps/heightmap.tga");
 	
-	state->ground =
-	    load_mesh(gl, mesh_create_from_heightmap(heightmap, 10000.0f, 1024, 1000.0f), 0);
+	state->ground = load_mesh(gl, mesh_create_plane_xz(10.0f, 10), 0);
 	mesh_data_free(&state->ground.data);
-	texture_data_free(&heightmap);
     
 	state->cube = load_mesh(gl, mesh_create_cube(1.0f), 0);
 	mesh_data_free(&state->cube.data);
@@ -90,24 +86,12 @@ game_initialize(game_state* state)
 	state->ground_material = material_create(&state->textured, KB(1));
 	material_set_texture(&state->ground_material, "main_texture", &state->checker);
 	
-	state->cup_material = material_create(&state->visualize_normals, KB(1));
-
 	state->text_background = material_create(&state->colored, KB(1));
 	material_set_color(&state->text_background, "color",
 			   vector4_create(0.0f, 0.0f, 0.0f, 0.75f));
     }
     
     state->camera_position = (vector3){{{0.0f, 1.0f, -2.0f}}};
-
-    int n;
-    for_range(n, 50)
-    {
-	vector3 position = (vector3){{{platform_randomf(-50.0f, 50.0f),
-				       0.0f,
-				       platform_randomf(-50.0f, 50.0f)}}};
-	    
-	*(state->created_cube_positions + state->created_cube_count++) = position;
-    }
 	
     state->initialized = 1;
 }
@@ -166,32 +150,12 @@ game_update_and_render(game_state* state)
 
     control_camera(state);
 
-    vector3 pointer_location = vector3_add(state->camera_position, state->camera_forward);
-    if(keyboard_is_pressed(&state->keyboard, VKEY_Q) && state->created_cube_count < MAX_CUBES)
-    {
-	*(state->created_cube_positions + state->created_cube_count++) = pointer_location;
-    }
-
-    if(keyboard_is_pressed(&state->keyboard, VKEY_Z) && state->created_cube_count > 0)
-    {
-	state->created_cube_count -= 1;
-    }
-
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     { // NOTE: Draw scene
 	renderer_queue_push(&state->render_queue, &state->ground,
 			    &state->ground_material, matrix_identity());
-	
-	int i;
-	for(i = 0; i < state->created_cube_count; i++)
-	{
-	    vector3 position = *(state->created_cube_positions + i);
-	    matrix4 transform = matrix_translate(position.x, position.y, position.z);
-	
-	    renderer_queue_push(&state->render_queue, &state->cup, &state->cup_material, transform);
-	}
 
 	float right = (float)state->screen_width * 0.5f;
 	float top = (float)state->screen_height * 0.5f;

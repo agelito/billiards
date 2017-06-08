@@ -1,5 +1,5 @@
-#ifndef RACERA_H_INCLUDED
-#define RACERA_H_INCLUDED
+#ifndef GAME_H_INCLUDED
+#define GAME_H_INCLUDED
 
 #define assert(expr) if(!(expr)) { platform_log("assertion! %s:%d\n", __FILE__, __LINE__); *(int*)0 = 0; }
 
@@ -16,8 +16,6 @@
 
 #include "input/mouse.h"
 #include "input/keyboard.h"
-
-#define MAX_CUBES 2048
 
 typedef struct game_state game_state;
 
@@ -59,18 +57,14 @@ struct game_state
     loaded_font deja_vu;
 
     material ground_material;
-    material cup_material;
     material text_background;
 
     vector3 camera_position;
     vector3 camera_pitch_yaw_roll;
     vector3 camera_forward;
-    
-    int created_cube_count;
-    vector3 created_cube_positions[MAX_CUBES];
 };
 
 void
 game_update_and_render(struct game_state* state);
 
-#endif // RACERA_H_INCLUDED
+#endif // GAME_H_INCLUDED
