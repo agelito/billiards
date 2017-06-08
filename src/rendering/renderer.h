@@ -8,25 +8,14 @@
 #include "material.h"
 
 typedef struct render_queue render_queue;
-typedef struct render_queue_item render_queue_item;
-
-struct render_queue_item
-{
-    loaded_mesh* mesh;
-    material* material;
-    matrix4 transform;
-
-    uint32 draw_element_offset;
-    uint32 draw_element_count;
-};
 
 struct render_queue
 {
     gl_functions* gl;
 
-    int count;
-    int capacity;
-    render_queue_item* items;
+    uint32 queue_used;
+    uint32 queue_capacity;
+    uint8* queue_items;
 
     shader_uniform_group uniforms;
     shader_uniform_group uniforms_per_object;
@@ -40,10 +29,14 @@ void
 renderer_apply_uniforms(gl_functions* gl, shader_program* shader, shader_uniform_group* group);
 
 render_queue
-renderer_queue_create(gl_functions* gl, int capacity, int text_capacity);
+renderer_queue_create(gl_functions* gl, uint32 capacity, uint32 text_capacity);
 
 void
-renderer_queue_push(render_queue* queue, loaded_mesh* mesh, material* material, matrix4 transform);
+renderer_queue_push_clear(render_queue* queue, uint32 clear_flags, float clear_color[4]);
+
+void
+renderer_queue_push_draw(render_queue* queue, loaded_mesh* mesh,
+			 material* material, matrix4 transform);
 
 void
 renderer_queue_push_text(render_queue* queue, char* text, loaded_font* font,

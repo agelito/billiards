@@ -150,12 +150,12 @@ game_update_and_render(game_state* state)
 
     control_camera(state);
 
-    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    renderer_queue_push_clear(&state->render_queue, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT,
+			      (float[4]){0.1f, 0.1f, 0.1f, 1.0f});
 
     { // NOTE: Draw scene
-	renderer_queue_push(&state->render_queue, &state->ground,
-			    &state->ground_material, matrix_identity());
+	renderer_queue_push_draw(&state->render_queue, &state->ground,
+				 &state->ground_material, matrix_identity());
 
 	float right = (float)state->screen_width * 0.5f;
 	float top = (float)state->screen_height * 0.5f;
