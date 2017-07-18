@@ -1,8 +1,11 @@
 // colored.frag
+#version 330
 
 uniform vec4 color;
 
+out vec4 out_color;
+
 void main()
 {
-    gl_FragColor = color;
+    out_color = color;
 }

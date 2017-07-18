@@ -1,11 +1,15 @@
 // normals_visualize.frag
+#version 330
 
-varying vec3 normal;
+in vec3 normal;
+
+out vec4 out_color;
 
 void main()
 {
-    normal.x = (normal.x + 1.0) * 0.5;
-    normal.y = (normal.y + 1.0) * 0.5;
-    normal.z = (normal.z + 1.0) * 0.5;
-    gl_FragColor = vec4(normal.x, normal.y, normal.z, 1.0);
+    vec3 normal_color;
+    normal_color.x = (normal.x + 1.0) * 0.5;
+    normal_color.y = (normal.y + 1.0) * 0.5;
+    normal_color.z = (normal.z + 1.0) * 0.5;
+    out_color = vec4(normal_color, 1.0f);
 }

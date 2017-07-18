@@ -1,8 +1,11 @@
 // colors_visualize.frag
+#version 330
 
-varying vec4 color;
+in vec4 color;
+
+out vec4 out_color;
 
 void main()
 {
-    gl_FragColor = color;
+    out_color = color;
 }

@@ -1,8 +1,11 @@
 // texcoords_visualize.frag
+#version 330
 
-varying vec2 uv;
+in vec2 uv;
+
+out vec4 out_color;
 
 void main()
 {
-    gl_FragColor = vec4(uv.x, uv.y, 0.0, 1.0);
+    out_color = vec4(uv.x, uv.y, 0.0, 1.0);
 }

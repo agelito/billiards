@@ -1,10 +1,12 @@
 // text.frag
+#version 330
 
 uniform sampler2D main_texture;
-
 uniform vec4 tint_color;
 
-varying vec2 uv;
+in vec2 uv;
+
+out vec4 out_color;
 
 void main()
 {
@@ -12,5 +14,5 @@ void main()
 
     vec4 color = tint_color;
     
-    gl_FragColor = vec4(color.r, color.g, color.b, page_color.r * color.a);
+    out_color = vec4(color.r, color.g, color.b, page_color.r * color.a);
 }
