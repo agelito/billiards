@@ -14,19 +14,29 @@ struct uniform_data_location
 };
 
 static void
-print_shader_error(gl_functions* gl, GLuint shader)
+print_shader_info_log(gl_functions* gl, GLuint shader)
 {
-    GLchar info_log[1024];
-    gl->glGetShaderInfoLog(shader, 1024, NULL, info_log);
-    platform_log("%s\n\n", info_log);
+    int info_log_length;
+    gl->glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &info_log_length);
+    if(info_log_length > 1)
+    {
+	GLchar info_log[1024];
+	gl->glGetShaderInfoLog(shader, 1024, NULL, info_log);
+	platform_log("%s\n\n", info_log);
+    }
 }
 
 static void
-print_program_error(gl_functions* gl, GLuint program)
+print_program_info_log(gl_functions* gl, GLuint program)
 {
-    char info_log[1024];
-    gl->glGetProgramInfoLog(program, 1024, NULL, (GLchar*)info_log);
-    platform_log("%s\n\n", info_log);
+    int info_log_length;
+    gl->glGetProgramiv(program, GL_INFO_LOG_LENGTH, &info_log_length);
+    if(info_log_length > 1)
+    {
+	GLchar info_log[1024];
+	gl->glGetProgramInfoLog(program, 1024, NULL, info_log);
+	platform_log("%s\n\n", info_log);
+    }
 }
 
 shader_program
@@ -55,18 +65,22 @@ load_shader(gl_functions* gl, char* vertex_path, char* fragment_path, bool32 tra
     
     gl->glCompileShader(shader.vertex);
     gl->glGetShaderiv(shader.vertex, GL_COMPILE_STATUS, &successful_compile);
+
+    print_shader_info_log(gl, shader.vertex);
+    
     if(!successful_compile)
     {
         platform_log("failed to compile vertex shader:\n");
-        print_shader_error(gl, shader.vertex);
     }
 
     gl->glCompileShader(shader.fragment);
     gl->glGetShaderiv(shader.fragment, GL_COMPILE_STATUS, &successful_compile);
+
+    print_shader_info_log(gl, shader.fragment);
+    
     if(!successful_compile)
     {
         platform_log("failed to compile fragment shader:\n");
-        print_shader_error(gl, shader.fragment);
     }
 
     shader.program = gl->glCreateProgram();
@@ -74,18 +88,21 @@ load_shader(gl_functions* gl, char* vertex_path, char* fragment_path, bool32 tra
     gl->glAttachShader(shader.program, shader.fragment);
     gl->glLinkProgram(shader.program);
 
+    print_program_info_log(gl, shader.program);
+
     int successful_link = 0;
     gl->glGetProgramiv(shader.program, GL_LINK_STATUS, &successful_link);
     if(!successful_link)
     {
         platform_log("failed to link shader program:\n");
-        print_program_error(gl, shader.program);
     }
 
     shader.info = shader_reflect(gl, &shader);
 
     return shader;
 }
+
+
 
 static shader_data_type
 shader_type_from_gl(GLenum type)

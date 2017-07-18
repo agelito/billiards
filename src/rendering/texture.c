@@ -8,7 +8,7 @@
     texture.colors + (x + y * texture.width) * texture.components
 
 loaded_texture
-load_texture(gl_functions* gl, texture_data data)
+load_texture(gl_functions* gl, texture_data data, texture_wrap_mode wrap_mode)
 {
     loaded_texture texture;
 
@@ -19,8 +19,21 @@ load_texture(gl_functions* gl, texture_data data)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    if(wrap_mode == TEXTURE_REPEAT)
+    {
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    }
+    else if(wrap_mode == TEXTURE_MIRROR)
+    {
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+    }
+    else if(wrap_mode == TEXTURE_CLAMP)
+    {
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+    }
 
     GLenum texture_format = GL_RGB;
     if(data.components == 4)

@@ -55,15 +55,13 @@ int main(int argc, char* argv[])
     exe_dir_length = platform_executable_directory(exe_dir, exe_dir_length);
     platform_set_working_directory(exe_dir);
     
-    window_x11 window_context = create_window(1280, 720, "racera");
+    window_x11 window_context = create_window(1280, 720, "billiards");
 
     keyboard_x11 keyboard = keyboard_x11_init(window_context.display);
     xinput2 mouse_raw = xinput2_init(window_context.display);
 
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
-    
-    
 
     renderer_check_error();
 

@@ -35,7 +35,7 @@ load_font(gl_functions* gl, font_data data)
     {
 	char* page_texture_path = *(data.page_names + page_index);
 	loaded_texture page_texture =
-	    load_texture(gl, texture_create_from_tga(page_texture_path));
+	    load_texture(gl, texture_create_from_tga(page_texture_path), 1);
 	texture_data_free(&page_texture.data);
 	*(font.textures + page_index) = page_texture;
 

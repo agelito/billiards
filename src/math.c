@@ -20,6 +20,15 @@ vector2_scale(vector2 a, float s)
     return result;
 }
 
+vector2
+vector2_subtract(vector2 a, vector2 b)
+{
+    vector2 result;
+    result.x = a.x - b.x;
+    result.y = a.y - b.y;
+    return result;
+}
+
 float
 vector3_magnitude(vector3 input)
 {
@@ -90,6 +99,16 @@ vector3_scale(vector3 a, float s)
     result.x = a.x * s;
     result.y = a.y * s;
     result.z = a.z * s;
+    return result;
+}
+
+vector3
+vector3_lerp(vector3 a, vector3 b, float t)
+{
+    vector3 result;
+    result.x = a.x + ((b.x - a.x) * t);
+    result.y = a.y + ((b.y - a.y) * t);
+    result.z = a.z + ((b.z - a.z) * t);
     return result;
 }
 

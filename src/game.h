@@ -42,22 +42,28 @@ struct game_state
     shader_program visualize_colors;
     shader_program visualize_normals;
     shader_program visualize_texcoords;
+    shader_program visualize_tangents;
+    shader_program lightning;
 
     render_queue render_queue;
 
     loaded_mesh ground;
-    loaded_mesh cube;
-    loaded_mesh triangle;
-    loaded_mesh pointer;
     loaded_mesh quad;
-    loaded_mesh cup;
+    loaded_mesh sphere;
 
     loaded_texture checker;
+    loaded_texture checker2;
+    loaded_texture table_cloth;
+
+    loaded_texture billiard_balls[16];
 
     loaded_font deja_vu;
 
     material ground_material;
     material text_background;
+    material sphere_material;
+    material billiard[16];
+    material pool_table;
 
     vector3 camera_position;
     vector3 camera_pitch_yaw_roll;

@@ -14,6 +14,8 @@ enum vertex_attributes
     vertex_attributes_normals,
     vertex_attributes_texcoords,
     vertex_attributes_colors,
+    vertex_attributes_tangents,
+    vertex_attributes_binormals,
     vertex_attributes_count
 };
 
@@ -21,6 +23,8 @@ enum vertex_attributes
 #define VA_NORMALS_BIT   (1 << vertex_attributes_normals)
 #define VA_TEXCOORDS_BIT (1 << vertex_attributes_texcoords)
 #define VA_COLORS_BIT    (1 << vertex_attributes_colors)
+#define VA_TANGENTS_BIT  (1 << vertex_attributes_tangents)
+#define VA_BINORMALS_BIT (1 << vertex_attributes_binormals)
 
 #define VA_ISSET(mask, bits) ((mask & bits) == bits)
 #define VA_INCLUDE(mask, bits) (mask |= bits)
@@ -44,6 +48,8 @@ struct vertex_data
     vector3* positions;
     vector3* normals;
     vector2* texcoords;
+    vector3* tangents;
+    vector3* binormals;
     color* colors;
 };
 
@@ -76,6 +82,9 @@ mesh_data mesh_create_triangle(float side);
 mesh_data mesh_create_circle(float radius, int subdivisions);
 mesh_data mesh_create_cube(float side);
 mesh_data mesh_create_plane_xz(float side, int subdivisions);
+mesh_data mesh_create_sphere(float radius, int subdivisions);
 void mesh_data_free(mesh_data* data);
+
+void mesh_generate_tangents(mesh_data* data);
 
 #endif // MESH_H_INCLUDED

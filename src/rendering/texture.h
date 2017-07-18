@@ -15,7 +15,14 @@ typedef struct
     texture_data data;
 } loaded_texture;
 
-loaded_texture load_texture(gl_functions* gl, texture_data data);
+typedef enum
+{
+    TEXTURE_REPEAT,
+    TEXTURE_MIRROR,
+    TEXTURE_CLAMP
+} texture_wrap_mode;
+
+loaded_texture load_texture(gl_functions* gl, texture_data data, texture_wrap_mode wrap_mode);
 
 texture_data texture_create_checker(int width, int height, int checker_size);
 texture_data texture_create_from_tga(char* path);

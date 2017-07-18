@@ -9,6 +9,7 @@ typedef struct material_data material_data;
 typedef enum
 {
     material_data_type_unknown,
+    material_data_type_scalar,
     material_data_type_vector2,
     material_data_type_vector3,
     material_data_type_vector4,
@@ -46,6 +47,7 @@ void material_set_value(material* material, uint32 name_hash, void* value,
 
 void material_set_texture(material* material, char* name, loaded_texture* texture);
 void material_set_color(material* material, char* name, vector4 color);
+void material_set_scalar(material* material, char* name, float value);
 
 void material_apply(material* material, shader_uniform_group* uniforms);
 

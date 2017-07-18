@@ -116,11 +116,15 @@ mesh_layout_for_shader(gl_functions* gl, loaded_mesh* mesh, shader_program* shad
     int color_location = gl->glGetAttribLocation(shader->program, "in_color");
     int texcoord_location = gl->glGetAttribLocation(shader->program, "in_uv");
     int normal_location = gl->glGetAttribLocation(shader->program, "in_normal");
+    int tangent_location = gl->glGetAttribLocation(shader->program, "in_tangent");
+    int binormal_location = gl->glGetAttribLocation(shader->program, "in_binormal");
 
     if(position_location != -1) VA_INCLUDE(shader_attributes, VA_POSITIONS_BIT);
     if(normal_location != -1)   VA_INCLUDE(shader_attributes, VA_NORMALS_BIT);
     if(texcoord_location != -1) VA_INCLUDE(shader_attributes, VA_TEXCOORDS_BIT);
     if(color_location != -1)    VA_INCLUDE(shader_attributes, VA_COLORS_BIT);
+    if(tangent_location != -1)  VA_INCLUDE(shader_attributes, VA_TANGENTS_BIT);
+    if(binormal_location != -1) VA_INCLUDE(shader_attributes, VA_BINORMALS_BIT);
 
     int attribute_mask = (shader_attributes & mesh->attribute_mask);
     
@@ -170,6 +174,20 @@ mesh_layout_for_shader(gl_functions* gl, loaded_mesh* mesh, shader_program* shad
 	    gl->glBindBuffer(GL_ARRAY_BUFFER, *(mesh->vertex_buffer + vertex_attributes_colors));
 	    gl->glEnableVertexAttribArray(color_location);
 	    gl->glVertexAttribPointer(color_location, 3, GL_FLOAT, GL_FALSE, sizeof(color), 0);
+	}
+
+	if(VA_ISSET(attribute_mask, VA_TANGENTS_BIT))
+	{
+	    gl->glBindBuffer(GL_ARRAY_BUFFER, *(mesh->vertex_buffer + vertex_attributes_tangents));
+	    gl->glEnableVertexAttribArray(tangent_location);
+	    gl->glVertexAttribPointer(tangent_location, 3, GL_FLOAT, GL_FALSE, sizeof(vector3), 0);
+	}
+
+	if(VA_ISSET(attribute_mask, VA_BINORMALS_BIT))
+	{
+	    gl->glBindBuffer(GL_ARRAY_BUFFER, *(mesh->vertex_buffer + vertex_attributes_binormals));
+	    gl->glEnableVertexAttribArray(binormal_location);
+	    gl->glVertexAttribPointer(binormal_location, 3, GL_FLOAT, GL_FALSE, sizeof(vector3), 0);
 	}
     }
 
@@ -228,7 +246,9 @@ renderer_queue_push_item(render_queue* queue, render_queue_type type,
     uint32 push_size = sizeof(render_queue_item) + command_size;
     if((queue->queue_used + push_size) > queue->queue_capacity)
     {
-	platform_log("render queue capacity full (%d/%d)\n", queue->queue_used, queue->queue_capacity);
+	platform_log("render queue capacity full (%d/%d)\n",
+		     queue->queue_used + push_size,
+		     queue->queue_capacity);
 	return;
     }
     
@@ -463,6 +483,8 @@ renderer_queue_process(render_queue* queue)
 	    render_queue_draw* draw =
 		(render_queue_draw*)(queue_head + sizeof(render_queue_item));
 
+	    int rebind_mesh = 0;
+	    
 	    material* material = draw->material;
 	    shader_program* shader = material->shader;
 	    if(material != bound_material)
@@ -476,10 +498,11 @@ renderer_queue_process(render_queue* queue)
 		material_apply(material, &queue->uniforms_per_object);
 	    
 		bound_material = material;
+		rebind_mesh = 1;
 	    }
 	
 	    loaded_mesh* mesh = draw->mesh;
-	    if(mesh != bound_mesh)
+	    if(mesh != bound_mesh || rebind_mesh)
 	    {
 		renderer_bind_mesh_buffers(gl, mesh, shader);
 		bound_mesh = mesh;

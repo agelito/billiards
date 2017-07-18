@@ -49,6 +49,7 @@ typedef struct
 
 vector2 vector2_create(float x, float y);
 vector2 vector2_scale(vector2 a, float s);
+vector2 vector2_subtract(vector2 a, vector2 b);
 
 float vector3_magnitude(vector3 input);
 vector3 vector3_create(float x, float y, float z);
@@ -57,6 +58,7 @@ vector3 vector3_subtract(vector3 a, vector3 b);
 vector3 vector3_normalize(vector3 input);
 vector3 vector3_cross(vector3 a, vector3 b);
 vector3 vector3_scale(vector3 a, float s);
+vector3 vector3_lerp(vector3 a, vector3 b, float t);
 float vector3_dot(vector3 a, vector3 b);
 
 vector3 vector3_matrix_multiply(matrix4 matrix, vector3 input);
