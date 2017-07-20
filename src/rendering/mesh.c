@@ -26,6 +26,16 @@ load_mesh(gl_functions* gl, mesh_data data, bool32 dynamic)
     {
 	usage = GL_DYNAMIC_DRAW;
     }
+
+    if(data.triangles)
+    {
+	uint32* index_buffer = &mesh.index_buffer;
+	gl->glGenBuffers(1, index_buffer);
+	gl->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, *index_buffer);
+
+	size_t index_buffer_size = (sizeof(uint32) * data.index_count);
+	gl->glBufferData(GL_ELEMENT_ARRAY_BUFFER, index_buffer_size, data.triangles, usage);
+    }
     
     if(data.vertices.positions)
     {
@@ -190,29 +200,46 @@ mesh_data
 mesh_create_quad()
 {
     mesh_data data = (mesh_data){0};
-    data.vertex_count = 6;
+    data.vertex_count = 4;
+    data.index_count = 6;
 
     real32 half_side = 0.5f;
 
     size_t position_data_size = (data.vertex_count * sizeof(vector3));
     vector3* positions = (vector3*)malloc(position_data_size);
     *(positions + 0) = vector3_create(-half_side, -half_side, 0.0f);
-    *(positions + 1) = vector3_create(half_side, -half_side, 0.0f);
-    *(positions + 2) = vector3_create(-half_side, half_side, 0.0f);
-    *(positions + 3) = vector3_create(-half_side, half_side, 0.0f);
-    *(positions + 4) = vector3_create(half_side, -half_side, 0.0f);
-    *(positions + 5) = vector3_create(half_side, half_side, 0.0f);
+    *(positions + 1) = vector3_create(-half_side, half_side, 0.0f);
+    *(positions + 2) = vector3_create(half_side, half_side, 0.0f);
+    *(positions + 3) = vector3_create(half_side, -half_side, 0.0f);
     data.vertices.positions = positions;
 
     size_t texcoord_data_size = (data.vertex_count * sizeof(vector2));
     vector2* texcoords = (vector2*)malloc(texcoord_data_size);
     *(texcoords + 0) = vector2_create(0.0f, 0.0f);
-    *(texcoords + 1) = vector2_create(1.0f, 0.0f);
-    *(texcoords + 2) = vector2_create(0.0f, 1.0f);
-    *(texcoords + 3) = vector2_create(0.0f, 1.0f);
-    *(texcoords + 4) = vector2_create(1.0f, 0.0f);
-    *(texcoords + 5) = vector2_create(1.0f, 1.0f);
+    *(texcoords + 1) = vector2_create(0.0f, 1.0f);
+    *(texcoords + 2) = vector2_create(1.0f, 1.0f);
+    *(texcoords + 3) = vector2_create(1.0f, 0.0f);
     data.vertices.texcoords = texcoords;
+
+    size_t normal_data_size = (data.vertex_count * sizeof(vector3));
+    vector3* normals = (vector3*)malloc(normal_data_size);
+    *(normals + 0) = vector3_create(0.0f, 0.0f, -1.0f);
+    *(normals + 1) = vector3_create(0.0f, 0.0f, -1.0f);
+    *(normals + 2) = vector3_create(0.0f, 0.0f, -1.0f);
+    *(normals + 3) = vector3_create(0.0f, 0.0f, -1.0f);
+    data.vertices.normals = normals;
+
+    size_t index_data_size = (data.index_count * sizeof(uint32));
+    uint32* triangles = (uint32*)malloc(index_data_size);
+
+    *(triangles + 0) = 2;
+    *(triangles + 1) = 1;
+    *(triangles + 2) = 0;
+    *(triangles + 3) = 2;
+    *(triangles + 4) = 0;
+    *(triangles + 5) = 3;
+
+    data.triangles = triangles;
 
     return data;
 }
@@ -748,6 +775,12 @@ mesh_create_sphere(float radius, int subdivisions)
 void
 mesh_data_free(mesh_data* data)
 {
+    if(data->triangles)
+    {
+	free(data->triangles);
+	data->triangles = 0;
+    }
+    
     if(data->vertices.positions)
     {
 	free(data->vertices.positions);

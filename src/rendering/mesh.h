@@ -55,9 +55,11 @@ struct vertex_data
 
 struct mesh_data
 {
+    uint32 index_count;
+    uint32* triangles;
     int vertex_count;
     vertex_data vertices;
-};
+ };
 
 struct input_layout
 {
@@ -71,6 +73,7 @@ struct loaded_mesh
     int layout_count;
     input_layout layouts[MESH_MAX_INPUT_LAYOUTS];
     GLuint vertex_buffer[MESH_MAX_VERTEX_BUFFERS];
+    GLuint index_buffer;
     mesh_data data;
 };
 

@@ -138,7 +138,7 @@ mesh_layout_for_shader(gl_functions* gl, loaded_mesh* mesh, shader_program* shad
 	    break;
 	}
     }
-
+    
     if(!layout)
     {
 	assert(mesh->layout_count < MESH_MAX_INPUT_LAYOUTS);
@@ -147,6 +147,11 @@ mesh_layout_for_shader(gl_functions* gl, loaded_mesh* mesh, shader_program* shad
 
 	gl->glGenVertexArrays(1, &layout->vertex_array);
 	gl->glBindVertexArray(layout->vertex_array);
+
+	if(mesh->index_buffer)
+	{
+	    gl->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->index_buffer);
+	}
 
 	if(VA_ISSET(attribute_mask, VA_POSITIONS_BIT))
 	{
@@ -287,8 +292,16 @@ renderer_queue_push_draw(render_queue* queue, loaded_mesh* mesh, material* mater
     draw.material = material;
     draw.transform = transform;
 
-    draw.draw_element_offset = 0;
-    draw.draw_element_count = mesh->data.vertex_count;
+    if(mesh->data.index_count)
+    {
+	draw.draw_element_offset = 0;
+	draw.draw_element_count = mesh->data.index_count;
+    }
+    else
+    {
+	draw.draw_element_offset = 0;
+	draw.draw_element_count = mesh->data.vertex_count;
+    }
 
     renderer_queue_push_item(queue, render_queue_type_draw, &draw, sizeof(render_queue_draw));
 }
@@ -513,7 +526,15 @@ renderer_queue_process(render_queue* queue)
 
 	    renderer_apply_uniforms(gl, shader, &queue->uniforms_per_object);
 
-	    glDrawArrays(GL_TRIANGLES, draw->draw_element_offset, draw->draw_element_count);
+	    if(!mesh->index_buffer)
+	    {
+		glDrawArrays(GL_TRIANGLES, draw->draw_element_offset, draw->draw_element_count);
+	    }
+	    else
+	    {
+		glDrawElements(GL_TRIANGLES, draw->draw_element_count,
+			       GL_UNSIGNED_INT, (void*)0);
+	    }
 	} break;
 	}
 

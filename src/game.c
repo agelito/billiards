@@ -71,7 +71,7 @@ game_initialize(game_state* state)
 	state->quad = load_mesh(gl, mesh_create_quad(), 0);
 	mesh_data_free(&state->quad.data);
 
-	mesh_data sphere_mesh = mesh_create_sphere(1.0f, 4);
+	mesh_data sphere_mesh = mesh_create_sphere(1.0f, 3);
 	mesh_generate_tangents(&sphere_mesh);
 	
 	state->sphere = load_mesh(gl, sphere_mesh, TEXTURE_REPEAT);
@@ -251,8 +251,8 @@ game_update_and_render(game_state* state)
 
     static real32 rotation_y = 90.0f;
     static real32 rotation_x = 0.0f;
-    rotation_x += 0.5f;
-    rotation_y += 3.0f;
+    rotation_x += 0.05f;
+    rotation_y += 0.3f;
 
     matrix4 ball_rotation = matrix_multiply(matrix_rotation_x(rotation_x),
 					    matrix_rotation_y(rotation_y));
@@ -266,6 +266,10 @@ game_update_and_render(game_state* state)
 
 	renderer_queue_push_draw(&state->render_queue, &state->sphere, &state->sphere_material,
 				 matrix_multiply(matrix_translate(-24.0f, 1.0f, 0.0f), ball_rotation));
+
+	renderer_queue_push_draw(&state->render_queue, &state->quad, &state->billiard[7],
+				 matrix_multiply(matrix_translate(0.0f, 4.0f, 3.0f),
+						 matrix_scale(6.0f, 3.0f, 3.0f)));
 
 	// NOTE: Draw billiard balls
 	renderer_queue_push_draw(&state->render_queue, &state->sphere, &state->billiard[0],
