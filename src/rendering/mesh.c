@@ -731,8 +731,8 @@ mesh_create_sphere(float radius, int subdivisions)
 	*(data.vertices.normals + vertex_index) = normal;
 
 	vector2 texcoord;
-	texcoord.x = atan2(normal.x, -normal.z) / pi2 + 0.5f;
-	texcoord.y = (normal.y * 0.5f + 0.5f);
+	texcoord.x = 0.5f + atan2(normal.z, normal.x) / pi2;
+	texcoord.y = 0.5f - asin(normal.y) / MATH_PI;
 
 	*(data.vertices.texcoords + vertex_index) = texcoord;
     }

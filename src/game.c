@@ -71,8 +71,7 @@ game_initialize(game_state* state)
 	state->quad = load_mesh(gl, mesh_create_quad(), 0);
 	mesh_data_free(&state->quad.data);
 
-	mesh_data sphere_mesh = mesh_create_sphere(1.0f, 5);
-	//mesh_data sphere_mesh = obj_load_from_file("sphere.obj");
+	mesh_data sphere_mesh = mesh_create_sphere(1.0f, 4);
 	mesh_generate_tangents(&sphere_mesh);
 	
 	state->sphere = load_mesh(gl, sphere_mesh, TEXTURE_REPEAT);
@@ -144,7 +143,7 @@ game_initialize(game_state* state)
 	texture_data_free(&state->billiard_balls[15].data);
 
 	state->table_cloth =
-	    load_texture(gl, texture_create_from_tga("pool_table_cloth.tga"), TEXTURE_MIRROR);
+	    load_texture(gl, texture_create_checker(256, 256, 128), TEXTURE_MIRROR);
 	texture_data_free(&state->table_cloth.data);
     }
 
@@ -167,8 +166,9 @@ game_initialize(game_state* state)
 	material_set_texture(&state->sphere_material, "main_texture", &state->checker2);
 	material_set_scalar(&state->sphere_material, "roughness", 0.0f);
 
-	material billiard_ball_material = material_create(&state->lightning, 68);
+	material billiard_ball_material = material_create(&state->lightning, 88);
 	material_set_scalar(&billiard_ball_material, "roughness", 0.5f);
+	material_set_scalar(&billiard_ball_material, "shininess", 32.0f);
 
 	int i;
 	for_range(i, 16)

@@ -8,6 +8,7 @@ uniform vec4 light_color_intensity;
 
 uniform float ambient_coefficient;
 uniform float roughness;
+uniform float shininess;
 
 uniform vec3 camera_position;
 
@@ -21,17 +22,21 @@ in vec3 eye_direction;
 
 out vec4 out_color;
 
-vec3 blinn_phong(vec3 normal, vec3 eye_direction, vec3 light_direction, vec3 light_color)
+vec3 blinn_phong(vec3 normal, vec3 eye_direction, vec3 light_direction,
+		 vec3 light_color, float light_intensity, vec3 diffuse_color)
 {
     vec3 result = vec3(0.0, 0.0, 0.0);
 
-    if(dot(light_direction, normal) > 0.0)
+    float lambertian = max(0.0, dot(light_direction, normal));
+
+    if(lambertian > 0.0)
     {
 	vec3 reflection = reflect(-light_direction, normal);
 	float specular = max(dot(reflection, eye_direction), 0.0);
-	float intensity = pow(specular, 14.0);
+	float intensity = pow(specular, shininess);
 
-	result = light_color * intensity;
+	result = ((lambertian * diffuse_color) +
+		  (light_color * intensity)) * light_intensity;
     }
 
     return result;
@@ -135,17 +140,18 @@ void main()
     vec3 ld = normalize(light_direction);
     vec3 ed = normalize(eye_direction);
     
-    vec3 on = oren_nayar(n, ed, ld, light_color_intensity.xyz);
-    vec3 diffuse = linear_albedo * on * light_color_intensity.w;
+    // vec3 on = oren_nayar(n, ed, ld, light_color_intensity.xyz);
+    // vec3 lit_color = linear_albedo * on * light_color_intensity.w;
 
     vec3 t = normalize(tangent);
     vec3 b = normalize(binormal);
     
     // vec3 specular = ward_specular(n, t, b, ed, ld, light_color_intensity.xyz);
-    vec3 specular = blinn_phong(n, ed, ld, light_color_intensity.xyz);
+    vec3 lit_color = blinn_phong(n, ed, ld, light_color_intensity.xyz,
+				 light_color_intensity.w, linear_albedo);
 
     vec3 gamma = vec3(1.0 / 2.2);
-    vec3 linear_color = ambient+ diffuse + specular;
+    vec3 linear_color = ambient + lit_color;
     vec3 output_color = pow(linear_color, gamma);
     
     out_color = vec4(output_color, 1.0);
