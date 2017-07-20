@@ -1,5 +1,5 @@
-# racera
-Sometime in the future this might turn into a racing game, or something completely different. The future will tell.
+# billiards 
+Toy project for experimenting with writing games and graphics using C and OpenGL.
 
 ## Linux Build
 Build using the build.sh script
