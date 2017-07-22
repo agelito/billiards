@@ -6,6 +6,7 @@
 // TODO: Use platform for memory allocation instead of stdlib.
 #include <stdlib.h>
 #include <math.h>
+#include <string.h>
 
 #include "../asset_import/obj_importer.c"
 
@@ -372,7 +373,7 @@ mesh_create_circle(float radius, int subdivisions)
     return data;
 }
 
-#include <string.h>
+
 
 mesh_data
 mesh_create_cube(float side)
