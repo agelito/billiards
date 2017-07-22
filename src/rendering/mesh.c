@@ -9,6 +9,7 @@
 #include <string.h>
 
 #include "../asset_import/obj_importer.c"
+#include "../hash_map.c"
 
 #define create_vertex(x, y, z, color, uv_x, uv_y) (vertex){{{{x, y, z}}}, color, {{{uv_x, uv_y}}}}
 
@@ -372,8 +373,6 @@ mesh_create_circle(float radius, int subdivisions)
 
     return data;
 }
-
-
 
 mesh_data
 mesh_create_cube(float side)
