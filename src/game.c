@@ -71,7 +71,7 @@ game_initialize(game_state* state)
 	state->quad = load_mesh(gl, mesh_create_quad(), 0);
 	mesh_data_free(&state->quad.data);
 
-	mesh_data sphere_mesh = mesh_create_sphere(1.0f, 3);
+	mesh_data sphere_mesh = mesh_create_sphere(1.0f, 4);
 	mesh_generate_normals(&sphere_mesh, 1);
 	mesh_generate_tangents(&sphere_mesh);
 	

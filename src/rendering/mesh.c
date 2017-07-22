@@ -942,6 +942,10 @@ mesh_create_sphere(float radius, int subdivisions)
 
 #if 1
     int vertex_count_required, index_count_required;
+
+    platform_log("before fix seams\n vertex count: %d\n index count: %d\n",
+		 data.vertex_count, data.index_count);
+    
     icosahedron_fix_texture_seams(&data, 0, 0, 0, &vertex_count_required, &index_count_required);
 
     vector3* new_positions = (vector3*)malloc(sizeof(vector3) * vertex_count_required);
@@ -966,6 +970,9 @@ mesh_create_sphere(float radius, int subdivisions)
     data.vertices.positions = new_positions;
     data.vertices.texcoords = new_texcoords;
     data.triangles = new_triangles;
+
+    platform_log("after fix seams\n vertex count: %d\n index count: %d\n",
+		 data.vertex_count, data.index_count);
 #endif
 
     return data;
