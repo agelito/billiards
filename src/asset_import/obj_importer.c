@@ -27,7 +27,7 @@ advance_line(char* at)
     return at;
 }
 
-static mesh_data
+mesh_data
 obj_load_from_file(char* path)
 {
     mesh_data result = (mesh_data){0};
