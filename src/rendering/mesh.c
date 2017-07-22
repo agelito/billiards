@@ -126,6 +126,16 @@ update_mesh(gl_functions* gl, loaded_mesh* mesh, uint32 offset, uint32 count)
     GLuint* vertex_buffer = 0;
     size_t vertex_buffer_offset = 0;;
     size_t vertex_buffer_size = 0;
+
+    if(mesh->index_buffer && mesh->data.triangles)
+    {
+	gl->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->index_buffer);
+
+	size_t index_buffer_offset = (offset * sizeof(uint32));
+	size_t index_buffer_size = (count * sizeof(uint32));
+	gl->glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, index_buffer_offset, index_buffer_size,
+			    mesh->data.triangles);
+    }
     
     if(VA_ISSET(mesh->attribute_mask, VA_POSITIONS_BIT))
     {
