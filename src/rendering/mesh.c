@@ -12,6 +12,9 @@
 #include "../hash_map.c"
 
 #define create_vertex(x, y, z, color, uv_x, uv_y) (vertex){{{{x, y, z}}}, color, {{{uv_x, uv_y}}}}
+#define create_vertex_hash(x, y, z) ((int)(x * 1000.0f) & 0x3ff) |	\
+    (((int)(y * 1000.0f) & 0x3ff) << 10) |				\
+    (((int)(z * 1000.0f) & 0x3ff) << 20)
 
 loaded_mesh
 load_mesh(gl_functions* gl, mesh_data data, bool32 dynamic)
@@ -626,26 +629,36 @@ mesh_create_sphere(float radius, int subdivisions)
     // NOTE: Equation for capacity found using wolfram alpha.
     int ico_sphere_vertex_capacity = 4 * (-2 + 5 * pow(2, 2 * subdivisions));
     int ico_sphere_vertex_count = 0;
-    
+
     size_t ico_sphere_vertices_size = sizeof(vector3) * ico_sphere_vertex_capacity;
     vector3* ico_sphere_vertices = (vector3*)malloc(ico_sphere_vertices_size);
 
-    *(ico_sphere_vertices + 0) = vector3_create(-1.0f,  1.0f, 0.0f);
-    *(ico_sphere_vertices + 1) = vector3_create( 1.0f,  1.0f, 0.0f);
-    *(ico_sphere_vertices + 2) = vector3_create(-1.0f, -1.0f, 0.0f);
-    *(ico_sphere_vertices + 3) = vector3_create( 1.0f, -1.0f, 0.0f);
+    hash_map vertex_map = hash_map_create(ico_sphere_vertex_capacity);
 
-    *(ico_sphere_vertices + 4) = vector3_create(0.0f, -1.0f,  1.0f);
-    *(ico_sphere_vertices + 5) = vector3_create(0.0f,  1.0f,  1.0f);
-    *(ico_sphere_vertices + 6) = vector3_create(0.0f, -1.0f, -1.0f);
-    *(ico_sphere_vertices + 7) = vector3_create(0.0f,  1.0f, -1.0f);
+    *(ico_sphere_vertices + 0) = vector3_normalize(vector3_create(-1.0f,  1.0f, 0.0f));
+    *(ico_sphere_vertices + 1) = vector3_normalize(vector3_create( 1.0f,  1.0f, 0.0f));
+    *(ico_sphere_vertices + 2) = vector3_normalize(vector3_create(-1.0f, -1.0f, 0.0f));
+    *(ico_sphere_vertices + 3) = vector3_normalize(vector3_create( 1.0f, -1.0f, 0.0f));
 
-    *(ico_sphere_vertices + 8)  = vector3_create( 1.0f, 0.0f, -1.0f);
-    *(ico_sphere_vertices + 9)  = vector3_create( 1.0f, 0.0f,  1.0f);
-    *(ico_sphere_vertices + 10) = vector3_create(-1.0f, 0.0f, -1.0f);
-    *(ico_sphere_vertices + 11) = vector3_create(-1.0f, 0.0f,  1.0f);
+    *(ico_sphere_vertices + 4) = vector3_normalize(vector3_create(0.0f, -1.0f,  1.0f));
+    *(ico_sphere_vertices + 5) = vector3_normalize(vector3_create(0.0f,  1.0f,  1.0f));
+    *(ico_sphere_vertices + 6) = vector3_normalize(vector3_create(0.0f, -1.0f, -1.0f));
+    *(ico_sphere_vertices + 7) = vector3_normalize(vector3_create(0.0f,  1.0f, -1.0f));
+
+    *(ico_sphere_vertices + 8)  = vector3_normalize(vector3_create( 1.0f, 0.0f, -1.0f));
+    *(ico_sphere_vertices + 9)  = vector3_normalize(vector3_create( 1.0f, 0.0f,  1.0f));
+    *(ico_sphere_vertices + 10) = vector3_normalize(vector3_create(-1.0f, 0.0f, -1.0f));
+    *(ico_sphere_vertices + 11) = vector3_normalize(vector3_create(-1.0f, 0.0f,  1.0f));
     
     ico_sphere_vertex_count = 12;
+
+    int i;
+    for_range(i, ico_sphere_vertex_count)
+    {
+	vector3 vertex = *(ico_sphere_vertices + i);
+	int vertex_hash = create_vertex_hash(vertex.x, vertex.y, vertex.z);
+	hash_map_insert(&vertex_map, vertex_hash, i);
+    }
 
     // NOTE: Equation for capacity found using wolfram alpha.
     int face_index_capacity = 15 * pow(4, subdivisions + 1);
@@ -682,7 +695,7 @@ mesh_create_sphere(float radius, int subdivisions)
     face_index_count = push_triangle_face(6, 10, 2, faces_write, face_index_count);
     face_index_count = push_triangle_face(8, 7,  6, faces_write, face_index_count);
     face_index_count = push_triangle_face(9, 1,  8, faces_write, face_index_count);
-    
+
     int subdivision;
     for(subdivision = 0; subdivision < subdivisions; ++subdivision)
     {
@@ -693,7 +706,7 @@ mesh_create_sphere(float radius, int subdivisions)
 	faces_read = faces_swap;
 
 	face_index_count = 0;
-	
+
 	int face, index_offset;
 	for(face = 0; face < face_count; ++face)
 	{
@@ -716,18 +729,49 @@ mesh_create_sphere(float radius, int subdivisions)
 	    vector3 vertex_b = *(ico_sphere_vertices + b);
 	    vector3 vertex_c = *(ico_sphere_vertices + c);
 	    
-	    vector3 mid_ab = vector3_lerp(vertex_a, vertex_b, 0.5f);
-	    vector3 mid_bc = vector3_lerp(vertex_b, vertex_c, 0.5f);
-	    vector3 mid_ca = vector3_lerp(vertex_c, vertex_a, 0.5f);
+	    vector3 mid_ab = vector3_normalize(vector3_lerp(vertex_a, vertex_b, 0.5f));
+	    vector3 mid_bc = vector3_normalize(vector3_lerp(vertex_b, vertex_c, 0.5f));
+	    vector3 mid_ca = vector3_normalize(vector3_lerp(vertex_c, vertex_a, 0.5f));
 
-	    int a2 = ico_sphere_vertex_count;
-	    *(ico_sphere_vertices + ico_sphere_vertex_count++) = mid_ab;
+	    int mid_ab_hash = create_vertex_hash(mid_ab.x, mid_ab.y, mid_ab.z);
+	    int mid_bc_hash = create_vertex_hash(mid_bc.x, mid_bc.y, mid_bc.z);
+	    int mid_ca_hash = create_vertex_hash(mid_ca.x, mid_ca.y, mid_ca.z);
 
-	    int b2 = ico_sphere_vertex_count;
-	    *(ico_sphere_vertices + ico_sphere_vertex_count++) = mid_bc;
+	    int a2, b2, c2;
 	    
-	    int c2 = ico_sphere_vertex_count;
-	    *(ico_sphere_vertices + ico_sphere_vertex_count++) = mid_ca;
+	    if(hash_map_contains(&vertex_map, mid_ab_hash))
+	    {
+		a2 = hash_map_get_value(&vertex_map, mid_ab_hash);
+	    }
+	    else
+	    {
+		a2 = ico_sphere_vertex_count;
+		*(ico_sphere_vertices + ico_sphere_vertex_count++) = mid_ab;
+		hash_map_insert(&vertex_map, mid_ab_hash, a2);
+	    }
+
+	    if(hash_map_contains(&vertex_map, mid_bc_hash))
+	    {
+		b2 = hash_map_get_value(&vertex_map, mid_bc_hash);
+	    }
+	    else
+	    {
+		b2 = ico_sphere_vertex_count;
+		*(ico_sphere_vertices + ico_sphere_vertex_count++) = mid_bc;
+		hash_map_insert(&vertex_map, mid_bc_hash, b2);
+	    }
+
+
+	    if(hash_map_contains(&vertex_map, mid_ca_hash))
+	    {
+		c2 = hash_map_get_value(&vertex_map, mid_ca_hash);
+	    }
+	    else
+	    {
+		c2 = ico_sphere_vertex_count;
+		*(ico_sphere_vertices + ico_sphere_vertex_count++) = mid_ca;
+		hash_map_insert(&vertex_map, mid_ca_hash, c2);
+	    }
 
 	    face_index_count = push_triangle_face(a, c2, a2, faces_write, face_index_count);
 	    face_index_count = push_triangle_face(b, a2, b2, faces_write, face_index_count);
@@ -739,40 +783,41 @@ mesh_create_sphere(float radius, int subdivisions)
     faces_read = faces_write;
     faces_write = 0;
 
+    size_t vertex_data_size = sizeof(vector3) * ico_sphere_vertex_count;
+    size_t texcoord_data_size = sizeof(vector2) * ico_sphere_vertex_count;
+    data.vertices.positions = (vector3*)malloc(vertex_data_size);
+    data.vertices.normals   = (vector3*)malloc(vertex_data_size);
+    data.vertices.texcoords = (vector2*)malloc(texcoord_data_size);
+    data.vertex_count       = ico_sphere_vertex_count;
+
+    float pi2 = (2.0f * MATH_PI);
+    
     int vertex_index;
     for(vertex_index = 0; vertex_index < ico_sphere_vertex_count; ++vertex_index)
     {
 	vector3 vertex = *(ico_sphere_vertices + vertex_index);
 	vertex = vector3_normalize(vertex);
-	vertex = vector3_scale(vertex, radius);
-	*(ico_sphere_vertices + vertex_index) = vertex;
-    }
-    
-    size_t vertex_data_size = sizeof(vector3) * face_index_count;
-    size_t texcoord_data_size = sizeof(vector2) * face_index_count;
-    data.vertices.positions = (vector3*)malloc(vertex_data_size);
-    data.vertices.normals   = (vector3*)malloc(vertex_data_size);
-    data.vertices.texcoords = (vector2*)malloc(texcoord_data_size);
-    data.vertex_count       = face_index_count;
-
-    float pi2 = (2.0f * MATH_PI);
-
-    for(vertex_index = 0; vertex_index < face_index_count; ++vertex_index)
-    {
-	int index = *(faces_read + vertex_index);
-
-	vector3 position = *(ico_sphere_vertices + index);
-	*(data.vertices.positions + vertex_index) = position;
-
-	vector3 normal = vector3_normalize(position);
-	*(data.vertices.normals + vertex_index) = normal;
+	
+	*(data.vertices.positions + vertex_index) = vector3_scale(vertex, radius);
+	*(data.vertices.normals + vertex_index) = vertex;
 
 	vector2 texcoord;
-	texcoord.x = 0.5f + atan2(normal.z, normal.x) / pi2;
-	texcoord.y = 0.5f - asin(normal.y) / MATH_PI;
-
+	texcoord.x = 0.5f + atan2(vertex.z, vertex.x) / pi2;
+	texcoord.y = 0.5f - asin(vertex.y) / MATH_PI;
 	*(data.vertices.texcoords + vertex_index) = texcoord;
     }
+
+    size_t index_data_size = sizeof(uint32) * face_index_count;
+    uint32* index_data = (uint32*)malloc(index_data_size);
+    data.index_count = face_index_count;
+    data.triangles = index_data;
+
+    for_range(i, face_index_count)
+    {
+	*(index_data + i) = *(faces_read + i);
+    }
+
+    hash_map_delete(&vertex_map);
     
     free(ico_sphere_vertices);
     
@@ -845,12 +890,6 @@ mesh_generate_tangents(mesh_data* data)
 	platform_log("can't generate tangents without positions.\n");
 	return;
     }
-
-    if(!data->vertices.normals)
-    {
-	platform_log("can't generate tangents without normals.\n");
-	return;
-    }
     
     if(!data->vertices.texcoords)
     {
@@ -858,36 +897,60 @@ mesh_generate_tangents(mesh_data* data)
 	return;
     }
 
-    
-
     size_t tangent_workset_size = sizeof(vector3) * data->vertex_count;
-    vector3* tangents_workset1 = (vector3*)malloc(tangent_workset_size * 2);
-    vector3* tangents_workset2 = (tangents_workset1 + data->vertex_count);
+    vector3* tangents = (vector3*)malloc(tangent_workset_size * 2);
+    vector3* binormals = (tangents + data->vertex_count);
 
-    int tangent_reset;
-    for_range(tangent_reset, data->vertex_count)
+    int workset_reset;
+    for_range(workset_reset, data->vertex_count)
     {
-	*(tangents_workset1 + tangent_reset) = vector3_create(0.0f, 0.0f, 0.0f);
-	*(tangents_workset2 + tangent_reset) = vector3_create(0.0f, 0.0f, 0.0f);
+	*(tangents + workset_reset) = vector3_create(0.0f, 0.0f, 0.0f);
+	*(binormals + workset_reset) = vector3_create(0.0f, 0.0f, 0.0f);
     }
 
-    int triangle_count = data->vertex_count / 3;
-
+    int triangle_count;
+    if(data->triangles)
+    {
+	triangle_count = data->index_count / 3;
+    }
+    else
+    {
+	triangle_count = data->vertex_count / 3;
+    }
+    
     int triangle;
     for_range(triangle, triangle_count)
     {
-	int vertex_index = triangle * 3;
+	int vertex_index0;
+	int vertex_index1;
+	int vertex_index2;
+	
+	if(data->triangles)
+	{
+	    uint32* triangle_start =
+		(data->triangles + (triangle * 3));
+	    vertex_index0 = *(triangle_start + 0);
+	    vertex_index1 = *(triangle_start + 1);
+	    vertex_index2 = *(triangle_start + 2);
+	}
+	else
+	{
+	    int triangle_start = triangle * 3;
+	    vertex_index0 = triangle_start + 0;
+	    vertex_index1 = triangle_start + 1;
+	    vertex_index2 = triangle_start + 2;
+	}
 
-	vector3 vertex_position0 = *(data->vertices.positions + vertex_index + 0);
-	vector3 vertex_position1 = *(data->vertices.positions + vertex_index + 1);
-	vector3 vertex_position2 = *(data->vertices.positions + vertex_index + 2);
+	vector3 vertex_position0 = *(data->vertices.positions + vertex_index0);
+	vector3 vertex_position1 = *(data->vertices.positions + vertex_index1);
+	vector3 vertex_position2 = *(data->vertices.positions + vertex_index2);
 
 	vector3 position_delta1 = vector3_subtract(vertex_position1, vertex_position0);
 	vector3 position_delta2 = vector3_subtract(vertex_position2, vertex_position0);
 
-	vector2 vertex_texcoord0 = *(data->vertices.texcoords + vertex_index + 0);
-	vector2 vertex_texcoord1 = *(data->vertices.texcoords + vertex_index + 1);
-	vector2 vertex_texcoord2 = *(data->vertices.texcoords + vertex_index + 2);
+	vector2 vertex_texcoord0 = *(data->vertices.texcoords + vertex_index0);
+	vector2 vertex_texcoord1 = *(data->vertices.texcoords + vertex_index1);
+	vector2 vertex_texcoord2 = *(data->vertices.texcoords + vertex_index2);
 
 	vector2 texcoord_delta1 = vector2_subtract(vertex_texcoord1, vertex_texcoord0);
 	vector2 texcoord_delta2 = vector2_subtract(vertex_texcoord2, vertex_texcoord0);
@@ -903,11 +966,13 @@ mesh_generate_tangents(mesh_data* data)
 					     vector3_scale(position_delta1, texcoord_delta2.x));
 	binormal = vector3_scale(binormal, r);
 
-	vector3* tangent_out = (tangents_workset1 + vertex_index);
-	*tangent_out = vector3_add(tangent, *tangent_out);
+	*(tangents + vertex_index0) = vector3_add(tangent, *(tangents + vertex_index0));
+	*(tangents + vertex_index1) = vector3_add(tangent, *(tangents + vertex_index1));
+	*(tangents + vertex_index2) = vector3_add(tangent, *(tangents + vertex_index2));
 	
-	vector3* binormal_out = (tangents_workset2 + vertex_index);
-	*binormal_out = vector3_add(binormal, *binormal_out);
+	*(binormals + vertex_index0) = vector3_add(binormal, *(binormals + vertex_index0));
+	*(binormals + vertex_index1) = vector3_add(binormal, *(binormals + vertex_index1));
+	*(binormals + vertex_index2) = vector3_add(binormal, *(binormals + vertex_index2));
     }
 
     size_t tangents_output_size = sizeof(vector3) * data->vertex_count;
@@ -919,10 +984,10 @@ mesh_generate_tangents(mesh_data* data)
     int vertex;
     for_range(vertex, data->vertex_count)
     {
-	vector3 tangent = *(tangents_workset1 + vertex);
+	vector3 tangent = *(tangents + vertex);
 	tangent = vector3_normalize(tangent);
 	
-	vector3 binormal = *(tangents_workset2 + vertex);
+	vector3 binormal = *(binormals + vertex);
 	binormal = vector3_normalize(binormal);
 
 	*(tangents_result + vertex) = tangent;
@@ -932,7 +997,7 @@ mesh_generate_tangents(mesh_data* data)
     data->vertices.tangents = tangents_result;
     data->vertices.binormals = binormals_result;
 
-    free(tangents_workset1);
+    free(tangents);
 }
 
 #undef create_vertex
