@@ -621,6 +621,123 @@ push_triangle_face(int vertex0, int vertex1, int vertex2, int* out_faces, int ou
     return out_offset;
 }
 
+void
+icosahedron_fix_texture_seams(mesh_data* mesh, vector3* vertex_out,
+			      vector2* texcoord_out, uint32* index_out,
+			      int* vertex_count_out, int* index_count_out)
+{
+    if(!mesh->triangles)  return;
+
+    hash_map correction_map = hash_map_create(mesh->index_count);
+    
+    int vertex_count = mesh->vertex_count;
+
+    int new_index_count = 0;
+
+    uint32 triangle, triangle_count = mesh->index_count / 3;
+    for_range(triangle, triangle_count)
+    {
+	int index = (triangle * 3);
+	
+	uint32 vertices[3];
+	vertices[0] = *(mesh->triangles + index + 0);
+	vertices[1] = *(mesh->triangles + index + 1);
+	vertices[2] = *(mesh->triangles + index + 2);
+
+	vector3 positions[3];
+	positions[0] = *(mesh->vertices.positions + vertices[0]);
+	positions[1] = *(mesh->vertices.positions + vertices[1]);
+	positions[2] = *(mesh->vertices.positions + vertices[2]);
+
+	vector2 uvs[3];
+	uvs[0] = *(mesh->vertices.texcoords + vertices[0]);
+	uvs[1] = *(mesh->vertices.texcoords + vertices[1]);
+	uvs[2] = *(mesh->vertices.texcoords + vertices[2]);
+
+	vector3 uv_delta0 = vector3_subtract(vector3_create(uvs[0].x, uvs[0].y, 0.0f),
+					     vector3_create(uvs[1].x, uvs[1].y, 0.0f));
+	vector3 uv_delta1 = vector3_subtract(vector3_create(uvs[2].x, uvs[2].y, 0.0f),
+					     vector3_create(uvs[1].x, uvs[1].y, 0.0f));
+
+	vector3 uv_cross = vector3_cross(uv_delta1, uv_delta0);
+
+	if(uv_cross.z >= 0.0f)
+	{
+	    int correction_index;
+	    for_range(correction_index, 3)
+	    {
+		int vertex_index        = vertices[correction_index];
+		vector3 vertex_position = positions[correction_index];
+		vector2 vertex_uv       = uvs[correction_index];
+
+		if(vertex_uv.x >= 0.9f)
+		{
+		    if(hash_map_contains(&correction_map, vertex_index))
+		    {
+			if(index_out)
+			{
+			    *(index_out + new_index_count++) =
+				hash_map_get_value(&correction_map, vertex_index);
+			}
+			else
+			{
+			    new_index_count++;
+			}
+		    }
+		    else
+		    {
+			vertex_uv.x -= 1.0f;
+
+			if(vertex_out)   *(vertex_out + vertex_count)   = vertex_position;
+			if(texcoord_out) *(texcoord_out + vertex_count) = vertex_uv;
+	
+			int corrected_index = vertex_count++;
+			hash_map_insert(&correction_map, vertex_index, corrected_index);
+
+			if(index_out)
+			{
+			    *(index_out + new_index_count++) = corrected_index;
+			}
+			else
+			{
+			    new_index_count++;
+			}
+		    }
+		}
+		else
+		{
+		    if(index_out)
+		    {
+			*(index_out + new_index_count++) = vertex_index;
+		    }
+		    else
+		    {
+			new_index_count++;
+		    }
+		}
+	    }
+	}
+	else
+	{
+	    if(index_out)
+	    {
+		*(index_out + new_index_count++) = vertices[0];
+		*(index_out + new_index_count++) = vertices[1];
+		*(index_out + new_index_count++) = vertices[2];
+	    }
+	    else
+	    {
+		new_index_count += 3;
+	    }
+	}
+    }
+
+    hash_map_delete(&correction_map);
+
+    if(index_count_out) *index_count_out = new_index_count;
+    if(vertex_count_out) *vertex_count_out = vertex_count;
+}
+
 mesh_data
 mesh_create_sphere(float radius, int subdivisions)
 {
@@ -786,7 +903,6 @@ mesh_create_sphere(float radius, int subdivisions)
     size_t vertex_data_size = sizeof(vector3) * ico_sphere_vertex_count;
     size_t texcoord_data_size = sizeof(vector2) * ico_sphere_vertex_count;
     data.vertices.positions = (vector3*)malloc(vertex_data_size);
-    data.vertices.normals   = (vector3*)malloc(vertex_data_size);
     data.vertices.texcoords = (vector2*)malloc(texcoord_data_size);
     data.vertex_count       = ico_sphere_vertex_count;
 
@@ -799,23 +915,23 @@ mesh_create_sphere(float radius, int subdivisions)
 	vertex = vector3_normalize(vertex);
 	
 	*(data.vertices.positions + vertex_index) = vector3_scale(vertex, radius);
-	*(data.vertices.normals + vertex_index) = vertex;
 
 	vector2 texcoord;
 	texcoord.x = 0.5f + atan2(vertex.z, vertex.x) / pi2;
-	texcoord.y = 0.5f - asin(vertex.y) / MATH_PI;
+	texcoord.y = 1.0f - (0.5f - asin(vertex.y) / MATH_PI);
 	*(data.vertices.texcoords + vertex_index) = texcoord;
     }
 
     size_t index_data_size = sizeof(uint32) * face_index_count;
     uint32* index_data = (uint32*)malloc(index_data_size);
-    data.index_count = face_index_count;
-    data.triangles = index_data;
-
+    
     for_range(i, face_index_count)
     {
 	*(index_data + i) = *(faces_read + i);
     }
+
+    data.index_count = face_index_count;
+    data.triangles   = index_data;
 
     hash_map_delete(&vertex_map);
     
@@ -823,6 +939,34 @@ mesh_create_sphere(float radius, int subdivisions)
     
     free(faces1);
     free(faces2);
+
+#if 1
+    int vertex_count_required, index_count_required;
+    icosahedron_fix_texture_seams(&data, 0, 0, 0, &vertex_count_required, &index_count_required);
+
+    vector3* new_positions = (vector3*)malloc(sizeof(vector3) * vertex_count_required);
+    vector2* new_texcoords = (vector2*)malloc(sizeof(vector2) * vertex_count_required);
+    uint32* new_triangles  = (uint32*)malloc(sizeof(uint32) * index_count_required);
+
+    for_range(i, data.vertex_count)
+    {
+	*(new_positions + i) = *(data.vertices.positions + i);
+	*(new_texcoords + i) = *(data.vertices.texcoords + i);
+    }
+    
+    icosahedron_fix_texture_seams(&data, new_positions, new_texcoords, new_triangles, 0, 0);
+
+    free(data.vertices.positions);
+    free(data.vertices.texcoords);
+    free(data.triangles);
+
+    data.vertex_count = vertex_count_required;
+    data.index_count = index_count_required;
+
+    data.vertices.positions = new_positions;
+    data.vertices.texcoords = new_texcoords;
+    data.triangles = new_triangles;
+#endif
 
     return data;
 }
