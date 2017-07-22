@@ -1144,4 +1144,100 @@ mesh_generate_tangents(mesh_data* data)
     free(tangents);
 }
 
+void
+mesh_generate_normals(mesh_data* data, int from_center)
+{
+    if(data->vertices.normals)
+	free(data->vertices.normals);
+
+    data->vertices.normals = 0;
+    
+    if(!data->vertices.positions)
+    {
+	platform_log("can't generate normals without positions.\n");
+	return;
+    }
+
+    int vertex_count = data->vertex_count;
+
+    vector3* normals = (vector3*)malloc(sizeof(vector3) * vertex_count);
+
+    int vertex_index;
+    for_range(vertex_index, vertex_count)
+    {
+	*(normals + vertex_index) = vector3_create(0.0f, 0.0f, 0.0f);
+
+	if(from_center)
+	{
+	    vector3 position = *(data->vertices.positions + vertex_index);
+	    *(normals + vertex_index) = vector3_normalize(position);
+	}
+    }
+
+    if(!from_center)
+    {
+	int triangle_count;
+	if(data->triangles)
+	{
+	    triangle_count = data->index_count / 3;
+	}
+	else
+	{
+	    triangle_count = data->vertex_count / 3;
+	}
+
+	int triangle;
+	for_range(triangle, triangle_count)
+	{
+	    int vertex_index0;
+	    int vertex_index1;
+	    int vertex_index2;
+	
+	    if(data->triangles)
+	    {
+		uint32* triangle_start =
+		    (data->triangles + (triangle * 3));
+		vertex_index0 = *(triangle_start + 0);
+		vertex_index1 = *(triangle_start + 1);
+		vertex_index2 = *(triangle_start + 2);
+	    }
+	    else
+	    {
+		int triangle_start = triangle * 3;
+		vertex_index0 = triangle_start + 0;
+		vertex_index1 = triangle_start + 1;
+		vertex_index2 = triangle_start + 2;
+	    }
+
+	    vector3 position0 = *(data->vertices.positions + vertex_index0);
+	    vector3 position1 = *(data->vertices.positions + vertex_index1);
+	    vector3 position2 = *(data->vertices.positions + vertex_index2);
+
+	    vector3 delta0 = vector3_subtract(position1, position0);
+	    vector3 delta1 = vector3_subtract(position2, position0);
+
+	    vector3 normal = vector3_cross(delta1, delta0);
+	    normal = vector3_normalize(normal);
+
+	    vector3* normal0 = (normals + vertex_index0);
+	    *normal0 = vector3_add(*normal0, normal);
+
+	    vector3* normal1 = (normals + vertex_index1);
+	    *normal1 = vector3_add(*normal1, normal);
+
+	    vector3* normal2 = (normals + vertex_index2);
+	    *normal2 = vector3_add(*normal2, normal);
+	}
+
+	int vertex_index;
+	for_range(vertex_index, data->vertex_count)
+	{
+	    vector3 normal = *(normals + vertex_index);
+	    *(normals + vertex_index) = vector3_normalize(normal);
+	}
+    }
+
+    data->vertices.normals = normals;
+}
+
 #undef create_vertex

@@ -89,5 +89,6 @@ mesh_data mesh_create_sphere(float radius, int subdivisions);
 void mesh_data_free(mesh_data* data);
 
 void mesh_generate_tangents(mesh_data* data);
+void mesh_generate_normals(mesh_data* data, int from_center);
 
 #endif // MESH_H_INCLUDED
