@@ -3,18 +3,18 @@
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 
-#include "window_win32.h"
+#include "win32_window.h"
 
 int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
-    window_win32* window = window_win32_create(500, 500, "racera");
+    win32_window* window = win32_window_create(500, 500, "billiards");
 
     while(window->is_open)
     {
-        window_win32_process_messages(window);
+        win32_window_process_messages(window);
     }
 
-    window_win32_destroy(window);
+    win32_window_destroy(window);
     window = 0;
 
     return 0;
