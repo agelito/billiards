@@ -391,8 +391,9 @@ main(int argc, char* argv[])
 
     // NOTE:                 Hash          Offset        Size          Path Length
     u32 lookup_entry_size = (sizeof(u32) + sizeof(u64) + sizeof(u64) + sizeof(u16));
-
-    u64 lookup_size = (lookup_entry_size * file_count);
+    
+    // NOTE:          BOM           File Count    Lookup Entries
+    u64 header_size = sizeof(u16) + sizeof(u32) + (lookup_entry_size * file_count);
 
     u64 file_data_size = 0;
 					  
@@ -400,27 +401,28 @@ main(int argc, char* argv[])
     for(file_index = 0; file_index < file_count; ++file_index)
     {
 	ap_file* file = (configuration.filelist.files + file_index);
-	printf("%08x %-40s    ", file->path_hash, file->path);
-	print_file_size(file->size);
-	printf("\n");
-
-	lookup_size += sizeof(char) * strlen(file->path);
+	
+	header_size += sizeof(char) * strlen(file->path);
 
 	*(file_data_offsets + file_index) = file_data_size;
 
 	file_data_size += file->size;
     }
 
-    printf("archive information\n");
+    /*
     printf("%-18s", " total size: ");
-    print_file_size(lookup_size + file_data_size);
+    print_file_size(header_size + file_data_size);
     printf("\n");
-    printf("%-18s", " lookup size: ");
-    print_file_size(lookup_size);
+    printf("%-18s", " header size: ");
+    print_file_size(header_size);
     printf("\n");
     printf("%-18s", " file data size: ");
     print_file_size(file_data_size);
     printf("\n");
+    printf("%-18s %11d\n", " file count:", file_count);
+    */
+
+    printf("* %-20s --- %s\n", "create archive file", configuration.output_file);
 
     FILE* archive_file = fopen(configuration.output_file, "wb");
     if(archive_file == 0)
@@ -431,10 +433,17 @@ main(int argc, char* argv[])
 	return -1;
     }
 
+    u16 byte_order = 0xfeff;
+
+    printf("* %-20s --- ", "writing header");
+
+    fwrite(&byte_order, 1, sizeof(u16), archive_file);
+    fwrite(&file_count, 1, sizeof(u32), archive_file);
+
     for(file_index = 0; file_index < file_count; ++file_index)
     {
 	ap_file* file = (configuration.filelist.files + file_index);
-	u64 offset = *(file_data_offsets + file_index) + lookup_size;
+	u64 offset = *(file_data_offsets + file_index) + header_size;
 
 	// TODO: Is this safe for all kind of string encodings?
 	
@@ -448,13 +457,23 @@ main(int argc, char* argv[])
 	fwrite(file->path, 1, path_size, archive_file);
     }
 
+    printf("wrote %lu bytes\n", header_size);
+
     char read_buffer[4096];
 
     for(file_index = 0; file_index < file_count; ++file_index)
     {
 	ap_file* file = (configuration.filelist.files + file_index);
 
+	printf("* %-20s --- (%d/%d) %08x %s\n", "appending file",
+	       file_index+1, file_count, file->path_hash, file->path);
+
 	FILE* source_file = fopen(file->path, "rb");
+	if(!source_file)
+	{
+	    printf("error opening file: %s\n", file->path);
+	    break;
+	}
 
 	size_t bytes_left = file->size;
 	while(bytes_left > 0)
@@ -478,6 +497,8 @@ main(int argc, char* argv[])
 
 	fclose(source_file);
     }
+
+    printf("* %-20s --- %s\n", "close archive file", configuration.output_file);
 
     fclose(archive_file);
 
